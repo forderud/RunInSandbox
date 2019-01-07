@@ -35,8 +35,8 @@ int wmain(int argc, wchar_t *argv[]) {
         }
     }
 
-    // initialize COM security
-    CHECK(CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_STATIC_CLOAKING, NULL));
+    // attempt to disable COM security
+    CHECK(CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL, RPC_C_AUTHN_LEVEL_NONE, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_STATIC_CLOAKING, NULL));
 
     // create COM object in a separate process
     CComPtr<IUnknown> obj;
