@@ -96,7 +96,7 @@ int wmain(int argc, wchar_t *argv[]) {
     {
         DWORD class_context = CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING; // | CLSCTX_ENABLE_AAA;
         wchar_t *progId = argv[1]; // e.g. "Excel.Application"
-#if 1
+#ifdef DEBUG_COM_ACTIVATION
         // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
         CLSID clsid = {};
         CHECK(CLSIDFromProgID(progId, &clsid));
