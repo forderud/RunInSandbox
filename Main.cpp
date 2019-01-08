@@ -2,6 +2,8 @@
 #include <atlbase.h>
 
 
+/** Attempt to create a COM server that runds through a specific user account.
+    WARNING: Does not seem to work. */
 CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
     // impersonate a different user
     CHandle user_token;
@@ -57,5 +59,5 @@ int wmain (int argc, wchar_t *argv[]) {
         abort();
 
     CComPtr<IUnknown> obj = CoCreateAsUser(argv[1], argv[2], argv[3]);
-    std::cout << "Object created" << std::endl;
+    std::cout << "COM object created" << std::endl;
 }
