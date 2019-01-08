@@ -3,10 +3,6 @@
 
 
 CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
-    // initialize multi-threaded COM apartment
-    if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
-        abort();
-
     // impersonate a different user
     CHandle user_token;
     if (!LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &user_token.m_h)) {
@@ -39,16 +35,26 @@ CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passw
     if (FAILED(hr))
         abort();
 #endif
+
+    // undo impersonation
+    if (!RevertToSelf()) {
+        auto err = GetLastError(); abort();
+    }
+
     return obj;
 }
 
 
-int wmain(int argc, wchar_t *argv[]) {
+int wmain (int argc, wchar_t *argv[]) {
     if (argc < 4) {
         std::cerr << "Too few arguments\n.";
         std::cerr << "Usage: ComImpersonation.exe <ProgID> <username> <password>" << std::endl;
         return -1;
     }
+
+    // initialize multi-threaded COM apartment
+    if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
+        abort();
 
     CComPtr<IUnknown> obj = CoCreateAsUser(argv[1], argv[2], argv[3]);
     std::cout << "Object created" << std::endl;
