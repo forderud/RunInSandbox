@@ -11,3 +11,6 @@ WARNING: Does not work yet. Have submitted [DCOM registration timeout when attem
 |Run as user          | :white_check_mark: (confirmed)                                              |
 |Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
 |Registry setup       | :x: Unknown                                                                 |
+
+### Work-arounds
+Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but seem to launch the process in a different session.
