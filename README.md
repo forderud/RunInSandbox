@@ -13,4 +13,4 @@ WARNING: Does not work yet. Have submitted [DCOM registration timeout when attem
 |Registry setup       | :x: Unknown                                                                 |
 
 ### Work-arounds
-Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but seem to launch the process in a different session.
+Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
