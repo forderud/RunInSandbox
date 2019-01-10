@@ -6,8 +6,8 @@ WARNING: Does not work yet. Have submitted [DCOM registration timeout when attem
 
 ### Overview of subproblems
 
-| Subproblem          | Status                                                                  |
-|---------------------|-------------------------------------------------------------------------|
-|Run as user          | :white_check_mark: (confirmed)                                          |
-|Environment variables| :x: Inherited from client process (inconsistent with impersonated user) |
-|Registry setup       | :x: Unknown                                                             |
+| Subproblem          | Status                                                                      |
+|---------------------|-----------------------------------------------------------------------------|
+|Run as user          | :white_check_mark: (confirmed)                                              |
+|Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
+|Registry setup       | :x: Unknown                                                                 |
