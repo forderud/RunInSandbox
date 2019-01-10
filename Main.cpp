@@ -57,11 +57,13 @@ CComPtr<IUnknown> CoCreateAsUser2 (wchar_t* progid, wchar_t* user, wchar_t* pass
 #pragma warning(disable: 4996) // _wgetenv: This function or variable may be unsafe. Consider using _wdupenv_s instead.
         std::wstring computername = _wgetenv(L"COMPUTERNAME");
 #pragma warning(pop)
+        std::wstring domain = L"";
+
         COAUTHIDENTITY id = {};
         id.User = (USHORT*)user;
         id.UserLength = (ULONG)wcslen(user);
-        id.Domain = (USHORT*)computername.c_str();
-        id.DomainLength = (ULONG)computername.length();
+        id.Domain = (USHORT*)domain.c_str();
+        id.DomainLength = (ULONG)domain.length();
         id.Password = (USHORT*)passwd;
         id.PasswordLength = (ULONG)wcslen(passwd);
         id.Flags = SEC_WINNT_AUTH_IDENTITY_UNICODE;
@@ -69,11 +71,11 @@ CComPtr<IUnknown> CoCreateAsUser2 (wchar_t* progid, wchar_t* user, wchar_t* pass
         COAUTHINFO ai = {};
         ai.dwAuthnSvc = RPC_C_AUTHN_WINNT; // RPC_C_AUTHN_DEFAULT;
         ai.dwAuthzSvc = RPC_C_AUTHZ_NONE;
-        ai.pwszServerPrincName = (WCHAR*)computername.c_str();
-        ai.dwAuthnLevel = RPC_C_AUTHN_LEVEL_CALL; // RPC_C_AUTHN_LEVEL_DEFAULT;
+        ai.pwszServerPrincName = nullptr; // (WCHAR*)computername.c_str();
+        ai.dwAuthnLevel = RPC_C_AUTHN_LEVEL_DEFAULT; //RPC_C_AUTHN_LEVEL_CALL;
         ai.dwImpersonationLevel = RPC_C_IMP_LEVEL_IMPERSONATE;
         ai.pAuthIdentityData = &id;
-        ai.dwCapabilities = EOAC_STATIC_CLOAKING; // EOAC_NONE;
+        ai.dwCapabilities = EOAC_NONE; // EOAC_STATIC_CLOAKING;
 
         COSERVERINFO si = {};
         si.pAuthInfo = &ai;
