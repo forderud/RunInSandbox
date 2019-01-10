@@ -4,7 +4,8 @@
 
 
 /** Attempt to create a COM server that runds through a specific user account.
-    WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process. */
+    WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
+    REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
 CComPtr<IUnknown> CoCreateAsUser1 (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
     // impersonate a different user
     CHandle user_token;
@@ -44,7 +45,8 @@ CComPtr<IUnknown> CoCreateAsUser1 (wchar_t* progid, wchar_t* user, wchar_t* pass
 
 
 /** Attempt to create a COM server that runds through a specific user account.
-    WARNING: Does not seem to work. Fails silently and instead launches with the current user. */
+    WARNING: Does not seem to work. Fails silently and instead launches with the current user.
+    REF: https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003/54135347#54135347 */
 CComPtr<IUnknown> CoCreateAsUser2 (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
     CLSID clsid = {};
     CLSIDFromProgID(progid, &clsid);
