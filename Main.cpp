@@ -81,7 +81,7 @@ CComPtr<IUnknown> CoCreateAsUser2 (wchar_t* progid, wchar_t* user, wchar_t* pass
 
 #ifdef DEBUG_COM_ACTIVATION
         CComPtr<IClassFactory> cf;
-        HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, &si, IID_IClassFactory, (void**)&cf);
+        HRESULT hr = CoGetClassObject(clsid, CLSCTX_REMOTE_SERVER, &si, IID_IClassFactory, (void**)&cf);
         if (FAILED(hr))
             abort();
         hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
@@ -89,7 +89,7 @@ CComPtr<IUnknown> CoCreateAsUser2 (wchar_t* progid, wchar_t* user, wchar_t* pass
             abort();
 #else
         MULTI_QI mqi = { &IID_IUnknown, nullptr, E_FAIL };
-        HRESULT hr = CoCreateInstanceEx(clsid, nullptr, CLSCTX_LOCAL_SERVER /*| CLSCTX_ENABLE_CLOAKING | CLSCTX_ENABLE_AAA*/, &si, 1, &mqi);
+        HRESULT hr = CoCreateInstanceEx(clsid, nullptr, CLSCTX_REMOTE_SERVER /*| CLSCTX_ENABLE_CLOAKING | CLSCTX_ENABLE_AAA*/, &si, 1, &mqi);
         if (FAILED(hr))
             abort();
         obj.Attach(mqi.pItf);
