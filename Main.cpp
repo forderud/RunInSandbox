@@ -14,11 +14,6 @@ CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passw
         auto err = GetLastError(); abort();
     }
 
-    // attempt to disable COM security and enable cloaking
-    HRESULT hr = CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL, RPC_C_AUTHN_LEVEL_NONE, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_STATIC_CLOAKING, NULL);
-    if (FAILED(hr))
-        abort();
-
     // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     CComPtr<IUnknown> obj;
 #ifdef DEBUG_COM_ACTIVATION
@@ -33,7 +28,7 @@ CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passw
     if (FAILED(hr))
         abort();
 #else
-    hr = obj.CoCreateInstance(progid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
+    HRESULT hr = obj.CoCreateInstance(progid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
     if (FAILED(hr))
         abort();
 #endif
@@ -57,6 +52,13 @@ int wmain (int argc, wchar_t *argv[]) {
     // initialize multi-threaded COM apartment
     if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
         abort();
+
+#if 0
+    // attempt to disable COM security and enable cloaking
+    HRESULT hr = CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL, RPC_C_AUTHN_LEVEL_NONE, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, /*EOAC_NONE*/ EOAC_STATIC_CLOAKING, NULL);
+    if (FAILED(hr))
+        abort();
+#endif
 
     CComPtr<IUnknown> obj = CoCreateAsUser(argv[1], argv[2], argv[3]);
     std::cout << "COM object created" << std::endl;
