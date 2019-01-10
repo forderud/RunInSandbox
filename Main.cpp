@@ -1,10 +1,11 @@
 #include <iostream>
 #include <atlbase.h>
+//#define DEBUG_COM_ACTIVATION
 
 
 /** Attempt to create a COM server that runds through a specific user account.
-    WARNING: Does not seem to work. */
-CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
+    WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process. */
+CComPtr<IUnknown> CoCreateAsUser1 (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
     // impersonate a different user
     CHandle user_token;
     if (!LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &user_token.m_h)) {
@@ -21,7 +22,7 @@ CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passw
     CLSID clsid = {};
     CLSIDFromProgID(progid, &clsid);
     CComPtr<IClassFactory> cf;
-    hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
+    HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
     if (FAILED(hr))
         abort();
     hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
@@ -36,6 +37,61 @@ CComPtr<IUnknown> CoCreateAsUser (wchar_t* progid, wchar_t* user, wchar_t* passw
     // undo impersonation
     if (!RevertToSelf()) {
         auto err = GetLastError(); abort();
+    }
+
+    return obj;
+}
+
+
+/** Attempt to create a COM server that runds through a specific user account.
+    WARNING: Does not seem to work. Fails silently and instead launches with the current user. */
+CComPtr<IUnknown> CoCreateAsUser2 (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
+    CLSID clsid = {};
+    CLSIDFromProgID(progid, &clsid);
+
+    CComPtr<IUnknown> obj;
+    {
+#pragma warning(push)
+#pragma warning(disable: 4996) // _wgetenv: This function or variable may be unsafe. Consider using _wdupenv_s instead.
+        std::wstring computername = _wgetenv(L"COMPUTERNAME");
+#pragma warning(pop)
+        COAUTHIDENTITY id = {};
+        id.User = (USHORT*)user;
+        id.UserLength = (ULONG)wcslen(user);
+        id.Domain = (USHORT*)computername.c_str();
+        id.DomainLength = (ULONG)computername.length();
+        id.Password = (USHORT*)passwd;
+        id.PasswordLength = (ULONG)wcslen(passwd);
+        id.Flags = SEC_WINNT_AUTH_IDENTITY_UNICODE;
+
+        COAUTHINFO ai = {};
+        ai.dwAuthnSvc = RPC_C_AUTHN_WINNT; // RPC_C_AUTHN_DEFAULT;
+        ai.dwAuthzSvc = RPC_C_AUTHZ_NONE;
+        ai.pwszServerPrincName = (WCHAR*)computername.c_str();
+        ai.dwAuthnLevel = RPC_C_AUTHN_LEVEL_CALL; // RPC_C_AUTHN_LEVEL_DEFAULT;
+        ai.dwImpersonationLevel = RPC_C_IMP_LEVEL_IMPERSONATE;
+        ai.pAuthIdentityData = &id;
+        ai.dwCapabilities = EOAC_STATIC_CLOAKING; // EOAC_NONE;
+
+        COSERVERINFO si = {};
+        si.pAuthInfo = &ai;
+        si.pwszName = (WCHAR*)computername.c_str();
+
+#ifdef DEBUG_COM_ACTIVATION
+        CComPtr<IClassFactory> cf;
+        HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, &si, IID_IClassFactory, (void**)&cf);
+        if (FAILED(hr))
+            abort();
+        hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
+        if (FAILED(hr))
+            abort();
+#else
+        MULTI_QI mqi = { &IID_IUnknown, nullptr, E_FAIL };
+        HRESULT hr = CoCreateInstanceEx(clsid, nullptr, CLSCTX_LOCAL_SERVER /*| CLSCTX_ENABLE_CLOAKING | CLSCTX_ENABLE_AAA*/, &si, 1, &mqi);
+        if (FAILED(hr))
+            abort();
+        obj.Attach(mqi.pItf);
+#endif
     }
 
     return obj;
@@ -60,6 +116,7 @@ int wmain (int argc, wchar_t *argv[]) {
         abort();
 #endif
 
-    CComPtr<IUnknown> obj = CoCreateAsUser(argv[1], argv[2], argv[3]);
+    //CComPtr<IUnknown> obj = CoCreateAsUser1(argv[1], argv[2], argv[3]);
+    CComPtr<IUnknown> obj = CoCreateAsUser2(argv[1], argv[2], argv[3]);
     std::cout << "COM object created" << std::endl;
 }
