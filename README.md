@@ -6,16 +6,16 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 
 WARNING: **Does not work yet**. Have submitted [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) to StackOverflow to request advise.
 
-| Subproblem          | Status                                                                      |
+| Problem             | Status                                                                      |
 |---------------------|-----------------------------------------------------------------------------|
 |Run as user          | :white_check_mark: (confirmed)                                              |
 |Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
-|Registry setup       | :x: Unknown                                                                 |
+|Registry setup       | :x: Unknown (might be problems also here)                                   |
 
 Work-around:
 Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
 
 ## COAUTHINFO-based impersonation approach
-This approach provides a `COSERVERINFO` argument that contains `COAUTHINFO`/`COAUTHIDENTITY` structures containing the username & password for the desired COM server credentials.
+This approach passes a `COSERVERINFO` parameter when creating the COM server. This parameter contains `COAUTHINFO`/`COAUTHIDENTITY` structures with the desired username & password for the COM server.
 
 WARNING: **Does not work yet**. Have found [CoCreateInstanceEx returns S_OK with invalid credentials on Win2003](https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003) on StackOverflow for this problem.
