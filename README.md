@@ -1,10 +1,10 @@
 # COM Impersonation
-Work-in-progress code for launching a COM server through a different user.
+Work-in-progress code for launching an out-of-process COM server through a different user on the *same machine*.
 
-WARNING: Does not work yet. Have submitted [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) to StackOverflow to request advise.
+## Client-side impersonation approach
+This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
-
-### Overview of subproblems
+WARNING: **Does not work yet**. Have submitted [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) to StackOverflow to request advise.
 
 | Subproblem          | Status                                                                      |
 |---------------------|-----------------------------------------------------------------------------|
@@ -12,5 +12,10 @@ WARNING: Does not work yet. Have submitted [DCOM registration timeout when attem
 |Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
 |Registry setup       | :x: Unknown                                                                 |
 
-### Work-arounds
+Work-around:
 Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
+
+## COAUTHINFO-based impersonation approach
+This approach provides a `COSERVERINFO` argument that contains `COAUTHINFO`/`COAUTHIDENTITY` structures containing the username & password for the desired COM server credentials.
+
+WARNING: **Does not work yet**. Have found [CoCreateInstanceEx returns S_OK with invalid credentials on Win2003](https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003) on StackOverflow for this problem.
