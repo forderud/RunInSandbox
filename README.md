@@ -8,7 +8,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 |---------------------|-----------------------------------------------------------------------------|
 |Run as user          | :white_check_mark: (confirmed)                                              |
 |Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
-|Registry mounting    | :x: Unknown (might be problems also here)                                   |
+|Registry mounting    | :question: Unknown (might be problems also here)                            |
 
 WARNING: **Does not work yet**. Have submitted StackOverflow [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) question to request advise.
 
