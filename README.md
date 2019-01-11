@@ -4,16 +4,15 @@ Work-in-progress code for launching an out-of-process COM server through a diffe
 ## Client-side impersonation approach
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
-WARNING: **Does not work yet**. Have submitted [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) to StackOverflow to request advise.
-
 | Problem             | Status                                                                      |
 |---------------------|-----------------------------------------------------------------------------|
 |Run as user          | :white_check_mark: (confirmed)                                              |
 |Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
 |Registry setup       | :x: Unknown (might be problems also here)                                   |
 
-Work-around:
-Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
+WARNING: **Does not work yet**. Have submitted [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) to StackOverflow to request advise.
+
+Work-around: Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
 
 ## COAUTHINFO-based impersonation approach
 This approach passes a `COSERVERINFO` parameter when creating the COM server. This parameter contains `COAUTHINFO`/`COAUTHIDENTITY` structures with the desired username & password for the COM server.
