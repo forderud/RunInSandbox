@@ -2,10 +2,10 @@
 Work-in-progress code for launching executables and out-of-process COM server in a sandboxed environment on the *same machine*.
 
 ## Executable sandboxing
-Run 'RunInSandbox.exe ExePath  [username] [password]' to launch 'ExePath' in a AppContainer process.
+Run `RunInSandbox.exe ExePath  [username] [password]` to launch `ExePath` in a AppContainer process.
 
 ## COM sandboxing
-Run 'RunInSandbox.exe ProgID [username] [password]' to launch the 'ProgID' COM server in a low-integrity process. Unfortunately, user impersonation and AppContainer isolation doesn't work yet for COM servers.
+Run `RunInSandbox.exe ProgID [username] [password]` to launch the `ProgID` COM server in a low-integrity process. Unfortunately, user impersonation and AppContainer isolation doesn't work yet for COM servers.
 
 ## Client-side impersonation problems
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
