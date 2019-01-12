@@ -5,5 +5,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoCreateAsUser.hpp" />
+    <ClInclude Include="ProcCreate.hpp" />
   </ItemGroup>
 </Project>

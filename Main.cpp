@@ -1,5 +1,6 @@
 #include <iostream>
 #include "CoCreateAsUser.hpp"
+#include "ProcCreate.hpp"
 
 
 int wmain (int argc, wchar_t *argv[]) {
@@ -35,8 +36,7 @@ int wmain (int argc, wchar_t *argv[]) {
         CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, argv[2], argv[3]);
         std::cout << "COM object created" << std::endl;
     } else {
-        // TODO: Implement CreateProcessAsUser...
-        std::cerr << "ERROR: CreateProcessAsUser not yet implemented\n.";
+        ProcCreate(argv[1]);
         return -1;
 
     }
