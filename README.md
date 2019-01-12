@@ -1,7 +1,13 @@
-# COM Impersonation
-Work-in-progress code for launching an out-of-process COM server through a different user on the *same machine*.
+# Run in Sandbox
+Work-in-progress code for launching executables and out-of-process COM server in a sandboxed environment on the *same machine*.
 
-## Client-side impersonation approach
+## Executable sandboxing
+Run 'RunInSandbox.exe ExePath  [username] [password]' to launch 'ExePath' in a AppContainer process.
+
+## COM sandboxing
+Run 'RunInSandbox.exe ProgID [username] [password]' to launch the 'ProgID' COM server in a low-integrity process. Unfortunately, user impersonation and AppContainer isolation doesn't work yet for COM servers.
+
+## Client-side impersonation problems
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
 | Problem             | Status                                                                      |
@@ -14,7 +20,7 @@ WARNING: **Does not work yet**. Have submitted StackOverflow [DCOM registration 
 
 Work-around: Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) registry key to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
 
-## COAUTHINFO-based impersonation approach
+## COAUTHINFO-based impersonation problems
 This approach passes a `COSERVERINFO` parameter when creating the COM server. This parameter contains `COAUTHINFO`/`COAUTHIDENTITY` structures with the desired username & password for the COM server.
 
 WARNING: **Does not work yet**. The StackOverflow [CoCreateInstanceEx returns S_OK with invalid credentials on Win2003](https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003) question seem to cover the same problem.
