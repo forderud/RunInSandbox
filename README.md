@@ -26,4 +26,4 @@ This approach passes a `COSERVERINFO` parameter when creating the COM server. Th
 WARNING: **Does not work yet**. The StackOverflow [CoCreateInstanceEx returns S_OK with invalid credentials on Win2003](https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003) question seem to cover the same problem.
 
 #### AppContainer impersonation problems
-Don't know how to "connect" an AppContainer SID to a impersonation token.
+Don't know how to "connect" an [AppContainer](https://docs.microsoft.com/en-us/windows/desktop/secauthz/appcontainer-for-legacy-applications-) SID to a impersonation token.
