@@ -159,18 +159,18 @@ private:
 
 /** RAII class for temporarily impersonating integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
-struct LowIntegrity {
-    LowIntegrity() : m_token(GetIntegrityToken()) {
+struct ImpersonateUser {
+    ImpersonateUser() : m_token(GetLowIntegrityToken()) {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
-    ~LowIntegrity() {
+    ~ImpersonateUser() {
         WIN32_CHECK(RevertToSelf());
     }
 
-    /** Create a high/medium/low-integrity token associated with the current user.
+    /** Create a low-integrity token associated with the current user.
         Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
-    static HandleWrap GetIntegrityToken() {
+    static HandleWrap GetLowIntegrityToken() {
         HandleWrap cur_token;
         WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
 
