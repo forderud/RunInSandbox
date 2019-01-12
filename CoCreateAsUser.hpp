@@ -1,4 +1,5 @@
 #pragma once
+#include "AppContainer.hpp"
 #include <atlbase.h>
 //#define DEBUG_COM_ACTIVATION
 
@@ -8,13 +9,7 @@
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
 CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, wchar_t* user, wchar_t* passwd) {
     // impersonate a different user
-    CHandle user_token;
-    if (!LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &user_token.m_h)) {
-        auto err = GetLastError(); abort();
-    }
-    if (!ImpersonateLoggedOnUser(user_token)) {
-        auto err = GetLastError(); abort();
-    }
+    ImpersonateUser imp_user(user, passwd, true);
 
     // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     CComPtr<IUnknown> obj;

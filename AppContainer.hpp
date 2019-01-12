@@ -157,10 +157,23 @@ private:
 };
 
 
-/** RAII class for temporarily impersonating integrity levels for the current thread.
+/** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateUser {
-    ImpersonateUser() : m_token(GetLowIntegrityToken()) {
+    ImpersonateUser(wchar_t* user, wchar_t* passwd, bool low_integrity) {
+        if (user && passwd) {
+            // impersonate a different user
+            WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &m_token));
+        } else {
+            // current user
+            HandleWrap cur_token;
+            WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
+            WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &m_token));
+        }
+
+        if (low_integrity)
+            ApplyLowIntegrity();
+
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
@@ -170,13 +183,7 @@ struct ImpersonateUser {
 
     /** Create a low-integrity token associated with the current user.
         Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
-    static HandleWrap GetLowIntegrityToken() {
-        HandleWrap cur_token;
-        WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
-
-        HandleWrap impersonation_token;
-        WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &impersonation_token));
-
+    void ApplyLowIntegrity() {
         SidWrap li_sid;
         {
             // low integrity SID - same as ConvertStringSidToSid("S-1-16-4096",..)
@@ -189,9 +196,8 @@ struct ImpersonateUser {
         TOKEN_MANDATORY_LABEL TIL = {};
         TIL.Label.Attributes = SE_GROUP_INTEGRITY;
         TIL.Label.Sid = li_sid;
-        WIN32_CHECK(SetTokenInformation(impersonation_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(li_sid)));
+        WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(li_sid)));
 
-        return impersonation_token;
     }
 
     HandleWrap m_token;

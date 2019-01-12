@@ -16,11 +16,6 @@ int wmain (int argc, wchar_t *argv[]) {
     bool progid_provided = SUCCEEDED(CLSIDFromProgID(argv[1], &clsid));
 
     if (progid_provided) {
-        if (argc < 4) {
-            std::wcerr << L"ERROR: username and password arguments missing\n.";
-            return -1;
-        }
-
         // initialize multi-threaded COM apartment
         if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
             abort();
@@ -33,8 +28,11 @@ int wmain (int argc, wchar_t *argv[]) {
     #endif
 
         std::wcout << L"Creating COM object " << argv[1] << L"...\n";
-        //CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, argv[2], argv[3]);
-        CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, argv[2], argv[3]);
+        wchar_t* user = (argc >= 3) ? argv[2] : nullptr;
+        wchar_t* pw   = (argc >= 4) ? argv[3] : nullptr;
+        CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, user, pw);
+        //CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, user, pw);
+
     } else {
         std::wcout << L"Starting executable " << argv[1] << L"...\n";
         ProcCreate(argv[1]);
