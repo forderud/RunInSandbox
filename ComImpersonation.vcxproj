@@ -130,6 +130,7 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppContainer.hpp" />
     <ClInclude Include="CoCreateAsUser.hpp" />
     <ClInclude Include="ProcCreate.hpp" />
   </ItemGroup>

@@ -6,5 +6,6 @@
   <ItemGroup>
     <ClInclude Include="CoCreateAsUser.hpp" />
     <ClInclude Include="ProcCreate.hpp" />
+    <ClInclude Include="AppContainer.hpp" />
   </ItemGroup>
 </Project>
