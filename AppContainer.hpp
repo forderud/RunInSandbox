@@ -11,9 +11,9 @@ public:
     AppContainerWrap() {
         AddWellKnownCapabilities();
 
-        const wchar_t PROFILE_NAME[] = L"ComImpersonation.AppContainer";
-        const wchar_t DISPLAY_NAME[] = L"ComImpersonation.AppContainer";
-        const wchar_t DESCRIPTION[] = L"ComImpersonation AppContainer";
+        const wchar_t PROFILE_NAME[] = L"RunInSandbox.AppContainer";
+        const wchar_t DISPLAY_NAME[] = L"RunInSandbox.AppContainer";
+        const wchar_t DESCRIPTION[] = L"RunInSandbox AppContainer";
 
         // delete existing (if present)
         HRESULT hr = DeleteAppContainerProfile(PROFILE_NAME);

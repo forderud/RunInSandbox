@@ -6,8 +6,8 @@
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: ComImpersonation.exe <ProgID>  <username> <password>\n";
-        std::wcerr << L"Usage: ComImpersonation.exe <ExePath> [<username> <password>]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe <ProgID>  <username> <password>\n";
+        std::wcerr << L"Usage: RunInSandbox.exe <ExePath> [<username> <password>]\n";
         return -1;
     }
 
