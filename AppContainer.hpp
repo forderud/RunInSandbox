@@ -140,18 +140,13 @@ private:
             WinCapabilityRemovableStorageSid,
         };
 
-        for (auto c : capabilities) {
+        for (auto cap : capabilities) {
             PSID sid = LocalAlloc(LPTR, SECURITY_MAX_SID_SIZE);
             if (sid == nullptr)
                 abort();
 
             DWORD sidListSize = SECURITY_MAX_SID_SIZE;
-            WIN32_CHECK(CreateWellKnownSid(c, NULL, sid, &sidListSize));
-
-            if (!IsWellKnownSid(sid, c)) {
-                FreeSid(sid);
-                continue;
-            }
+            WIN32_CHECK(CreateWellKnownSid(cap, NULL, sid, &sidListSize));
 
             m_capabilities.push_back({ sid, SE_GROUP_ENABLED });
         }
