@@ -11,11 +11,9 @@ public:
         SIZE_T attr_size = 0;
         InitializeProcThreadAttributeList(NULL, attr_count, 0, &attr_size);
         si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attr_size);
-        if (!InitializeProcThreadAttributeList(si.lpAttributeList, attr_count, 0, &attr_size))
-            abort();
+        WIN32_CHECK(InitializeProcThreadAttributeList(si.lpAttributeList, attr_count, 0, &attr_size));
         
-        if (!UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, &sc, sizeof(sc), NULL, NULL))
-            abort();
+        WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, &sc, sizeof(sc), NULL, NULL));
     }
 
     ~StartupInfoWrap() {
@@ -39,8 +37,5 @@ static void ProcCreate(wchar_t * exe_path) {
     StartupInfoWrap si(ac.SecCap());
 
     PROCESS_INFORMATION pi = {};
-    if (!CreateProcess(exe_path, NULL, NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi)) {
-        auto err = GetLastError();
-        abort();
-    }
+    WIN32_CHECK(CreateProcess(exe_path, NULL, NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
 }

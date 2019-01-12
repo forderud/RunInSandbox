@@ -1,8 +1,86 @@
 #pragma once
+#include <cassert>
 #include <vector>
 #include <Windows.h>
+#include <comdef.h>
 #include <userenv.h>
 #pragma comment(lib, "Userenv.lib")
+
+
+static void WIN32_CHECK(BOOL res) {
+    if (res)
+        return;
+
+    _com_error error(GetLastError());
+    const TCHAR * msg_ptr = error.ErrorMessage();
+    abort();
+}
+
+
+class HandleWrap {
+public:
+    HandleWrap() {
+    }
+    HandleWrap(const HandleWrap & other) {
+        handle = other.handle;
+    }
+    HandleWrap(HandleWrap && other) {
+        handle = other.handle;
+        other.handle = nullptr;
+    }
+
+    ~HandleWrap() {
+        if (handle) {
+            CloseHandle(handle);
+            handle = nullptr;
+        }
+    }
+
+    operator HANDLE () {
+        return handle;
+    }
+    HANDLE* operator & () {
+        return &handle;
+    }
+
+private:
+    HANDLE handle = nullptr;
+};
+static_assert(sizeof(HandleWrap) == sizeof(HANDLE), "HandleWrap size mismatch");
+
+
+class SidWrap {
+public:
+    SidWrap() {
+    }
+    ~SidWrap() {
+        Clear();
+    }
+
+    void Clear() {
+        if (!sid)
+            return;
+
+        FreeSid(sid);
+        sid = nullptr;
+    }
+
+    void Allocate(DWORD size) {
+        Clear();
+        sid = LocalAlloc(LPTR, size);
+    }
+
+    operator PSID () {
+        return sid;
+    }
+    PSID* operator & () {
+        return &sid;
+    }
+
+protected:
+    PSID sid = nullptr;
+};
+static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 
 
 /** RAII class for encapsulating AppContainer configuration. */
@@ -31,7 +109,7 @@ public:
 
         for (auto &c : m_capabilities) {
             if (c.Sid) {
-                HeapFree(GetProcessHeap(), 0, c.Sid);
+                FreeSid(c.Sid);
                 c.Sid = nullptr;
             }
         }
@@ -63,16 +141,15 @@ private:
         };
 
         for (auto c : capabilities) {
-            PSID sid = HeapAlloc(GetProcessHeap(), 0, SECURITY_MAX_SID_SIZE);
+            PSID sid = LocalAlloc(LPTR, SECURITY_MAX_SID_SIZE);
             if (sid == nullptr)
                 abort();
 
             DWORD sidListSize = SECURITY_MAX_SID_SIZE;
-            if (!CreateWellKnownSid(c, NULL, sid, &sidListSize))
-                abort();
+            WIN32_CHECK(CreateWellKnownSid(c, NULL, sid, &sidListSize));
 
             if (!IsWellKnownSid(sid, c)) {
-                HeapFree(GetProcessHeap(), 0, sid);
+                FreeSid(sid);
                 continue;
             }
 
@@ -82,4 +159,45 @@ private:
 
     PSID                            m_sid = nullptr;
     std::vector<SID_AND_ATTRIBUTES> m_capabilities;
+};
+
+
+/** RAII class for temporarily impersonating integrity levels for the current thread.
+    Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
+struct LowIntegrity {
+    LowIntegrity() : m_token(GetIntegrityToken()) {
+        WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
+    }
+
+    ~LowIntegrity() {
+        WIN32_CHECK(RevertToSelf());
+    }
+
+    /** Create a high/medium/low-integrity token associated with the current user.
+        Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
+    static HandleWrap GetIntegrityToken() {
+        HandleWrap cur_token;
+        WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
+
+        HandleWrap impersonation_token;
+        WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &impersonation_token));
+
+        SidWrap li_sid;
+        {
+            // low integrity SID - same as ConvertStringSidToSid("S-1-16-4096",..)
+            DWORD sid_size = SECURITY_MAX_SID_SIZE;
+            li_sid.Allocate(sid_size);
+            WIN32_CHECK(CreateWellKnownSid(WinLowLabelSid, nullptr, li_sid, &sid_size));
+        }
+
+        // reduce process integrity level
+        TOKEN_MANDATORY_LABEL TIL = {};
+        TIL.Label.Attributes = SE_GROUP_INTEGRITY;
+        TIL.Label.Sid = li_sid;
+        WIN32_CHECK(SetTokenInformation(impersonation_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(li_sid)));
+
+        return impersonation_token;
+    }
+
+    HandleWrap m_token;
 };
