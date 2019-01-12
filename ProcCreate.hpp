@@ -28,9 +28,6 @@ public:
     STARTUPINFOEX* operator& () {
         return &si;
     }
-    STARTUPINFOEX* operator -> () {
-        return &si;
-    }
 
 private:
     STARTUPINFOEX si = {};

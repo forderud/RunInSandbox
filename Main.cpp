@@ -5,9 +5,9 @@
 
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
-        std::cerr << "Too few arguments\n.";
-        std::cerr << "Usage: ComImpersonation.exe <ProgID>  <username> <password>\n";
-        std::cerr << "Usage: ComImpersonation.exe <AppPath> [<username> <password>]\n";
+        std::wcerr << L"Too few arguments\n.";
+        std::wcerr << L"Usage: ComImpersonation.exe <ProgID>  <username> <password>\n";
+        std::wcerr << L"Usage: ComImpersonation.exe <ExePath> [<username> <password>]\n";
         return -1;
     }
 
@@ -17,7 +17,7 @@ int wmain (int argc, wchar_t *argv[]) {
 
     if (progid_provided) {
         if (argc < 4) {
-            std::cerr << "Too few arguments: username and password arguments missing\n.";
+            std::wcerr << L"ERROR: username and password arguments missing\n.";
             return -1;
         }
 
@@ -32,13 +32,12 @@ int wmain (int argc, wchar_t *argv[]) {
             abort();
     #endif
 
+        std::wcout << L"Creating COM object " << argv[1] << L"...\n";
         //CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, argv[2], argv[3]);
         CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, argv[2], argv[3]);
-        std::cout << "COM object created" << std::endl;
     } else {
+        std::wcout << L"Starting executable " << argv[1] << L"...\n";
         ProcCreate(argv[1]);
-        return -1;
-
     }
-
+    std::wcout << L"[done]" << std::endl;
 }
