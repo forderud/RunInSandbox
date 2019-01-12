@@ -6,8 +6,8 @@
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: RunInSandbox.exe <ProgID>  <username> <password>\n";
-        std::wcerr << L"Usage: RunInSandbox.exe <ExePath> [<username> <password>]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe ProgID  [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe ExePath [username] [password]\n";
         return -1;
     }
 
@@ -27,14 +27,14 @@ int wmain (int argc, wchar_t *argv[]) {
             abort();
     #endif
 
-        std::wcout << L"Creating COM object " << argv[1] << L"...\n";
+        std::wcout << L"Creating COM object " << argv[1] << L" in low-integrity...\n";
         wchar_t* user = (argc >= 3) ? argv[2] : nullptr;
         wchar_t* pw   = (argc >= 4) ? argv[3] : nullptr;
-        CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, user, pw);
+        CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, user, pw, true);
         //CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, user, pw);
 
     } else {
-        std::wcout << L"Starting executable " << argv[1] << L"...\n";
+        std::wcout << L"Starting executable " << argv[1] << L" in AppContainer...\n";
         ProcCreate(argv[1]);
     }
     std::wcout << L"[done]" << std::endl;

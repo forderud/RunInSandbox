@@ -7,9 +7,9 @@
 /** Attempt to create a COM server that runds through a specific user account.
     WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, wchar_t* user, wchar_t* passwd) {
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, wchar_t* user, wchar_t* passwd, bool low_integrity) {
     // impersonate a different user
-    ImpersonateUser imp_user(user, passwd, true);
+    ImpersonateUser imp_user(user, passwd, low_integrity);
 
     // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     CComPtr<IUnknown> obj;
