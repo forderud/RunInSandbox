@@ -6,7 +6,7 @@
 /** Attempt to create a COM server that runds through a specific user account.
     WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (wchar_t* progid, wchar_t* user, wchar_t* passwd) {
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, wchar_t* user, wchar_t* passwd) {
     // impersonate a different user
     CHandle user_token;
     if (!LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &user_token.m_h)) {
@@ -20,8 +20,6 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (wchar_t* progid, wchar_t* user, wc
     CComPtr<IUnknown> obj;
 #ifdef DEBUG_COM_ACTIVATION
     // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
-    CLSID clsid = {};
-    CLSIDFromProgID(progid, &clsid);
     CComPtr<IClassFactory> cf;
     HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
     if (FAILED(hr))
@@ -30,7 +28,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (wchar_t* progid, wchar_t* user, wc
     if (FAILED(hr))
         abort();
 #else
-    HRESULT hr = obj.CoCreateInstance(progid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
+    HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
     if (FAILED(hr))
         abort();
 #endif
@@ -47,10 +45,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (wchar_t* progid, wchar_t* user, wc
 /** Attempt to create a COM server that runds through a specific user account.
     WARNING: Does not seem to work. Fails silently and instead launches with the current user.
     REF: https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003/54135347#54135347 */
-CComPtr<IUnknown> CoCreateAsUser_dcom(wchar_t* progid, wchar_t* user, wchar_t* passwd) {
-    CLSID clsid = {};
-    CLSIDFromProgID(progid, &clsid);
-
+CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passwd) {
     CComPtr<IUnknown> obj;
     {
 #pragma warning(push)
