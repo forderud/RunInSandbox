@@ -1,5 +1,5 @@
 #pragma once
-#include "AppContainer.hpp"
+#include "Sandboxing.hpp"
 #include <atlbase.h>
 //#define DEBUG_COM_ACTIVATION
 
