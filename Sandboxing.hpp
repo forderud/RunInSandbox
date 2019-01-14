@@ -54,19 +54,14 @@ public:
     SidWrap() {
     }
     ~SidWrap() {
-        Clear();
-    }
-
-    void Clear() {
-        if (!sid)
-            return;
-
-        FreeSid(sid);
-        sid = nullptr;
+        if (sid) {
+            FreeSid(sid);
+            sid = nullptr;
+        }
     }
 
     void Allocate(DWORD size) {
-        Clear();
+        SidWrap::~SidWrap();
         sid = LocalAlloc(LPTR, size);
     }
 
