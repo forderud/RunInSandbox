@@ -1,9 +1,15 @@
 #include <iostream>
+#include <Shlobj.h>
 #include "CoCreateAsUser.hpp"
 #include "ProcCreate.hpp"
 
 
 int wmain (int argc, wchar_t *argv[]) {
+    if (!IsUserAnAdmin()) {
+        std::wcerr << L"ERROR: Admin priveledges not detected. Failing early, since some functionality might not work.\n";
+        return -2;
+    }
+
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe ProgID  [username] [password]\n";
