@@ -2,7 +2,7 @@
 Work-in-progress code for launching executables and out-of-process COM server in a sandboxed environment on the *same machine*.
 
 ## Executable sandboxing
-Run `RunInSandbox.exe ExePath  [username] [password]` to launch the `ExePath` application in a AppContainer process.
+Run `RunInSandbox.exe ExePath` to launch the `ExePath` application in a AppContainer process. This works for `STARTUPINFOEX`-based process creation, but not when using a "LowBox" token for process creation.
 
 ## COM sandboxing
 Run `RunInSandbox.exe ProgID [ax|li] [username] [password]` to launch the `ProgID` COM server in an AppContainer or low-integrity process. Unfortunately, neither user impersonation nor AppContainer isolation works properly yet.
