@@ -7,11 +7,15 @@
 #pragma comment(lib, "Userenv.lib")
 
 
-static void WIN32_CHECK(BOOL res) {
+static void WIN32_CHECK(BOOL res, DWORD whitelisted_err = ERROR_SUCCESS) {
     if (res)
         return;
 
-    _com_error error(GetLastError());
+    DWORD code = GetLastError();
+    if (code == whitelisted_err)
+        return;
+
+    _com_error error(code);
     const TCHAR * msg_ptr = error.ErrorMessage();
     abort();
 }
