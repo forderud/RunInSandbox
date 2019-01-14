@@ -131,7 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sandboxing.hpp" />
-    <ClInclude Include="CoCreateAsUser.hpp" />
+    <ClInclude Include="ComCreate.hpp" />
     <ClInclude Include="ProcCreate.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
