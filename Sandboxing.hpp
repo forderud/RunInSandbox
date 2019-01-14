@@ -25,8 +25,7 @@ public:
         handle = other.handle;
     }
     HandleWrap(HandleWrap && other) {
-        handle = other.handle;
-        other.handle = nullptr;
+        std::swap(handle, other.handle);
     }
 
     ~HandleWrap() {
@@ -34,6 +33,12 @@ public:
             CloseHandle(handle);
             handle = nullptr;
         }
+    }
+
+    HandleWrap& operator = (HandleWrap && other) {
+        HandleWrap::~HandleWrap();
+        std::swap(handle, other.handle);
+        return *this;
     }
 
     operator HANDLE () {
@@ -169,6 +174,10 @@ struct ImpersonateUser {
         if (low_integrity)
             ApplyLowIntegrity();
 
+        WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
+    }
+
+    ImpersonateUser(HandleWrap && token) : m_token(token) {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
