@@ -28,11 +28,6 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, wchar_t* user, wchar_
         abort();
 #endif
 
-    // undo impersonation
-    if (!RevertToSelf()) {
-        auto err = GetLastError(); abort();
-    }
-
     return obj;
 }
 
