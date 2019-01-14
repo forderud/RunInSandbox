@@ -1,5 +1,5 @@
 # Run in Sandbox
-Work-in-progress code for launching executables and out-of-process COM server in a sandboxed low-integrity or [AppContainer](https://docs.microsoft.com/en-us/windows/desktop/secauthz/appcontainer-for-legacy-applications-) environment on the *same machine*.
+Work-in-progress code for launching executables and out-of-process COM server in a sandboxed [low-integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10)) or [AppContainer](https://docs.microsoft.com/en-us/windows/desktop/secauthz/appcontainer-for-legacy-applications-) environment on the *same machine*.
 
 ## Executable sandboxing
 Run `RunInSandbox.exe ExePath` to launch the `ExePath` application in a AppContainer process. This works for `STARTUPINFOEX`-based process creation, but not when using a "LowBox" token for process creation.
