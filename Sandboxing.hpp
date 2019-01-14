@@ -3,8 +3,10 @@
 #include <vector>
 #include <Windows.h>
 #include <comdef.h>
+#include <versionhelpers.h>
 #include <userenv.h>
 #pragma comment(lib, "Userenv.lib")
+#include <Winternl.h>
 
 
 static void WIN32_CHECK(BOOL res, DWORD whitelisted_err = ERROR_SUCCESS) {
@@ -210,3 +212,60 @@ struct ImpersonateUser {
 
     HandleWrap m_token;
 };
+
+
+/** Copied from https://github.com/chromium/chromium/blob/master/sandbox/win/src/nt_internals.h */
+typedef NTSTATUS(WINAPI* NtCreateLowBoxToken)(
+    OUT PHANDLE token,
+    IN HANDLE original_handle,
+    IN ACCESS_MASK access,
+    IN POBJECT_ATTRIBUTES object_attribute,
+    IN PSID appcontainer_sid,
+    IN DWORD capabilityCount,
+    IN PSID_AND_ATTRIBUTES capabilities,
+    IN DWORD handle_count,
+    IN PHANDLE handles);
+
+
+/** Create AppContainer "LowBox" token for security impersonation.
+    WARNING: Does not work yet!
+    Based on https://github.com/chromium/chromium/blob/master/sandbox/win/src/restricted_token_utils.cc */
+HandleWrap CreateLowBoxToken(HandleWrap& base_token, TOKEN_TYPE token_type, SECURITY_CAPABILITIES &sec_cap, std::vector<HANDLE>& saved_handles) {
+    // get NtCreateLowBoxToken function pointer (not ref-counted)
+    auto CreateLowBoxToken_fn = reinterpret_cast<NtCreateLowBoxToken>(GetProcAddress(GetModuleHandle(L"ntdll.dll"), "NtCreateLowBoxToken"));
+
+    if (!base_token) {
+        WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &base_token));
+    }
+
+    OBJECT_ATTRIBUTES obj_attr = {};
+    InitializeObjectAttributes(&obj_attr, nullptr, 0, nullptr, nullptr);
+
+    HandleWrap token_lowbox;
+    NTSTATUS status = CreateLowBoxToken_fn(&token_lowbox, base_token, TOKEN_ALL_ACCESS, &obj_attr, sec_cap.AppContainerSid, sec_cap.CapabilityCount, sec_cap.Capabilities, (DWORD)saved_handles.size(), saved_handles.data());
+    if (!NT_SUCCESS(status)) {
+        _com_error error(HRESULT_FROM_NT(status));
+        abort();
+    }
+    if (token_lowbox == 0 || token_lowbox == INVALID_HANDLE_VALUE)
+        throw std::runtime_error("CreateLowBoxToken returned invalid token ");
+
+    // Default from NtCreateLowBoxToken is a Primary token.
+    if (token_type == TokenPrimary)
+        return token_lowbox;
+
+    HandleWrap token_for_sd;
+    WIN32_CHECK(::DuplicateTokenEx(token_lowbox, TOKEN_ALL_ACCESS, nullptr, SecurityImpersonation, TokenImpersonation, &token_for_sd));
+
+    // Copy security descriptor from primary token as the new object will have DACL from the current token's default DACL.
+    {
+        DWORD length_needed = 0;
+        WIN32_CHECK(::GetKernelObjectSecurity(token_lowbox, DACL_SECURITY_INFORMATION, nullptr, 0, &length_needed), ERROR_INSUFFICIENT_BUFFER);
+        std::vector<unsigned char> sec_desc_buffer(length_needed);
+        WIN32_CHECK(::GetKernelObjectSecurity(token_lowbox, DACL_SECURITY_INFORMATION, reinterpret_cast<PSECURITY_DESCRIPTOR>(sec_desc_buffer.data()), length_needed, &length_needed));
+
+        WIN32_CHECK(::SetKernelObjectSecurity(token_for_sd, DACL_SECURITY_INFORMATION, reinterpret_cast<PSECURITY_DESCRIPTOR>(sec_desc_buffer.data())));
+    }
+
+    return token_for_sd;
+}

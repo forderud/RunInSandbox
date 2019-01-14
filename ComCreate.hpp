@@ -3,13 +3,30 @@
 #include <atlbase.h>
 //#define DEBUG_COM_ACTIVATION
 
+enum MODE {
+    MODE_PLAIN,
+    MODE_LOW_INTEGRITY,
+    MODE_APP_CONTAINER,
+};
 
 /** Attempt to create a COM server that runds through a specific user account.
     WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, wchar_t* user, wchar_t* passwd, bool low_integrity) {
-    // impersonate a different user
-    ImpersonateUser imp_user(user, passwd, low_integrity);
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* user, wchar_t* passwd) {
+    std::unique_ptr< ImpersonateUser> impersonate;
+    if (mode < MODE_APP_CONTAINER) {
+        // impersonate a different user
+        impersonate.reset(new ImpersonateUser(user, passwd, mode == MODE_LOW_INTEGRITY));
+    } else {
+        // impersonate an AppContainer
+        // WARNING: Does not work. CoCreateInstance will fail with E_OUTOFMEMORY
+        AppContainerWrap ac;
+        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
+        std::vector<HANDLE> saved_handles;
+        HandleWrap base_token;
+        HandleWrap ac_token = CreateLowBoxToken(base_token, TokenImpersonation, sec_cap, saved_handles);
+        impersonate.reset(new ImpersonateUser(std::move(ac_token)));
+    }
 
     // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     CComPtr<IUnknown> obj;

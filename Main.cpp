@@ -12,14 +12,25 @@ int wmain (int argc, wchar_t *argv[]) {
 
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: RunInSandbox.exe ProgID  [username] [password]\n";
-        std::wcerr << L"Usage: RunInSandbox.exe ExePath [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe ProgID  [ac|li] [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe ExePath [ac] [username] [password]\n";
         return -1;
+    }
+
+    int arg_idx = 1;
+    MODE mode = MODE_PLAIN;
+    if (std::wstring(argv[arg_idx]) == L"li") {
+        mode = MODE_LOW_INTEGRITY;
+        arg_idx++;
+    }
+    else if (std::wstring(argv[arg_idx]) == L"ac") {
+        mode = MODE_APP_CONTAINER;
+        arg_idx++;
     }
 
     // check if 1st argument is a COM class ProgID
     CLSID clsid = {};
-    bool progid_provided = SUCCEEDED(CLSIDFromProgID(argv[1], &clsid));
+    bool progid_provided = SUCCEEDED(CLSIDFromProgID(argv[arg_idx], &clsid));
 
     if (progid_provided) {
         // initialize multi-threaded COM apartment
@@ -33,15 +44,23 @@ int wmain (int argc, wchar_t *argv[]) {
             abort();
     #endif
 
-        std::wcout << L"Creating COM object " << argv[1] << L" in low-integrity...\n";
-        wchar_t* user = (argc >= 3) ? argv[2] : nullptr;
-        wchar_t* pw   = (argc >= 4) ? argv[3] : nullptr;
-        CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, user, pw, true);
+        std::wcout << L"Creating COM object " << argv[arg_idx];
+        if (mode == MODE_LOW_INTEGRITY)
+            std::wclog << L" in low-integrity...\n";
+        else if (mode == MODE_APP_CONTAINER)
+            std::wclog << L" in AppContainer...\n";
+        else
+            std::wclog << L"...\n";
+
+        arg_idx++;
+        wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
+        wchar_t* pw   = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
+        CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, mode, user, pw);
         //CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, user, pw);
 
     } else {
-        std::wcout << L"Starting executable " << argv[1] << L" in AppContainer...\n";
-        ProcCreate(argv[1]);
+        std::wcout << L"Starting executable " << argv[arg_idx] << L" in AppContainer...\n";
+        ProcCreate(argv[arg_idx], true);
     }
     std::wcout << L"[done]" << std::endl;
 }

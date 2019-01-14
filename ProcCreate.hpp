@@ -35,11 +35,25 @@ private:
 };
 
 
-static void ProcCreate(wchar_t * exe_path) {
+static void ProcCreate(wchar_t * exe_path, bool token_based) {
     AppContainerWrap ac;
     StartupInfoWrap si;
-    si.Update(ac.SecCap());
 
     PROCESS_INFORMATION pi = {};
-    WIN32_CHECK(CreateProcess(exe_path, NULL, NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
+    if (!token_based) {
+        // create new AppContainer process, based on STARTUPINFO
+        // This seem to work correctly
+        si.Update(ac.SecCap());
+        WIN32_CHECK(CreateProcess(exe_path, NULL, NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
+    } else {
+        // create new AppContainer process, based on "LowBox" token
+        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
+        std::vector<HANDLE> saved_handles;
+        HandleWrap base_token;
+        HandleWrap ac_token = CreateLowBoxToken(base_token, TokenPrimary, sec_cap, saved_handles);
+
+        // WARNING: Process is created without any error, but crashes immediately afterwards
+        WIN32_CHECK(CreateProcessAsUser(ac_token, exe_path, nullptr, nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+        //WIN32_CHECK(CreateProcessWithTokenW(ac_token, 0 /*LOGON_WITH_PROFILE*/, exe_path, nullptr, 0/*flags*/, nullptr /*env*/, nullptr /*cur-dir*/, nullptr, &pi));
+    }
 }
