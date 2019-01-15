@@ -255,16 +255,16 @@ HandleWrap CreateLowBoxToken(HandleWrap& base_token, TOKEN_TYPE token_type, SECU
         return token_lowbox;
 
     HandleWrap token_for_sd;
-    WIN32_CHECK(::DuplicateTokenEx(token_lowbox, TOKEN_ALL_ACCESS, nullptr, SecurityImpersonation, TokenImpersonation, &token_for_sd));
+    WIN32_CHECK(DuplicateTokenEx(token_lowbox, TOKEN_ALL_ACCESS, nullptr, SecurityImpersonation, TokenImpersonation, &token_for_sd));
 
     // Copy security descriptor from primary token as the new object will have DACL from the current token's default DACL.
     {
         DWORD length_needed = 0;
-        WIN32_CHECK(::GetKernelObjectSecurity(token_lowbox, DACL_SECURITY_INFORMATION, nullptr, 0, &length_needed), ERROR_INSUFFICIENT_BUFFER);
+        WIN32_CHECK(GetKernelObjectSecurity(token_lowbox, DACL_SECURITY_INFORMATION, nullptr, 0, &length_needed), ERROR_INSUFFICIENT_BUFFER);
         std::vector<unsigned char> sec_desc_buffer(length_needed);
-        WIN32_CHECK(::GetKernelObjectSecurity(token_lowbox, DACL_SECURITY_INFORMATION, reinterpret_cast<PSECURITY_DESCRIPTOR>(sec_desc_buffer.data()), length_needed, &length_needed));
+        WIN32_CHECK(GetKernelObjectSecurity(token_lowbox, DACL_SECURITY_INFORMATION, reinterpret_cast<PSECURITY_DESCRIPTOR>(sec_desc_buffer.data()), length_needed, &length_needed));
 
-        WIN32_CHECK(::SetKernelObjectSecurity(token_for_sd, DACL_SECURITY_INFORMATION, reinterpret_cast<PSECURITY_DESCRIPTOR>(sec_desc_buffer.data())));
+        WIN32_CHECK(SetKernelObjectSecurity(token_for_sd, DACL_SECURITY_INFORMATION, reinterpret_cast<PSECURITY_DESCRIPTOR>(sec_desc_buffer.data())));
     }
 
     return token_for_sd;
