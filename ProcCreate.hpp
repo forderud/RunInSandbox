@@ -15,7 +15,7 @@ public:
         
     }
 
-    void Update(SECURITY_CAPABILITIES sc) {
+    void Update(SECURITY_CAPABILITIES & sc) {
         WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, &sc, sizeof(sc), NULL, NULL));
     }
 
@@ -37,17 +37,17 @@ private:
 
 static void ProcCreate(wchar_t * exe_path, bool token_based) {
     AppContainerWrap ac;
+    SECURITY_CAPABILITIES sec_cap = ac.SecCap();
     StartupInfoWrap si;
 
     PROCESS_INFORMATION pi = {};
     if (!token_based) {
         // create new AppContainer process, based on STARTUPINFO
         // This seem to work correctly
-        si.Update(ac.SecCap());
+        si.Update(sec_cap);
         WIN32_CHECK(CreateProcess(exe_path, NULL, NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
     } else {
         // create new AppContainer process, based on "LowBox" token
-        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
         std::vector<HANDLE> saved_handles;
         HandleWrap base_token;
         HandleWrap ac_token = CreateLowBoxToken(base_token, TokenPrimary, sec_cap, saved_handles);
