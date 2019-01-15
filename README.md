@@ -10,6 +10,13 @@ Run `RunInSandbox.exe ProgID [ac|li] [username] [password]` to launch the `ProgI
 #### Client-side impersonation problems
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
+| Token impersonation problems|                                                                     |
+|---------------------|-----------------------------------------------------------------------------|
+|Low integrity        | :white_check_mark: (confirmed)                                              |
+|AppContainer         | :x: Process is created but crashes immediately                              |
+
+WARNING: **AppContainer-based "LowBox" token impersonation does not work**. A process is created, but it crashes immediately after launch.
+
 | User impersonation problems|                                                                      |
 |---------------------|-----------------------------------------------------------------------------|
 |Run as user          | :white_check_mark: (confirmed)                                              |
@@ -19,14 +26,6 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 WARNING: **Does not work yet**. Have submitted StackOverflow [DCOM registration timeout when attempting to start a COM server through a different user](https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) question to request advise.
 
 Partial work-around: Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) registry key to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0, which is not desired.
-
-| Token impersonation problems|                                                                     |
-|---------------------|-----------------------------------------------------------------------------|
-|Low integrity        | :white_check_mark: (confirmed)                                              |
-|AppContainer         | :x: Process is created but crashes immediately                              |
-
-WARNING: **AppContainer-based "LowBox" token impersonation does not work**. A process is created, but it crashes immediately after launch.
-
 
 #### COAUTHINFO-based (DCOM) process creation problems
 This approach passes a [`COSERVERINFO`](https://docs.microsoft.com/en-us/windows/desktop/api/objidl/ns-objidl-_coserverinfo) parameter when creating the COM server. This parameter contains `COAUTHINFO`/`COAUTHIDENTITY` structures with the desired username & password for the COM server.
