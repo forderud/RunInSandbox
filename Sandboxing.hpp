@@ -234,9 +234,8 @@ HandleWrap CreateLowBoxToken(HandleWrap& base_token, TOKEN_TYPE token_type, SECU
     // get NtCreateLowBoxToken function pointer (not ref-counted)
     auto CreateLowBoxToken_fn = reinterpret_cast<NtCreateLowBoxToken>(GetProcAddress(GetModuleHandle(L"ntdll.dll"), "NtCreateLowBoxToken"));
 
-    if (!base_token) {
+    if (!base_token)
         WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &base_token));
-    }
 
     OBJECT_ATTRIBUTES obj_attr = {};
     InitializeObjectAttributes(&obj_attr, nullptr, 0, nullptr, nullptr);

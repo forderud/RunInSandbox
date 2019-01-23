@@ -12,8 +12,8 @@ int wmain (int argc, wchar_t *argv[]) {
 
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: RunInSandbox.exe ProgID  [ac|li] [username] [password]\n";
-        std::wcerr << L"Usage: RunInSandbox.exe ExePath [ac] [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li] ProgID [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac] ExePath [username] [password]\n";
         return -1;
     }
 
