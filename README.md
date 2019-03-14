@@ -15,14 +15,14 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 
 | Token impersonation problems|                                                                     |
 |---------------------|-----------------------------------------------------------------------------|
-|Low integrity        | :white_check_mark: (confirmed)                                              |
+|Low integrity        | :white_check_mark: (confirmed to work)                                      |
 |AppContainer         | :x: Process is created but crashes immediately                              |
 
 WARNING: **AppContainer-based "LowBox" token impersonation does not work**. A process is created, but it crashes immediately after launch.
 
 | User impersonation problems|                                                                      |
 |---------------------|-----------------------------------------------------------------------------|
-|Run as user          | :white_check_mark: (confirmed)                                              |
+|Run as user          | :white_check_mark: (confirmed to work)                                      |
 |Environment variables| :x: Inherited from client process user (inconsistent with impersonated user)|
 |Registry mounting    | :question: Unknown (might be problems also here)                            |
 
