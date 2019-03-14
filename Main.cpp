@@ -1,5 +1,8 @@
+#include <conio.h>
 #include <iostream>
 #include <Shlobj.h>
+#include <atlbase.h>
+#include <atlcom.h>
 #include "ComCreate.hpp"
 #include "ProcCreate.hpp"
 
@@ -55,12 +58,18 @@ int wmain (int argc, wchar_t *argv[]) {
         arg_idx++;
         wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
         wchar_t* pw   = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
-        CComPtr<IUnknown> obj1 = CoCreateAsUser_impersonate(clsid, mode, user, pw);
-        //CComPtr<IUnknown> obj2 = CoCreateAsUser_dcom(clsid, user, pw);
+        CComPtr<IUnknown> obj = CoCreateAsUser_impersonate(clsid, mode, user, pw);
+        //CComPtr<IUnknown> obj = CoCreateAsUser_dcom(clsid, user, pw);
 
+        // try to make window visible
+        SetComAttribute(obj, L"Visible", true);
+
+        std::wcout << L"Press any key to close..\n";
+        _getch();
     } else {
         std::wcout << L"Starting executable " << argv[arg_idx] << L" in AppContainer...\n";
         ProcCreate(argv[arg_idx], true);
     }
+
     std::wcout << L"[done]" << std::endl;
 }

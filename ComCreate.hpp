@@ -102,3 +102,30 @@ CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passw
 
     return obj;
 }
+
+
+/** Try to set a an attribute on an automation-compatible COM server. */
+static bool SetComAttribute(CComPtr<IUnknown> & obj, CComBSTR name, CComVariant value) {
+    CComPtr<IDispatch> obj_disp;
+    if (FAILED(obj.QueryInterface(&obj_disp)))
+        return false;
+
+    // lookup attribute ID
+    DISPID dispid = 0;
+    if (FAILED(obj_disp->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT, &dispid)))
+        return false;
+
+    // prepare arguments
+    DISPPARAMS params = {};
+    DISPID type = DISPID_PROPERTYPUT;
+    {
+        params.cArgs = 1;
+        params.rgvarg = &value;
+        params.cNamedArgs = 1;
+        params.rgdispidNamedArgs = &type;
+    }
+
+    // invoke call
+    HRESULT hr = obj_disp->Invoke(dispid, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_PROPERTYPUT, &params, NULL, NULL, NULL);
+    return SUCCEEDED(hr);
+}
