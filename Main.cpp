@@ -68,7 +68,7 @@ int wmain (int argc, wchar_t *argv[]) {
         _getch();
     } else {
         std::wcout << L"Starting executable " << argv[arg_idx] << L" in AppContainer...\n";
-        ProcCreate(argv[arg_idx], true);
+        ProcCreate(argv[arg_idx], false);
     }
 
     std::wcout << L"[done]" << std::endl;
