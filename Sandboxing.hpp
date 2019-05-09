@@ -27,9 +27,9 @@ class HandleWrap {
 public:
     HandleWrap() {
     }
-    HandleWrap(const HandleWrap & other) {
-        handle = other.handle;
-    }
+
+    HandleWrap(const HandleWrap & other) = delete;
+
     HandleWrap(HandleWrap && other) {
         std::swap(handle, other.handle);
     }
@@ -183,7 +183,7 @@ struct ImpersonateUser {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
-    ImpersonateUser(HandleWrap && token) : m_token(token) {
+    ImpersonateUser(HandleWrap && token) : m_token(std::move(token)) {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
