@@ -35,7 +35,7 @@ private:
 };
 
 
-static void ProcCreate(wchar_t * exe_path, bool token_based) {
+static HandleWrap ProcCreate(const wchar_t * exe_path, bool token_based) {
     AppContainerWrap ac;
     SECURITY_CAPABILITIES sec_cap = ac.SecCap();
     StartupInfoWrap si;
@@ -58,5 +58,8 @@ static void ProcCreate(wchar_t * exe_path, bool token_based) {
     }
 
     WIN32_CHECK(CloseHandle(pi.hProcess));
-    WIN32_CHECK(CloseHandle(pi.hThread));
+
+    HandleWrap retval;
+    retval = std::move(pi.hThread);
+    return retval;
 }
