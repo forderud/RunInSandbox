@@ -35,7 +35,12 @@ private:
 };
 
 
-static HandleWrap ProcCreate(const wchar_t * exe_path, bool token_based) {
+struct ProcessHandles {
+    HandleWrap process;
+    HandleWrap thread;
+};
+
+static ProcessHandles ProcCreate(const wchar_t * exe_path, bool token_based) {
     AppContainerWrap ac;
     SECURITY_CAPABILITIES sec_cap = ac.SecCap();
     StartupInfoWrap si;
@@ -61,9 +66,9 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, bool token_based) {
     if (WaitForInputIdle(pi.hProcess, INFINITE))
         WIN32_CHECK(0);
 
-    WIN32_CHECK(CloseHandle(pi.hProcess));
-
-    HandleWrap retval;
-    retval = std::move(pi.hThread);
-    return retval;
+    // return process & thread handle
+    ProcessHandles handles;
+    handles.process = std::move(pi.hProcess);
+    handles.thread = std::move(pi.hThread);
+    return handles;
 }
