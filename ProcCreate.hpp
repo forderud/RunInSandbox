@@ -57,6 +57,10 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, bool token_based) {
         //WIN32_CHECK(CreateProcessWithTokenW(ac_token, 0 /*LOGON_WITH_PROFILE*/, exe_path, nullptr, 0/*flags*/, nullptr /*env*/, nullptr /*cur-dir*/, nullptr, &pi));
     }
 
+    // wait for process to initialize
+    if (WaitForInputIdle(pi.hProcess, INFINITE))
+        WIN32_CHECK(0);
+
     WIN32_CHECK(CloseHandle(pi.hProcess));
 
     HandleWrap retval;
