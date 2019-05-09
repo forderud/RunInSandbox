@@ -174,8 +174,8 @@ enum IMPERSONATE_MOE {
 
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
-struct ImpersonateUser {
-    ImpersonateUser(wchar_t* user, wchar_t* passwd, bool low_integrity) {
+struct ImpersonateThread {
+    ImpersonateThread(wchar_t* user, wchar_t* passwd, bool low_integrity) {
         if (user && passwd) {
             // impersonate a different user
             WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &m_token));
@@ -192,14 +192,14 @@ struct ImpersonateUser {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
-    ImpersonateUser(HandleWrap && token, IMPERSONATE_MOE mode) : m_token(std::move(token)) {
+    ImpersonateThread(HandleWrap && token, IMPERSONATE_MOE mode) : m_token(std::move(token)) {
         if (mode == IMPERSONATE_USER)
             WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
         else
             WIN32_CHECK(ImpersonateAnonymousToken(m_token)); // change current thread integrity
     }
 
-    ~ImpersonateUser() {
+    ~ImpersonateThread() {
         WIN32_CHECK(RevertToSelf());
     }
 

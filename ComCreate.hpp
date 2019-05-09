@@ -14,10 +14,10 @@ enum MODE {
     WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
 CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* user, wchar_t* passwd) {
-    std::unique_ptr< ImpersonateUser> impersonate;
+    std::unique_ptr<ImpersonateThread> impersonate;
     if (mode < MODE_APP_CONTAINER) {
         // impersonate a different user
-        impersonate.reset(new ImpersonateUser(user, passwd, mode == MODE_LOW_INTEGRITY));
+        impersonate.reset(new ImpersonateThread(user, passwd, mode == MODE_LOW_INTEGRITY));
     } else {
         // impersonate an AppContainer
 #if 0
@@ -27,7 +27,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
         std::vector<HANDLE> saved_handles;
         HandleWrap base_token;
         HandleWrap ac_token = CreateLowBoxToken(base_token, TokenImpersonation, sec_cap, saved_handles);
-        impersonate.reset(new ImpersonateUser(std::move(ac_token), IMPERSONATE_USER));
+        impersonate.reset(new ImpersonateThread(std::move(ac_token), IMPERSONATE_USER));
 #else
         // launch notepad in an AppContainer process.
         // This is sort of overkill, since we only need the thread token
@@ -35,7 +35,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
 
         // impersonate the notepad thread
         // WARNING: AppContainer property is _not_ propagated when calling CoCreateInstance
-        impersonate.reset(new ImpersonateUser(std::move(token.thread), IMPERSONATE_ANONYMOUS));
+        impersonate.reset(new ImpersonateThread(std::move(token.thread), IMPERSONATE_ANONYMOUS));
 #endif
     }
 
