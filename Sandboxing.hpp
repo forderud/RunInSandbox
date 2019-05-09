@@ -41,6 +41,11 @@ public:
         }
     }
 
+    HandleWrap& operator = (HandleWrap && other) {
+        HandleWrap::~HandleWrap();
+        std::swap(handle, other.handle);
+        return *this;
+    }
     HandleWrap& operator = (HANDLE && other) {
         HandleWrap::~HandleWrap();
         std::swap(handle, other);
