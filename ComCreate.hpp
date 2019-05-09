@@ -25,7 +25,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
         std::vector<HANDLE> saved_handles;
         HandleWrap base_token;
         HandleWrap ac_token = CreateLowBoxToken(base_token, TokenImpersonation, sec_cap, saved_handles);
-        impersonate.reset(new ImpersonateUser(std::move(ac_token)));
+        impersonate.reset(new ImpersonateUser(std::move(ac_token), IMPERSONATE_USER));
     }
 
     // create COM object in a separate process (fails with 0x80080005: Server execution failed)

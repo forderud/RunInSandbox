@@ -162,6 +162,10 @@ private:
     std::vector<SID_AND_ATTRIBUTES> m_capabilities;
 };
 
+enum IMPERSONATE_MOE {
+    IMPERSONATE_USER,
+    IMPERSONATE_ANONYMOUS,
+};
 
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
@@ -183,8 +187,11 @@ struct ImpersonateUser {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
-    ImpersonateUser(HandleWrap && token) : m_token(std::move(token)) {
-        WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
+    ImpersonateUser(HandleWrap && token, IMPERSONATE_MOE mode) : m_token(std::move(token)) {
+        if (mode == IMPERSONATE_USER)
+            WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
+        else
+            WIN32_CHECK(ImpersonateAnonymousToken(m_token)); // change current thread integrity
     }
 
     ~ImpersonateUser() {
