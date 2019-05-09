@@ -41,9 +41,9 @@ public:
         }
     }
 
-    HandleWrap& operator = (HandleWrap && other) {
+    HandleWrap& operator = (HANDLE && other) {
         HandleWrap::~HandleWrap();
-        std::swap(handle, other.handle);
+        std::swap(handle, other);
         return *this;
     }
 
