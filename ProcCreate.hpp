@@ -66,6 +66,9 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, bool token_based) {
     if (WaitForInputIdle(pi.hProcess, INFINITE))
         WIN32_CHECK(0);
 
+    // wait a bit more (WaitForInputIdle doesn't seem to be sufficient)
+    Sleep(200);
+
     // return process & thread handle
     ProcessHandles handles;
     handles.process = std::move(pi.hProcess);
