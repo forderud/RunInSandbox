@@ -1,5 +1,6 @@
 #pragma once
 #include "Sandboxing.hpp"
+#include "ProcCreate.hpp"
 #include <atlbase.h>
 //#define DEBUG_COM_ACTIVATION
 
@@ -19,6 +20,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
         impersonate.reset(new ImpersonateUser(user, passwd, mode == MODE_LOW_INTEGRITY));
     } else {
         // impersonate an AppContainer
+#if 0
         // WARNING: Does not work. CoCreateInstance will fail with E_OUTOFMEMORY
         AppContainerWrap ac;
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
@@ -26,11 +28,20 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
         HandleWrap base_token;
         HandleWrap ac_token = CreateLowBoxToken(base_token, TokenImpersonation, sec_cap, saved_handles);
         impersonate.reset(new ImpersonateUser(std::move(ac_token), IMPERSONATE_USER));
+#else
+        // launch notepad in an AppContainer process.
+        // This is sort of overkill, since we only need the thread token
+        HandleWrap token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", false);
+
+        // impersonate the notepad thread
+        // WARNING: AppContainer property is _not_ propagated when calling CoCreateInstance
+        impersonate.reset(new ImpersonateUser(std::move(token), IMPERSONATE_ANONYMOUS));
+#endif
     }
 
-    // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     CComPtr<IUnknown> obj;
 #ifdef DEBUG_COM_ACTIVATION
+    // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
     CComPtr<IClassFactory> cf;
     HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
