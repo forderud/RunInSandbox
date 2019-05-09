@@ -56,4 +56,7 @@ static void ProcCreate(wchar_t * exe_path, bool token_based) {
         WIN32_CHECK(CreateProcessAsUser(ac_token, exe_path, nullptr, nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
         //WIN32_CHECK(CreateProcessWithTokenW(ac_token, 0 /*LOGON_WITH_PROFILE*/, exe_path, nullptr, 0/*flags*/, nullptr /*env*/, nullptr /*cur-dir*/, nullptr, &pi));
     }
+
+    WIN32_CHECK(CloseHandle(pi.hProcess));
+    WIN32_CHECK(CloseHandle(pi.hThread));
 }
