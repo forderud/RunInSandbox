@@ -36,7 +36,7 @@ public:
 
     ~HandleWrap() {
         if (handle) {
-            CloseHandle(handle);
+            WIN32_CHECK(CloseHandle(handle));
             handle = nullptr;
         }
     }
