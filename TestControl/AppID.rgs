@@ -1,0 +1,10 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		ForceRemove '%APPID%' = s 'TestControl Object'
+		{
+			val DllSurrogate = s ''
+		}
+	}
+}

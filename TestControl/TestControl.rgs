@@ -1,0 +1,27 @@
+HKCR
+{
+	TestControl.TestControl.1 = s 'TestControl Object'
+	{
+		CLSID = s '{F0DFBE77-1697-428E-A895-EFEE202B9333}'
+	}
+	TestControl.TestControl = s 'TestControl Object'
+	{		
+		CLSID = s '{F0DFBE77-1697-428E-A895-EFEE202B9333}'
+		CurVer = s 'TestControl.TestControl.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F0DFBE77-1697-428E-A895-EFEE202B9333} = s 'TestControl Object'
+		{
+			ProgID = s 'TestControl.TestControl.1'
+			VersionIndependentProgID = s 'TestControl.TestControl'
+			val AppID = s '%APPID%'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			TypeLib = s '{1FC81ABC-F123-4DEE-9380-4B40032E0ACD}'
+			Version = s '1.0'
+		}
+	}
+}

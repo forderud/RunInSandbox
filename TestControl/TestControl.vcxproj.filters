@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TestControl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ComSupport.hpp" />
+    <ClInclude Include="TestControl.hpp" />
+    <ClInclude Include="Resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AppID.rgs" />
+    <None Include="TestControl.rgs" />
+    <None Include="Module.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="TestControl.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TestControl.rc" />
+  </ItemGroup>
+</Project>

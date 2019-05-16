@@ -1,0 +1,26 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+[object,
+ oleautomation, // use "automation" marshaler (oleaut32.dll)
+ uuid(570FBF3C-D853-435E-B761-6A264393B9DA)]
+interface ISimpleCalculator : IUnknown {
+    HRESULT Add ([in] int a, [in] int b, [out,retval] int * sum);
+};
+
+
+[version(1.0),
+ uuid(1FC81ABC-F123-4DEE-9380-4B40032E0ACD),
+ helpstring("TestControl module")]
+library TestControl {
+    importlib("stdole2.tlb");
+
+    [version(1.0),
+     uuid(F0DFBE77-1697-428E-A895-EFEE202B9333),
+     helpstring("Simple COM class")]
+    coclass TestControl {
+        [default] interface ISimpleCalculator;
+    };
+};
+
