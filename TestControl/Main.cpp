@@ -15,6 +15,10 @@ public:
 
 class TestControlModule : public ATL::CAtlExeModuleT<TestControlModule> {
 public:
+    TestControlModule() {
+        //MessageBox(NULL, L"TestControl init", L"Debugging aid", MB_OK);
+    }
+
     DECLARE_LIBID(LIBID_TestControl)
     DECLARE_REGISTRY_APPID_RESOURCEID(IDR_AppID, "{264FBADA-8FEF-44B7-801E-B728A1749B5A}")
 };
