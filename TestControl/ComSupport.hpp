@@ -4,7 +4,7 @@ Copyright (c) 2016, GE Healthcare, Ultrasound.           */
 #pragma once
 
 #include <vector>
-#include <stdexcept>
+#include <iostream>
 #include <cassert>
 
 #include <comdef.h> // for _com_error
@@ -34,11 +34,12 @@ static void CHECK (HRESULT hr) {
         _com_error err(hr);
 #ifdef _UNICODE
         const wchar_t * msg = err.ErrorMessage(); // weak ptr.
-        throw std::runtime_error(ToAscii(msg));
+        std::wcout << L"ERROR: " << msg << std::endl;
 #else
         const char * msg = err.ErrorMessage(); // weak ptr.
-        throw std::runtime_error(msg);
+        std::cout << "ERROR: " << msg << std::endl;
 #endif
+        abort();
     }
 }
 

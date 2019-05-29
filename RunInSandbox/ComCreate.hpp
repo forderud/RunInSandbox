@@ -2,6 +2,7 @@
 #include "Sandboxing.hpp"
 #include "ProcCreate.hpp"
 #include <atlbase.h>
+#include "../TestControl/ComSupport.hpp"
 //#define DEBUG_COM_ACTIVATION
 
 enum MODE {
@@ -54,8 +55,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
         abort();
 #else
     HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
-    if (FAILED(hr))
-        abort();
+    CHECK(hr);
 #endif
 
     return obj;
