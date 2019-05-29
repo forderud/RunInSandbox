@@ -119,7 +119,14 @@
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>regsvr32.exe /s $(TargetPath)</Command>
+      <Command>IF $(ConfigurationType) == DynamicLibrary (
+  echo Registering DLL...
+  regsvr32 /s $(TargetPath)
+) ELSE (
+  echo Registering EXE...
+  $(TargetPath) /regserver
+)
+echo [done]</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Post-build registration</Message>
@@ -142,7 +149,14 @@
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>regsvr32.exe /s $(TargetPath)</Command>
+      <Command>IF $(ConfigurationType) == DynamicLibrary (
+  echo Registering DLL...
+  regsvr32 /s $(TargetPath)
+) ELSE (
+  echo Registering EXE...
+  $(TargetPath) /regserver
+)
+echo [done]</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Post-build registration</Message>
@@ -169,7 +183,14 @@
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>regsvr32.exe /s $(TargetPath)</Command>
+      <Command>IF $(ConfigurationType) == DynamicLibrary (
+  echo Registering DLL...
+  regsvr32 /s $(TargetPath)
+) ELSE (
+  echo Registering EXE...
+  $(TargetPath) /regserver
+)
+echo [done]</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Post-build registration</Message>
@@ -196,7 +217,14 @@
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>regsvr32.exe /s $(TargetPath)</Command>
+      <Command>IF $(ConfigurationType) == DynamicLibrary (
+  echo Registering DLL...
+  regsvr32 /s $(TargetPath)
+) ELSE (
+  echo Registering EXE...
+  $(TargetPath) /regserver
+)
+echo [done]</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Post-build registration</Message>
