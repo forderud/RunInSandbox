@@ -74,9 +74,6 @@ int wmain (int argc, wchar_t *argv[]) {
 
         // try to make window visible
         SetComAttribute(obj, L"Visible", true);
-
-        std::wcout << L"Press any key to close..\n";
-        _getch();
     } else {
         std::wcout << L"Starting executable " << argv[arg_idx] << L" in AppContainer...\n";
         ProcCreate(argv[arg_idx], false);
