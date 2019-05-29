@@ -4,17 +4,26 @@
 #include "ComSupport.hpp"
 #include <psapi.h>
 
-
+#ifdef _WINDLL
 class TestControlModule : public ATL::CAtlDllModuleT<TestControlModule> {
 public:
     DECLARE_LIBID(LIBID_TestControl)
     DECLARE_REGISTRY_APPID_RESOURCEID(IDR_AppID, "{264FBADA-8FEF-44B7-801E-B728A1749B5A}")
 };
 
+#else
+
+class TestControlModule : public ATL::CAtlExeModuleT<TestControlModule> {
+public:
+    DECLARE_LIBID(LIBID_TestControl)
+    DECLARE_REGISTRY_APPID_RESOURCEID(IDR_AppID, "{264FBADA-8FEF-44B7-801E-B728A1749B5A}")
+};
+#endif
+
 TestControlModule _AtlModule;
 
 
-
+#ifdef _WINDLL
 // DLL Entry Point
 extern "C" BOOL WINAPI DllMain(HINSTANCE /*hInstance*/, DWORD dwReason, LPVOID lpReserved) {
     if (dwReason == DLL_PROCESS_ATTACH) {
@@ -75,3 +84,11 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_  LPCWSTR pszCmdLine) {
 
     return hr;
 }
+
+#else
+
+// EXE Entry Point
+extern "C" int WINAPI _tWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd) {
+    return _AtlModule.WinMain(nShowCmd);
+}
+#endif
