@@ -23,7 +23,7 @@ WARNING: **AppContainer-based "LowBox" token impersonation does not work**. A pr
 | | User impersonation problems |
 |---------------------|-----------------------------------------------------------------------------|
 |Run as admin user    | :white_check_mark: (confirmed to work)                                      |
-|Run as non-admin user| :x: E_ACCESSDENIED (General access denied error) launch error, unless local DCOM "launch" and "activation" permission are granted. Still fail with 0x80080005 (Server execution failed) after launch & activation permissions are granted. |
+|Run as non-admin user| :x: E_ACCESSDENIED (General access denied error) launch error, unless local DCOM "launch" and "activation" permission are granted. Still fail with CO_E_SERVER_EXEC_FAILURE (Server execution failed) after launch & activation permissions are granted. |
 
 WARNING: **Does not work yet**. Did submit StackOverflow [DCOM registration timeout when attempting to start a COM server through a different user](https://web.archive.org/web/20190112183231/https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) question to request advise (link to cached version, since the question was deleted).
 

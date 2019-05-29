@@ -11,7 +11,7 @@ enum MODE {
 };
 
 /** Attempt to create a COM server that runds through a specific user account.
-    NOTICE: Non-admin users need to be granted local DCOM "launch" and "activation" permission to the DCOM object to prevent E_ACCESSDENIED (General access denied error). Unfortunately, creation still fails with 0x80080005 (Server execution failed).
+    NOTICE: Non-admin users need to be granted local DCOM "launch" and "activation" permission to the DCOM object to prevent E_ACCESSDENIED (General access denied error). Unfortunately, creation still fails with CO_E_SERVER_EXEC_FAILURE.
 
     WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
@@ -42,8 +42,8 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
     }
 
     CComPtr<IUnknown> obj;
+    // create COM object in a separate process
 #ifdef DEBUG_COM_ACTIVATION
-    // create COM object in a separate process (fails with 0x80080005: Server execution failed)
     // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
     CComPtr<IClassFactory> cf;
     HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
