@@ -5,7 +5,7 @@ Work-in-progress C++ code for launching executables and out-of-process COM serve
 Run `RunInSandbox.exe ExePath` to launch the `ExePath` application in a AppContainer process. This works for `STARTUPINFOEX`-based process creation, but not when using a "LowBox" token for process creation.
 
 ## COM sandboxing
-Run `RunInSandbox.exe [ac|li] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer or low-integrity process. The process will also run through a different user if username&password are provided. Unfortunately, only the low-integrity part works correctly. Neither user impersonation nor AppContainer isolation works properly yet.
+Run `RunInSandbox.exe [ac|li] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer or low-integrity process. The process will also run through a different user if username&password are provided. Unfortunately, AppContainer isolation doesn't work yet. Also, user impersonation only works for administrator accounts.
 
 Example usage:
 `RunInSandbox.exe li PowerPoint.Application` to start Microsoft PowerPoint in low-integrity mode.
