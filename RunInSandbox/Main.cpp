@@ -5,6 +5,7 @@
 #include <atlcom.h>
 #include "ComCreate.hpp"
 #include "ProcCreate.hpp"
+#include "../TestControl/TestControl_h.h"
 
 
 int wmain (int argc, wchar_t *argv[]) {
@@ -60,6 +61,16 @@ int wmain (int argc, wchar_t *argv[]) {
         wchar_t* pw   = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
         CComPtr<IUnknown> obj = CoCreateAsUser_impersonate(clsid, mode, user, pw);
         //CComPtr<IUnknown> obj = CoCreateAsUser_dcom(clsid, user, pw);
+
+        // try to add two numbers
+        CComPtr< ISimpleCalculator> calc;
+        obj.QueryInterface(&calc);
+        if (calc) {
+            int sum = 0;
+            if (FAILED(calc->Add(2, 3, &sum)))
+                abort();
+            assert(sum == 2 + 3);
+        }
 
         // try to make window visible
         SetComAttribute(obj, L"Visible", true);
