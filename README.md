@@ -13,14 +13,14 @@ Example usage:
 #### Client-side impersonation problems
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
-| Token impersonation problems|                                                                     |
+| | Token impersonation problems |
 |---------------------|-----------------------------------------------------------------------------|
 |Low integrity        | :white_check_mark: (confirmed to work)                                      |
 |AppContainer         | :x: Process is created but crashes immediately                              |
 
 WARNING: **AppContainer-based "LowBox" token impersonation does not work**. A process is created, but it crashes immediately after launch.
 
-| User impersonation problems|                                                                      |
+| | User impersonation problems |
 |---------------------|-----------------------------------------------------------------------------|
 |Run as admin user    | :white_check_mark: (confirmed to work)                                      |
 |Run as non-admin user| :x: E_ACCESSDENIED (General access denied error) launch error, unless local DCOM "launch" and "activation" permission are granted. Still fail with 0x80080005 (Server execution failed) after launch & activation permissions are granted. |
