@@ -178,7 +178,7 @@ struct ImpersonateThread {
     ImpersonateThread(wchar_t* user, wchar_t* passwd, bool low_integrity) {
         if (user && passwd) {
             // impersonate a different user
-            WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &m_token));
+            WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_NETWORK, LOGON32_PROVIDER_DEFAULT, &m_token));
         } else {
             // current user
             HandleWrap cur_token;
