@@ -16,7 +16,7 @@ HKCR
 			ProgID = s 'TestControl.TestControl.1'
 			VersionIndependentProgID = s 'TestControl.TestControl'
 			val AppID = s '%APPID%'
-			InprocServer32 = s '%MODULE%'
+			LocalServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
