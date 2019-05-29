@@ -9,10 +9,8 @@
 
 
 int wmain (int argc, wchar_t *argv[]) {
-    if (!IsUserAnAdmin()) {
-        std::wcerr << L"ERROR: Admin priveledges not detected. Failing early, since some functionality might not work.\n";
-        return -2;
-    }
+    if (!IsUserAnAdmin())
+        std::wcout << L"WARNING: Admin priveledges not detected. Some operations might fail.\n";
 
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
@@ -69,6 +67,8 @@ int wmain (int argc, wchar_t *argv[]) {
             int sum = 0;
             if (FAILED(calc->Add(2, 3, &sum)))
                 abort();
+
+            std::wcout << L"Add(2, 3) returned " << sum << L".\n";
             assert(sum == 2 + 3);
         }
 
