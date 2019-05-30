@@ -48,11 +48,9 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
     // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
     CComPtr<IClassFactory> cf;
     HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
-    if (FAILED(hr))
-        abort();
+    CHECK(hr);
     hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
-    if (FAILED(hr))
-        abort();
+    CHECK(hr);
 #else
     HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
     CHECK(hr);
@@ -99,16 +97,13 @@ CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passw
 #ifdef DEBUG_COM_ACTIVATION
         CComPtr<IClassFactory> cf;
         HRESULT hr = CoGetClassObject(clsid, CLSCTX_REMOTE_SERVER, &si, IID_IClassFactory, (void**)&cf);
-        if (FAILED(hr))
-            abort();
+        CHECK(hr);
         hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
-        if (FAILED(hr))
-            abort();
+        CHECK(hr);
 #else
         MULTI_QI mqi = { &IID_IUnknown, nullptr, E_FAIL };
         HRESULT hr = CoCreateInstanceEx(clsid, nullptr, CLSCTX_REMOTE_SERVER /*| CLSCTX_ENABLE_CLOAKING | CLSCTX_ENABLE_AAA*/, &si, 1, &mqi);
-        if (FAILED(hr))
-            abort();
+        CHECK(hr);
         obj.Attach(mqi.pItf);
 #endif
     }
