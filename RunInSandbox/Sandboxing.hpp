@@ -18,7 +18,7 @@ static void WIN32_CHECK(BOOL res, DWORD whitelisted_err = ERROR_SUCCESS) {
         return;
 
     _com_error error(code);
-    const TCHAR * msg_ptr = error.ErrorMessage();
+    std::wcout << L"ERROR: " << error.ErrorMessage() << std::endl;
     abort();
 }
 
