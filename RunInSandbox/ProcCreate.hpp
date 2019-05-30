@@ -50,7 +50,13 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, bool token_based) {
         // create new AppContainer process, based on STARTUPINFO
         // This seem to work correctly
         si.Update(sec_cap);
-        WIN32_CHECK(CreateProcess(exe_path, NULL, NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
+
+        auto cmdline = std::wstring() + L'"' + exe_path + L'"';
+#if 0
+        // mimic how svchost passes "-Embedding" argument
+        cmdline += L" -Embedding";
+#endif
+        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.c_str()), NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
     } else {
         // create new AppContainer process, based on "LowBox" token
         std::vector<HANDLE> saved_handles;
