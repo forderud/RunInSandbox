@@ -179,6 +179,11 @@ struct ImpersonateThread {
         if (user && passwd) {
             // impersonate a different user
             WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, &m_token));
+
+            // load associated user profile
+            m_profile.dwSize = sizeof(m_profile);
+            m_profile.lpUserName = user;
+            WIN32_CHECK(LoadUserProfile(m_token, &m_profile));
         } else {
             // current user
             HandleWrap cur_token;
@@ -200,6 +205,11 @@ struct ImpersonateThread {
     }
 
     ~ImpersonateThread() {
+        if (m_profile.lpUserName) {
+            // TODO: Defer profile unloading
+            //WIN32_CHECK(UnloadUserProfile(m_token, &m_profile));
+        }
+
         WIN32_CHECK(RevertToSelf());
     }
 
@@ -222,7 +232,8 @@ struct ImpersonateThread {
 
     }
 
-    HandleWrap m_token;
+    HandleWrap  m_token;
+    PROFILEINFO m_profile = {};
 };
 
 
