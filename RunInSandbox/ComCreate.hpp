@@ -3,7 +3,7 @@
 #include "ProcCreate.hpp"
 #include <atlbase.h>
 #include "../TestControl/ComSupport.hpp"
-//#define DEBUG_COM_ACTIVATION
+#define DEBUG_COM_ACTIVATION
 
 enum MODE {
     MODE_PLAIN,
