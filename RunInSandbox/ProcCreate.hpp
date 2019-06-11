@@ -7,12 +7,11 @@ public:
     StartupInfoWrap() {
         si.StartupInfo.cb = sizeof(STARTUPINFOEX);
 
-        const DWORD attr_count = 1;
+        const DWORD attr_count = 1; // only SECURITY_CAPABILITIES
         SIZE_T attr_size = 0;
-        InitializeProcThreadAttributeList(NULL, attr_count, 0, &attr_size);
+        InitializeProcThreadAttributeList(NULL, attr_count, 0, /*out*/&attr_size);
         si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attr_size);
         WIN32_CHECK(InitializeProcThreadAttributeList(si.lpAttributeList, attr_count, 0, &attr_size));
-        
     }
 
     void Update(SECURITY_CAPABILITIES & sc) {
