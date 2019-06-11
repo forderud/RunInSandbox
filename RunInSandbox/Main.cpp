@@ -76,7 +76,7 @@ int wmain (int argc, wchar_t *argv[]) {
         SetComAttribute(obj, L"Visible", true);
     } else {
         std::wcout << L"Starting executable " << argv[arg_idx] << L" in AppContainer...\n";
-        ProcCreate(argv[arg_idx], false);
+        ProcCreate_AppContainer(argv[arg_idx], false);
     }
 
     std::wcout << L"[done]" << std::endl;

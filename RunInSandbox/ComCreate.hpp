@@ -33,8 +33,8 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
         impersonate.reset(new ImpersonateThread(std::move(ac_token), IMPERSONATE_USER));
 #else
         // launch notepad in an AppContainer process.
-        // This is sort of overkill, since we only need the thread token
-        ProcessHandles token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", false);
+        // This is really overkill, since we only need the thread token
+        ProcessHandles token = ProcCreate_AppContainer(L"C:\\Windows\\System32\\notepad.exe", false);
 
         // impersonate the notepad thread
         // WARNING: AppContainer property is _not_ propagated when calling CoCreateInstance

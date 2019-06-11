@@ -40,7 +40,9 @@ struct ProcessHandles {
     HandleWrap thread;
 };
 
-static ProcessHandles ProcCreate(const wchar_t * exe_path, bool token_based) {
+
+/** Launch a new process within an AppContainer. */
+static ProcessHandles ProcCreate_AppContainer(const wchar_t * exe_path, bool token_based) {
     AppContainerWrap ac;
     SECURITY_CAPABILITIES sec_cap = ac.SecCap();
     StartupInfoWrap si;
