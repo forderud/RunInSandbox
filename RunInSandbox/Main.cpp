@@ -65,8 +65,7 @@ int wmain (int argc, wchar_t *argv[]) {
         obj.QueryInterface(&calc);
         if (calc) {
             int sum = 0;
-            if (FAILED(calc->Add(2, 3, &sum)))
-                abort();
+            CHECK(calc->Add(2, 3, &sum));
 
             std::wcout << L"Add(2, 3) returned " << sum << L".\n";
             assert(sum == 2 + 3);
