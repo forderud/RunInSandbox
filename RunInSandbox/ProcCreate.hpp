@@ -21,6 +21,7 @@ public:
     ~StartupInfoWrap() {
         if (si.lpAttributeList) {
             DeleteProcThreadAttributeList(si.lpAttributeList);
+            WIN32_CHECK(HeapFree(GetProcessHeap(), 0, si.lpAttributeList));
             si.lpAttributeList = nullptr;
         }
     }
