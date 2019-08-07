@@ -98,7 +98,21 @@ static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 class AppContainerWrap {
 public:
     AppContainerWrap() {
-        AddWellKnownCapabilities();
+        const WELL_KNOWN_SID_TYPE capabilities[] = {
+            WinCapabilityInternetClientSid,
+            WinCapabilityInternetClientServerSid,
+            WinCapabilityPrivateNetworkClientServerSid,
+            WinCapabilityPicturesLibrarySid,
+            WinCapabilityVideosLibrarySid,
+            WinCapabilityMusicLibrarySid,
+            WinCapabilityDocumentsLibrarySid,
+            WinCapabilitySharedUserCertificatesSid,
+            WinCapabilityEnterpriseAuthenticationSid,
+            WinCapabilityRemovableStorageSid,
+        };
+        for (auto cap : capabilities) {
+            AddCapability(cap);
+        }
 
         const wchar_t PROFILE_NAME[] = L"RunInSandbox.AppContainer";
         const wchar_t DISPLAY_NAME[] = L"RunInSandbox.AppContainer";
@@ -136,33 +150,18 @@ public:
         return sc;
     }
 
-private:
-    void AddWellKnownCapabilities() {
-        const WELL_KNOWN_SID_TYPE capabilities[] = {
-            WinCapabilityInternetClientSid,
-            WinCapabilityInternetClientServerSid,
-            WinCapabilityPrivateNetworkClientServerSid,
-            WinCapabilityPicturesLibrarySid,
-            WinCapabilityVideosLibrarySid,
-            WinCapabilityMusicLibrarySid,
-            WinCapabilityDocumentsLibrarySid,
-            WinCapabilitySharedUserCertificatesSid,
-            WinCapabilityEnterpriseAuthenticationSid,
-            WinCapabilityRemovableStorageSid,
-        };
+    void AddCapability(WELL_KNOWN_SID_TYPE capability) {
+        PSID sid = LocalAlloc(LPTR, SECURITY_MAX_SID_SIZE);
+        if (sid == nullptr)
+            abort();
 
-        for (auto cap : capabilities) {
-            PSID sid = LocalAlloc(LPTR, SECURITY_MAX_SID_SIZE);
-            if (sid == nullptr)
-                abort();
+        DWORD sidListSize = SECURITY_MAX_SID_SIZE;
+        WIN32_CHECK(CreateWellKnownSid(capability, NULL, sid, &sidListSize));
 
-            DWORD sidListSize = SECURITY_MAX_SID_SIZE;
-            WIN32_CHECK(CreateWellKnownSid(cap, NULL, sid, &sidListSize));
-
-            m_capabilities.push_back({ sid, SE_GROUP_ENABLED });
-        }
+        m_capabilities.push_back({ sid, SE_GROUP_ENABLED });
     }
 
+private:
     PSID                            m_sid = nullptr;
     std::vector<SID_AND_ATTRIBUTES> m_capabilities;
 };
