@@ -48,11 +48,11 @@ int wmain (int argc, wchar_t *argv[]) {
 
         std::wcout << L"Creating COM object " << argv[arg_idx];
         if (mode == MODE_LOW_INTEGRITY)
-            std::wclog << L" in low-integrity...\n";
+            std::wcout << L" in low-integrity...\n";
         else if (mode == MODE_APP_CONTAINER)
-            std::wclog << L" in AppContainer...\n";
+            std::wcout << L" in AppContainer...\n";
         else
-            std::wclog << L"...\n";
+            std::wcout << L"...\n";
 
         arg_idx++;
         wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
@@ -74,8 +74,14 @@ int wmain (int argc, wchar_t *argv[]) {
         // try to make window visible
         SetComAttribute(obj, L"Visible", true);
     } else {
-        std::wcout << L"Starting executable " << argv[arg_idx] << L" in AppContainer...\n";
-        ProcCreate_AppContainer(argv[arg_idx], false);
+        std::wcout << L"Starting executable " << argv[arg_idx];
+        if (mode == MODE_LOW_INTEGRITY)
+            std::wcout << L" in low-integrity...\n";
+        else if (mode == MODE_APP_CONTAINER)
+            std::wcout << L" in AppContainer...\n";
+        else
+            std::wcout << L"...\n";
+        ProcCreate_AppContainer(argv[arg_idx], mode);
     }
 
     std::wcout << L"[done]" << std::endl;
