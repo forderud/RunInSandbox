@@ -5,11 +5,6 @@
 #include "../TestControl/ComSupport.hpp"
 #define DEBUG_COM_ACTIVATION
 
-enum MODE {
-    MODE_PLAIN,
-    MODE_LOW_INTEGRITY,
-    MODE_APP_CONTAINER,
-};
 
 /** Attempt to create a COM server that runds through a specific user account.
     NOTICE: Non-admin users need to be granted local DCOM "launch" and "activation" permission to the DCOM object to prevent E_ACCESSDENIED (General access denied error). Unfortunately, creation still fails with CO_E_SERVER_EXEC_FAILURE.

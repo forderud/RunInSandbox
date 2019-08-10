@@ -235,6 +235,12 @@ struct ImpersonateThread {
     PROFILEINFO m_profile = {};
 };
 
+enum MODE {
+    MODE_PLAIN,
+    MODE_LOW_INTEGRITY,
+    MODE_APP_CONTAINER,
+};
+
 
 /** Copied from https://github.com/chromium/chromium/blob/master/sandbox/win/src/nt_internals.h */
 typedef NTSTATUS(WINAPI* NtCreateLowBoxToken)(
