@@ -24,26 +24,46 @@ static void WIN32_CHECK(BOOL res) {
     throw std::runtime_error(msg);
 }
 
+/// sporadic error codes experienced with SetNamedSecurityInfo
+const static DWORD SPORADIC_FAILURE_CODES[]{
+    ERROR_INSUFFICIENT_BUFFER, ///< 122
+    ERROR_INVALID_SID,         ///< 1337
+    ERROR_BAD_INHERITANCE_ACL, ///< 1340
+};
+
+
 /** Tag a folder path as writable by low-integrity processes.
     By default, only %USER PROFILE%\AppData\LocalLow is writable.
     Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
 static DWORD MakePathLowIntegrity(const WCHAR * path) {
-    ACL * sacl = nullptr; // system access control list
-    {
-        // initialize "low integrity" System Access Control List (SACL)
-        PSECURITY_DESCRIPTOR SD = nullptr;
-        // Security Descriptor String interpretation: (based on sddl.h)
-        // SACL:(ace_type=Integrity label; ace_flags=; rights=SDDL_NO_WRITE_UP; object_guid=; inherit_object_guid=; account_sid=Low mandatory level)
-        WIN32_CHECK(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"S:(ML;;NW;;;LW)", SDDL_REVISION_1, &SD, NULL));
-        BOOL sacl_present = FALSE;
-        BOOL sacl_defaulted = FALSE;
-        WIN32_CHECK(GetSecurityDescriptorSacl(SD, &sacl_present, &sacl, &sacl_defaulted));
-        LocalFree(SD);
-    }
+    DWORD ret = 0;
+    do {
+        ACL * sacl = nullptr; // system access control list
+        {
+            // initialize "low integrity" System Access Control List (SACL)
+            PSECURITY_DESCRIPTOR SD = nullptr;
+            // Security Descriptor String interpretation: (based on sddl.h)
+            // SACL:(ace_type=Integrity label; ace_flags=; rights=SDDL_NO_WRITE_UP; object_guid=; inherit_object_guid=; account_sid=Low mandatory level)
+            WIN32_CHECK(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"S:(ML;;NW;;;LW)", SDDL_REVISION_1, &SD, NULL));
+            BOOL sacl_present = FALSE;
+            BOOL sacl_defaulted = FALSE;
+            WIN32_CHECK(GetSecurityDescriptorSacl(SD, &sacl_present, &sacl, &sacl_defaulted));
+            LocalFree(SD);
+        }
 
-    // apply "low integrity" SACL
-    DWORD ret = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
-    return ret; // == ERROR_SUCCESS);
+        // apply "low integrity" SACL
+        ret = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
+        if (ret == ERROR_SUCCESS)
+            return ret;
+
+        bool sporadic_failure = std::find(std::begin(SPORADIC_FAILURE_CODES), std::end(SPORADIC_FAILURE_CODES), ret) != std::end(SPORADIC_FAILURE_CODES);
+        if (!sporadic_failure)
+            return ret;
+    } while (true);
+
+    // ERROR_FILE_NOT_FOUND ///< 2
+    // ERROR_ACCESS_DENIED  ///< 5
+    return ret; // failure
 }
 
 int wmain(int argc, wchar_t *argv[])
@@ -63,12 +83,6 @@ int wmain(int argc, wchar_t *argv[])
         return 0; // success
     }
 
-    // 5    - ERROR_ACCESS_DENIED (if no access)
-
-    // Sporadic failures experienced:
-    // 122  - ERROR_INSUFFICIENT_BUFFER (sporadic failure)
-    // 1337 - ERROR_INVALID_SID (sporadic failure)
-    // 1340 - ERROR_BAD_INHERITANCE_ACL (sporadic failure)
     std::wcout << L"ERROR code: " << err << std::endl;
     return 2;
 }
