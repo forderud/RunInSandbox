@@ -69,6 +69,7 @@ int wmain(int argc, wchar_t *argv[])
         return 0; // success
     }
 
-    std::wcout << L"ERROR code: " << err << std::endl;
+    _com_error error(err);
+    std::wcout << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
     return 2;
 }
