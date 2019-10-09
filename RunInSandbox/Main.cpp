@@ -15,7 +15,7 @@ int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li] ProgID [username] [password]\n";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac] ExePath [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li] ExePath\n";
         return -1;
     }
 
@@ -24,8 +24,7 @@ int wmain (int argc, wchar_t *argv[]) {
     if (std::wstring(argv[arg_idx]) == L"li") {
         mode = MODE_LOW_INTEGRITY;
         arg_idx++;
-    }
-    else if (std::wstring(argv[arg_idx]) == L"ac") {
+    } else if (std::wstring(argv[arg_idx]) == L"ac") {
         mode = MODE_APP_CONTAINER;
         arg_idx++;
     }
