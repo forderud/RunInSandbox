@@ -42,7 +42,7 @@ struct ProcessHandles {
 
 
 /** Launch a new process within an AppContainer. */
-static ProcessHandles ProcCreate_AppContainer(const wchar_t * exe_path, MODE mode) {
+static ProcessHandles ProcCreate(const wchar_t * exe_path, MODE mode) {
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
