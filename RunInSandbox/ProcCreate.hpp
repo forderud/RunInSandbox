@@ -42,13 +42,20 @@ struct ProcessHandles {
 
 
 /** Launch a new process within an AppContainer. */
-static ProcessHandles ProcCreate(const wchar_t * exe_path, MODE mode) {
+static ProcessHandles ProcCreate(const wchar_t * exe_path, MODE mode, int argc, wchar_t *argv[]) {
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
+    std::wstring arguments = exe_path;
+    // append extra arguments
+    for (int i = 0; i < argc; ++i) {
+        arguments += L" ";
+        arguments += argv[i];
+    }
+
     if (mode == MODE_LOW_INTEGRITY) {
         ImpersonateThread low_int(nullptr, nullptr, true);
-        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, nullptr, nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
     } else {
         AppContainerWrap ac;
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();

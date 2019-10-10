@@ -80,7 +80,8 @@ int wmain (int argc, wchar_t *argv[]) {
             std::wcout << L" in AppContainer...\n";
         else
             std::wcout << L"...\n";
-        ProcCreate(argv[arg_idx], mode);
+        int extra_args = argc - arg_idx - 1;
+        ProcCreate(argv[arg_idx], mode, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
     }
 
     std::wcout << L"[done]" << std::endl;

@@ -29,7 +29,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
 #else
         // launch notepad in an AppContainer process.
         // This is really overkill, since we only need the thread token
-        ProcessHandles token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", MODE_APP_CONTAINER);
+        ProcessHandles token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", MODE_APP_CONTAINER, 0, nullptr);
 
         // impersonate the notepad thread
         // WARNING: AppContainer property is _not_ propagated when calling CoCreateInstance
