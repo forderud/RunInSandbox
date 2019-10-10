@@ -11,17 +11,9 @@ static void WIN32_CHECK(BOOL res) {
         return;
 
     _com_error error(GetLastError());
-#ifdef _UNICODE
     const wchar_t * w_msg = error.ErrorMessage();
-#pragma warning(push)
-#pragma warning(disable: 4996) // function or variable may be unsafe
-    std::string msg(wcslen(w_msg), '\0');
-    wcstombs(const_cast<char*>(msg.data()), w_msg, msg.size());
-#pragma warning(pop)
-#else
-    const char * msg = error.ErrorMessage();
-#endif
-    throw std::runtime_error(msg);
+    std::wcerr << L"ERROR: " << w_msg << L"\n";
+    abort();
 }
 
 
@@ -70,6 +62,6 @@ int wmain(int argc, wchar_t *argv[])
     }
 
     _com_error error(err);
-    std::wcout << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+    std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
     return 2;
 }

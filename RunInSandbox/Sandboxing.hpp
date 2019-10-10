@@ -274,8 +274,10 @@ HandleWrap CreateLowBoxToken(HandleWrap& base_token, TOKEN_TYPE token_type, SECU
         _com_error error(HRESULT_FROM_NT(status));
         abort();
     }
-    if (token_lowbox == 0 || token_lowbox == INVALID_HANDLE_VALUE)
-        throw std::runtime_error("CreateLowBoxToken returned invalid token ");
+    if (token_lowbox == 0 || token_lowbox == INVALID_HANDLE_VALUE) {
+        std::cerr << "CreateLowBoxToken returned invalid token\n";
+        abort();
+    }
 
     // Default from NtCreateLowBoxToken is a Primary token.
     if (token_type == TokenPrimary)
