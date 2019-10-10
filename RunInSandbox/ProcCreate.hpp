@@ -85,8 +85,8 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, MODE mode, int argc, 
     }
 
     // wait for process to initialize
-    if (WaitForInputIdle(pi.hProcess, INFINITE))
-        WIN32_CHECK(0);
+    // ignore failure if process is not a GUI app
+    WaitForInputIdle(pi.hProcess, INFINITE);
 
     // wait a bit more (WaitForInputIdle doesn't seem to be sufficient)
     Sleep(200);
