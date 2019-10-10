@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     char buffer[] = "X";
     DWORD bytesWritten = 0;
     BOOL ok = WriteFile(handle, buffer, sizeof(buffer), &bytesWritten, /*no overlapped*/NULL);
-    if (!ok) {
+    if (!ok || (bytesWritten == 0)) {
         std::cerr << "Write failed\n";
         return -1;
     }
