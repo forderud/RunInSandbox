@@ -43,12 +43,13 @@ public:
 
     HandleWrap& operator = (HandleWrap && other) {
         HandleWrap::~HandleWrap();
-        std::swap(handle, other.handle);
+        new(this) HandleWrap(std::move(other));
         return *this;
     }
-    HandleWrap& operator = (HANDLE && other) {
+    HandleWrap& operator = (HANDLE other) {
         HandleWrap::~HandleWrap();
-        std::swap(handle, other);
+        new(this) HandleWrap();
+        handle = other;
         return *this;
     }
 
@@ -78,6 +79,7 @@ public:
 
     void Allocate(DWORD size) {
         SidWrap::~SidWrap();
+        new(this) SidWrap();
         sid = LocalAlloc(LPTR, size);
     }
 
