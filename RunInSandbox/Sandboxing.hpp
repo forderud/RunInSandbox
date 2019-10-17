@@ -173,10 +173,18 @@ enum IMPERSONATE_MOE {
     IMPERSONATE_ANONYMOUS,
 };
 
+enum class IntegrityLevel {
+    Default = 0,
+    Low     = WinLowLabelSid,
+    Medium  = WinMediumLabelSid,
+    High    = WinHighLabelSid,
+};
+
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateThread {
-    ImpersonateThread(wchar_t* user, wchar_t* passwd, bool low_integrity) {
+
+    ImpersonateThread(wchar_t* user, wchar_t* passwd, IntegrityLevel integrity) {
         if (user && passwd) {
             // impersonate a different user
             WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, &m_token));
@@ -192,8 +200,8 @@ struct ImpersonateThread {
             WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &m_token));
         }
 
-        if (low_integrity)
-            ApplyLowIntegrity();
+        if (integrity != IntegrityLevel::Default)
+            ApplyIntegrity(integrity);
 
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
@@ -216,13 +224,13 @@ struct ImpersonateThread {
 
     /** Create a low-integrity token associated with the current user.
         Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
-    void ApplyLowIntegrity() {
+    void ApplyIntegrity(IntegrityLevel integrity) {
         SidWrap li_sid;
         {
             // low integrity SID - same as ConvertStringSidToSid("S-1-16-4096",..)
             DWORD sid_size = SECURITY_MAX_SID_SIZE;
             li_sid.Allocate(sid_size);
-            WIN32_CHECK(CreateWellKnownSid(WinLowLabelSid, nullptr, li_sid, &sid_size));
+            WIN32_CHECK(CreateWellKnownSid(static_cast<WELL_KNOWN_SID_TYPE>(integrity), nullptr, li_sid, &sid_size));
         }
 
         // reduce process integrity level

@@ -15,7 +15,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
     std::unique_ptr<ImpersonateThread> impersonate;
     if (mode < MODE_APP_CONTAINER) {
         // impersonate a different user
-        impersonate.reset(new ImpersonateThread(user, passwd, mode == MODE_LOW_INTEGRITY));
+        impersonate.reset(new ImpersonateThread(user, passwd, (mode == MODE_LOW_INTEGRITY) ? IntegrityLevel::Low : IntegrityLevel::Default));
     } else {
         // impersonate an AppContainer
 #if 0
