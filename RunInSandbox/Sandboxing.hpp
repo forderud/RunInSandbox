@@ -175,9 +175,9 @@ enum IMPERSONATE_MOE {
 
 enum class IntegrityLevel {
     Default = 0,
-    Low     = WinLowLabelSid,
-    Medium  = WinMediumLabelSid,
-    High    = WinHighLabelSid,
+    Low     = WinLowLabelSid,    ///< same as ConvertStringSidToSid("S-1-16-4096",..)
+    Medium  = WinMediumLabelSid, ///< same as ConvertStringSidToSid("S-1-16-8192",..)
+    High    = WinHighLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-12288",..)
 };
 
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
@@ -227,7 +227,6 @@ struct ImpersonateThread {
     void ApplyIntegrity(IntegrityLevel integrity) {
         SidWrap li_sid;
         {
-            // low integrity SID - same as ConvertStringSidToSid("S-1-16-4096",..)
             DWORD sid_size = SECURITY_MAX_SID_SIZE;
             li_sid.Allocate(sid_size);
             WIN32_CHECK(CreateWellKnownSid(static_cast<WELL_KNOWN_SID_TYPE>(integrity), nullptr, li_sid, &sid_size));
@@ -238,7 +237,6 @@ struct ImpersonateThread {
         TIL.Label.Attributes = SE_GROUP_INTEGRITY;
         TIL.Label.Sid = li_sid;
         WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(li_sid)));
-
     }
 
     HandleWrap  m_token;
