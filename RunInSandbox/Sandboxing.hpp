@@ -181,7 +181,7 @@ enum class IntegrityLevel {
     High    = WinHighLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-12288",..)
 };
 
-std::wstring ToString (IntegrityLevel integrity) {
+static std::wstring ToString (IntegrityLevel integrity) {
     switch (integrity) {
     case IntegrityLevel::Default:      return L"default";
     case IntegrityLevel::AppContainer: return L"AppContainer";
@@ -192,6 +192,21 @@ std::wstring ToString (IntegrityLevel integrity) {
 
     abort(); // never reached
 }
+
+static IntegrityLevel FromString (std::wstring arg) {
+    if (arg == L"ac") {
+        return IntegrityLevel::AppContainer;
+    } else if (arg == L"li") {
+        return IntegrityLevel::Low;
+    } else if (arg == L"mi") {
+        return IntegrityLevel::Medium;
+    } else if (arg == L"hi") {
+        return IntegrityLevel::High;
+    }
+
+    return IntegrityLevel::Default;
+}
+
 
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */

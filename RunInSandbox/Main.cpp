@@ -19,20 +19,9 @@ int wmain (int argc, wchar_t *argv[]) {
     }
 
     int arg_idx = 1;
-    IntegrityLevel mode = IntegrityLevel::Default;
-    if (std::wstring(argv[arg_idx]) == L"ac") {
-        mode = IntegrityLevel::AppContainer;
+    IntegrityLevel mode = FromString(argv[arg_idx]);
+    if (mode != IntegrityLevel::Default)
         arg_idx++;
-    } else if (std::wstring(argv[arg_idx]) == L"li") {
-        mode = IntegrityLevel::Low;
-        arg_idx++;
-    } else if (std::wstring(argv[arg_idx]) == L"mi") {
-        mode = IntegrityLevel::Medium;
-        arg_idx++;
-    } else if (std::wstring(argv[arg_idx]) == L"hi") {
-        mode = IntegrityLevel::High;
-        arg_idx++;
-    }
 
     // check if 1st argument is a COM class ProgID
     CLSID clsid = {};
@@ -118,6 +107,7 @@ int wmain (int argc, wchar_t *argv[]) {
             }
 
             admin_imp.reset(new ImpersonateThread(username, password, IntegrityLevel::Default));
+            std::wcout << L"User credentials successfully impersonated.\n";
 
             SecureZeroMemory(password, sizeof(password));
             SecureZeroMemory(outAuthBuf, outAuthSize);
