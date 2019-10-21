@@ -73,7 +73,7 @@ int wmain (int argc, wchar_t *argv[]) {
         std::wcout << L"Starting executable " << argv[arg_idx];
         std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
 
-        std::unique_ptr<ImpersonateThread> admin_imp;
+        std::wstring username, password;
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
             //std::wcout << L"WARNING: Admin priveledges not detected. Some operations might fail.\n";
 
@@ -93,29 +93,27 @@ int wmain (int argc, wchar_t *argv[]) {
                 return -1;
             }
 
-            WCHAR username[CREDUI_MAX_USERNAME_LENGTH + 1] = {};
-            DWORD username_len = _countof(username);
-            WCHAR password[CREDUI_MAX_PASSWORD_LENGTH + 1] = {};
-            DWORD password_len = _countof(password);
+            username.resize(CREDUI_MAX_USERNAME_LENGTH + 1);
+            DWORD username_len = static_cast<DWORD>(username.size());
+            password.resize(CREDUI_MAX_PASSWORD_LENGTH + 1);
+            DWORD password_len = static_cast<DWORD>(password.size());
             WCHAR domain[CRED_MAX_DOMAIN_TARGET_NAME_LENGTH + 1] = {};
             DWORD domain_len = 0;
             // Attempt to decrypt the user's password
-            BOOL ok = CredUnPackAuthenticationBuffer(CRED_PACK_PROTECTED_CREDENTIALS, outAuthBuf, outAuthSize, username, &username_len, domain, &domain_len, password, &password_len);
+            BOOL ok = CredUnPackAuthenticationBuffer(CRED_PACK_PROTECTED_CREDENTIALS, outAuthBuf, outAuthSize, const_cast<wchar_t*>(username.data()), &username_len, domain, &domain_len, const_cast<wchar_t*>(password.data()), &password_len);
             if (!ok) {
                 std::wcerr << L"ERROR: Unable to retrieve credentials.\n";
                 return -1;
             }
 
-            admin_imp.reset(new ImpersonateThread(username, password, IntegrityLevel::Default));
-            std::wcout << L"User credentials successfully impersonated.\n";
-
-            SecureZeroMemory(password, sizeof(password));
             SecureZeroMemory(outAuthBuf, outAuthSize);
             CoTaskMemFree(outAuthBuf);
+
+            mode = IntegrityLevel::Default;
         }
 
         int extra_args = argc - arg_idx - 1;
-        ProcCreate(argv[arg_idx], mode, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
+        ProcCreate(argv[arg_idx], mode, username.empty() ? nullptr : username.c_str(), password.empty() ? nullptr : password.c_str(), extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
     }
 
     std::wcout << L"[done]" << std::endl;
