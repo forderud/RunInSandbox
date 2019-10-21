@@ -211,14 +211,14 @@ static IntegrityLevel FromString (std::wstring arg) {
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateThread {
-    ImpersonateThread(wchar_t* user, wchar_t* passwd, IntegrityLevel integrity) {
+    ImpersonateThread(const wchar_t* user, const wchar_t* passwd, IntegrityLevel integrity) {
         if (user && passwd) {
             // impersonate a different user
             WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, &m_token));
 
             // load associated user profile (doesn't work for current user)
             m_profile.dwSize = sizeof(m_profile);
-            m_profile.lpUserName = user;
+            m_profile.lpUserName = const_cast<wchar_t*>(user);
             //WIN32_CHECK(LoadUserProfile(m_token, &m_profile));
         } else {
             // current user
