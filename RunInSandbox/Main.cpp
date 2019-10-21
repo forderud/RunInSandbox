@@ -3,15 +3,14 @@
 #include <Shlobj.h>
 #include <atlbase.h>
 #include <atlcom.h>
+#include <wincred.h>
+#pragma comment(lib, "Credui.lib")
 #include "ComCreate.hpp"
 #include "ProcCreate.hpp"
 #include "../TestControl/TestControl_h.h"
 
 
 int wmain (int argc, wchar_t *argv[]) {
-    if (!IsUserAnAdmin())
-        std::wcout << L"WARNING: Admin priveledges not detected. Some operations might fail.\n";
-
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li] ProgID [username] [password]\n";
@@ -33,6 +32,46 @@ int wmain (int argc, wchar_t *argv[]) {
     } else if (std::wstring(argv[arg_idx]) == L"hi") {
         mode = IntegrityLevel::High;
         arg_idx++;
+    }
+
+    std::unique_ptr<ImpersonateThread> admin_imp;
+    if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
+        //std::wcout << L"WARNING: Admin priveledges not detected. Some operations might fail.\n";
+
+        CREDUI_INFOW credui = {};
+        credui.cbSize = sizeof(credui);
+        credui.pszMessageText = L"Please enter admin password";
+        credui.pszCaptionText = L"Administrator privileges required";
+
+        ULONG authPackage = 0;
+        void  *outAuthBuf = nullptr;
+        ULONG outAuthSize = 0;  
+        BOOL save = false;  
+
+        DWORD res = CredUIPromptForWindowsCredentialsW(&credui, /*auth err*/0, &authPackage, /*authBuff*/nullptr, /*auth buf size*/0, &outAuthBuf, &outAuthSize, &save, CREDUIWIN_GENERIC);
+        if (res != ERROR_SUCCESS) {
+            std::wcerr << L"ERROR: Authentication dialog canceled.\n";
+            return -1;
+        }
+
+        WCHAR username[CREDUI_MAX_USERNAME_LENGTH + 1] = {};
+        DWORD username_len = _countof(username);
+        WCHAR password[CREDUI_MAX_PASSWORD_LENGTH + 1] = {};
+        DWORD password_len = _countof(password);
+        WCHAR domain[CRED_MAX_DOMAIN_TARGET_NAME_LENGTH + 1] = {};
+        DWORD domain_len = 0;
+        // Attempt to decrypt the user's password
+        BOOL ok = CredUnPackAuthenticationBuffer(CRED_PACK_PROTECTED_CREDENTIALS, outAuthBuf, outAuthSize, username, &username_len, domain, &domain_len, password, &password_len);
+        if (!ok) {
+            std::wcerr << L"ERROR: Unable to retrieve credentials.\n";
+            return -1;
+        }
+
+        admin_imp.reset(new ImpersonateThread(username, password, IntegrityLevel::Default));
+
+        SecureZeroMemory(password, sizeof(password));
+        SecureZeroMemory(outAuthBuf, outAuthSize);
+        CoTaskMemFree(outAuthBuf);
     }
 
     // check if 1st argument is a COM class ProgID
