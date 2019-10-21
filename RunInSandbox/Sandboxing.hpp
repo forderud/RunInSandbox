@@ -216,10 +216,10 @@ struct ImpersonateThread {
             // impersonate a different user
             WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, &m_token));
 
-            // load associated user profile
+            // load associated user profile (doesn't work for current user)
             m_profile.dwSize = sizeof(m_profile);
             m_profile.lpUserName = user;
-            WIN32_CHECK(LoadUserProfile(m_token, &m_profile));
+            //WIN32_CHECK(LoadUserProfile(m_token, &m_profile));
         } else {
             // current user
             HandleWrap cur_token;
