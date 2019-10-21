@@ -107,6 +107,26 @@ CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passw
 }
 
 
+/** Create a AppID and elevation-enabled COM server in a admin process.
+    REF: https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
+template <typename T>
+static CComPtr<T> CoCreateInstanceAsAdmin (HWND window, const IID & classId) {
+    std::wstring name;
+    name.resize(39);
+    CHECK(::StringFromGUID2(classId, const_cast<wchar_t*>(name.data()), static_cast<int>(name.size())));
+    name = L"Elevation:Administrator!new:" + name;
+
+    BIND_OPTS3 options = {};
+    options.cbStruct = sizeof(options);
+    options.hwnd = window;
+    options.dwClassContext = CLSCTX_LOCAL_SERVER;
+
+    CComPtr<T> obj;
+    CHECK(::CoGetObject(name.c_str(), &options, __uuidof(T), reinterpret_cast<void**>(&obj)));
+    return obj;
+}
+
+
 /** Try to set a an attribute on an automation-compatible COM server. */
 static bool SetComAttribute(CComPtr<IUnknown> & obj, CComBSTR name, CComVariant value) {
     CComPtr<IDispatch> obj_disp;
