@@ -53,8 +53,8 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
         arguments += argv[i];
     }
 
-    if (mode == IntegrityLevel::Low) {
-        ImpersonateThread low_int(nullptr, nullptr, IntegrityLevel::Low);
+    if (mode != IntegrityLevel::AppContainer) {
+        ImpersonateThread low_int(nullptr, nullptr, mode);
         WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
     } else {
         AppContainerWrap ac;
