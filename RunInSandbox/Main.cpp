@@ -73,47 +73,22 @@ int wmain (int argc, wchar_t *argv[]) {
         std::wcout << L"Starting executable " << argv[arg_idx];
         std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
 
-        std::wstring username, password;
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
-            //std::wcout << L"WARNING: Admin priveledges not detected. Some operations might fail.\n";
-
-            CREDUI_INFOW credui = {};
-            credui.cbSize = sizeof(credui);
-            credui.pszMessageText = L"Please enter admin password";
-            credui.pszCaptionText = L"Administrator privileges required";
-
-            ULONG authPackage = 0;
-            void  *outAuthBuf = nullptr;
-            ULONG outAuthSize = 0;  
-            BOOL save = false;  
-
-            DWORD res = CredUIPromptForWindowsCredentialsW(&credui, /*auth err*/0, &authPackage, /*authBuff*/nullptr, /*auth buf size*/0, &outAuthBuf, &outAuthSize, &save, CREDUIWIN_GENERIC);
-            if (res != ERROR_SUCCESS) {
-                std::wcerr << L"ERROR: Authentication dialog canceled.\n";
-                return -1;
-            }
-
-            username.resize(CREDUI_MAX_USERNAME_LENGTH + 1);
-            DWORD username_len = static_cast<DWORD>(username.size());
-            password.resize(CREDUI_MAX_PASSWORD_LENGTH + 1);
-            DWORD password_len = static_cast<DWORD>(password.size());
-            WCHAR domain[CRED_MAX_DOMAIN_TARGET_NAME_LENGTH + 1] = {};
-            DWORD domain_len = 0;
-            // Attempt to decrypt the user's password
-            BOOL ok = CredUnPackAuthenticationBuffer(CRED_PACK_PROTECTED_CREDENTIALS, outAuthBuf, outAuthSize, const_cast<wchar_t*>(username.data()), &username_len, domain, &domain_len, const_cast<wchar_t*>(password.data()), &password_len);
-            if (!ok) {
-                std::wcerr << L"ERROR: Unable to retrieve credentials.\n";
-                return -1;
-            }
-
-            SecureZeroMemory(outAuthBuf, outAuthSize);
-            CoTaskMemFree(outAuthBuf);
-
-            mode = IntegrityLevel::Default;
+            SHELLEXECUTEINFOW info = {};
+            info.cbSize = sizeof(info);
+            info.fMask = 0;
+            info.hwnd = NULL;
+            info.lpVerb = L"runas";
+            info.lpFile = argv[arg_idx];
+            info.lpParameters = L"";
+            info.nShow = SW_NORMAL;
+            WIN32_CHECK(::ShellExecuteExW(&info));
+            std::wcout << L"Successfully created elevated process.\n";
+            return 0;
         }
 
         int extra_args = argc - arg_idx - 1;
-        ProcCreate(argv[arg_idx], mode, username.empty() ? nullptr : username.c_str(), password.empty() ? nullptr : password.c_str(), extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
+        ProcCreate(argv[arg_idx], mode, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
     }
 
     std::wcout << L"[done]" << std::endl;
