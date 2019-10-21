@@ -175,6 +175,7 @@ enum IMPERSONATE_MOE {
 
 enum class IntegrityLevel {
     Default = 0,
+    AppContainer = 1,            ///< dummy value to ease impl.
     Low     = WinLowLabelSid,    ///< same as ConvertStringSidToSid("S-1-16-4096",..)
     Medium  = WinMediumLabelSid, ///< same as ConvertStringSidToSid("S-1-16-8192",..)
     High    = WinHighLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-12288",..)
@@ -183,7 +184,6 @@ enum class IntegrityLevel {
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateThread {
-
     ImpersonateThread(wchar_t* user, wchar_t* passwd, IntegrityLevel integrity) {
         if (user && passwd) {
             // impersonate a different user
@@ -225,6 +225,8 @@ struct ImpersonateThread {
     /** Create a low-integrity token associated with the current user.
         Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
     void ApplyIntegrity(IntegrityLevel integrity) {
+        assert(integrity != IntegrityLevel::AppContainer);
+
         SidWrap li_sid;
         {
             DWORD sid_size = SECURITY_MAX_SID_SIZE;
@@ -241,12 +243,6 @@ struct ImpersonateThread {
 
     HandleWrap  m_token;
     PROFILEINFO m_profile = {};
-};
-
-enum MODE {
-    MODE_PLAIN,
-    MODE_LOW_INTEGRITY,
-    MODE_APP_CONTAINER,
 };
 
 

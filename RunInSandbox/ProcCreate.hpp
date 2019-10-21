@@ -42,7 +42,7 @@ struct ProcessHandles {
 
 
 /** Launch a new process within an AppContainer. */
-static ProcessHandles ProcCreate(const wchar_t * exe_path, MODE mode, int argc, wchar_t *argv[]) {
+static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int argc, wchar_t *argv[]) {
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
@@ -53,7 +53,7 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, MODE mode, int argc, 
         arguments += argv[i];
     }
 
-    if (mode == MODE_LOW_INTEGRITY) {
+    if (mode == IntegrityLevel::Low) {
         ImpersonateThread low_int(nullptr, nullptr, IntegrityLevel::Low);
         WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
     } else {

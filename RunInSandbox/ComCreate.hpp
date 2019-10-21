@@ -11,11 +11,11 @@
 
     WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* user, wchar_t* passwd) {
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, wchar_t* user, wchar_t* passwd) {
     std::unique_ptr<ImpersonateThread> impersonate;
-    if (mode < MODE_APP_CONTAINER) {
+    if (mode != IntegrityLevel::AppContainer) {
         // impersonate a different user
-        impersonate.reset(new ImpersonateThread(user, passwd, (mode == MODE_LOW_INTEGRITY) ? IntegrityLevel::Low : IntegrityLevel::Default));
+        impersonate.reset(new ImpersonateThread(user, passwd, mode));
     } else {
         // impersonate an AppContainer
 #if 0
@@ -29,7 +29,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, MODE mode, wchar_t* u
 #else
         // launch notepad in an AppContainer process.
         // This is really overkill, since we only need the thread token
-        ProcessHandles token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", MODE_APP_CONTAINER, 0, nullptr);
+        ProcessHandles token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", IntegrityLevel::AppContainer, 0, nullptr);
 
         // impersonate the notepad thread
         // WARNING: AppContainer property is _not_ propagated when calling CoCreateInstance

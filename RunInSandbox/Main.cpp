@@ -20,12 +20,12 @@ int wmain (int argc, wchar_t *argv[]) {
     }
 
     int arg_idx = 1;
-    MODE mode = MODE_PLAIN;
+    IntegrityLevel mode = IntegrityLevel::Default;
     if (std::wstring(argv[arg_idx]) == L"li") {
-        mode = MODE_LOW_INTEGRITY;
+        mode = IntegrityLevel::Low;
         arg_idx++;
     } else if (std::wstring(argv[arg_idx]) == L"ac") {
-        mode = MODE_APP_CONTAINER;
+        mode = IntegrityLevel::AppContainer;
         arg_idx++;
     }
 
@@ -46,9 +46,9 @@ int wmain (int argc, wchar_t *argv[]) {
     #endif
 
         std::wcout << L"Creating COM object " << argv[arg_idx];
-        if (mode == MODE_LOW_INTEGRITY)
+        if (mode == IntegrityLevel::Low)
             std::wcout << L" in low-integrity...\n";
-        else if (mode == MODE_APP_CONTAINER)
+        else if (mode == IntegrityLevel::AppContainer)
             std::wcout << L" in AppContainer...\n";
         else
             std::wcout << L"...\n";
@@ -74,9 +74,9 @@ int wmain (int argc, wchar_t *argv[]) {
         SetComAttribute(obj, L"Visible", true);
     } else {
         std::wcout << L"Starting executable " << argv[arg_idx];
-        if (mode == MODE_LOW_INTEGRITY)
+        if (mode == IntegrityLevel::Low)
             std::wcout << L" in low-integrity...\n";
-        else if (mode == MODE_APP_CONTAINER)
+        else if (mode == IntegrityLevel::AppContainer)
             std::wcout << L" in AppContainer...\n";
         else
             std::wcout << L"...\n";
