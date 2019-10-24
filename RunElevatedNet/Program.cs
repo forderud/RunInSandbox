@@ -30,6 +30,7 @@ namespace RunElevatedNet
         }
 
 
+        /** https://docs.microsoft.com/nb-no/windows/win32/api/objidl/ns-objidl-bind_opts */
         [StructLayout(LayoutKind.Sequential)]
         struct BIND_OPTS3
         {
@@ -44,6 +45,7 @@ namespace RunElevatedNet
             public IntPtr hwnd;
         }
 
+        /** https://docs.microsoft.com/en-us/windows/win32/api/objbase/nf-objbase-cogetobject */
         [DllImport("ole32", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
         [return: MarshalAs(UnmanagedType.Interface)]
         static extern object CoGetObject(string pszName, [In] ref BIND_OPTS3 pBindOptions, [In] [MarshalAs(UnmanagedType.LPStruct)] Guid riid);
