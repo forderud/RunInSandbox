@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MakeLowIntegrity", "MakeLow
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenDevice", "OpenDevice\OpenDevice.vcxproj", "{30B5888C-49F6-4E13-8E0A-2C2240B87553}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunElevatedNet", "RunElevatedNet\RunElevatedNet.csproj", "{3D481B63-2EA5-49C4-B351-AD292BEA65AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,10 @@ Global
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Debug|x64.Build.0 = Debug|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Release|x64.ActiveCfg = Release|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Release|x64.Build.0 = Release|x64
+		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Debug|x64.ActiveCfg = Debug|x64
+		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Debug|x64.Build.0 = Debug|x64
+		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Release|x64.ActiveCfg = Release|x64
+		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
