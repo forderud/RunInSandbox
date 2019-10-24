@@ -23,8 +23,7 @@ namespace RunElevatedNet
             System.Console.WriteLine("[success]");
 
             System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
-            Guid unknownGuid = Guid.Parse("00000000-0000-0000-C000-000000000046");
-            object objElevated = CoCreateInstanceAsAdmin((IntPtr)0, comCls, unknownGuid); // elevated
+            object objElevated = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
             System.Console.WriteLine("[success]");
 
             return 0;
@@ -52,7 +51,7 @@ namespace RunElevatedNet
 
         /** C# port of COM Elevation Moniker sample in https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
         [return: MarshalAs(UnmanagedType.Interface)]
-        static object CoCreateInstanceAsAdmin(IntPtr parentWindow, Type comClass, Guid comInterface)
+        static object CoCreateInstanceAsAdmin(IntPtr parentWindow, Type comClass)
         {
             // B formatting directive: returns {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx} 
             var monikerName = "Elevation:Administrator!new:" + comClass.GUID.ToString("B");
@@ -62,7 +61,8 @@ namespace RunElevatedNet
             bo.hwnd = parentWindow;
             bo.dwClassContext = 4; // CLSCTX_LOCAL_SERVER
 
-            var obj = CoGetObject(monikerName, ref bo, comInterface);
+            Guid unknownGuid = Guid.Parse("00000000-0000-0000-C000-000000000046"); // IUnknown
+            var obj = CoGetObject(monikerName, ref bo, unknownGuid);
             return obj;
         }
     }
