@@ -18,15 +18,57 @@ namespace RunElevatedNet
             // COM class to instantiate
             Type comCls = Type.GetTypeFromProgID(args[0]); // e.g. HNetCfg.FwPolicy2
 
-            System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
-            object objRegular = Activator.CreateInstance(comCls); // non-elevated
-            System.Console.WriteLine("[success]");
+            {
+                System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
+                object obj = Activator.CreateInstance(comCls); // non-elevated
+                System.Console.WriteLine("[success]");
 
-            System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
-            object objElevated = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
-            System.Console.WriteLine("[success]");
+                try {
+                    TestFirewall((INetFwPolicy2)obj);
+                } catch (InvalidCastException) {
+                    // skip firewall testing
+                }
+            }
+
+            {
+                System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
+                object obj = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
+                System.Console.WriteLine("[success]");
+
+                try {
+                    TestFirewall((INetFwPolicy2)obj);
+                } catch (InvalidCastException) {
+                    // skip firewall testing
+                }
+            }
 
             return 0;
+        }
+
+
+        static void TestFirewall (INetFwPolicy2 firewallPolicy)
+        {
+            System.Console.WriteLine("Testing Windows firewall API...");
+            // list existing rules
+            foreach (INetFwRule rule in firewallPolicy.Rules)
+            {
+                Console.WriteLine("Firewall rule:\n  Name: {0}\n  Desc: {1}\n  Ports: {2}", rule.Name, rule.Description ?? "", rule.LocalPorts);
+            }
+
+            {
+                // create new rule
+                Type ruleClass = Type.GetTypeFromProgID("HNetCfg.FWRule");
+                INetFwRule rule = (INetFwRule)Activator.CreateInstance(ruleClass);
+                rule.Name = "My HTTP server";
+                rule.Protocol = 6; //NET_FW_IP_PROTOCOL_TCP
+                rule.LocalPorts = "8080";
+                rule.Enabled = true;
+                rule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
+                rule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
+                // add new rule (throws UnauthorizedAccessException, unless firewallPolicy runs in an elevated process)
+                //firewallPolicy.Rules.Add(rule);
+            }
+            System.Console.WriteLine("[success]");
         }
 
 
