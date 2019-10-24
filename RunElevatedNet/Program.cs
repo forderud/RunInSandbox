@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using NetFwTypeLib;
 
@@ -11,12 +12,23 @@ namespace RunElevatedNet
         {
             if (args.Length < 1)
             {
-                System.Console.WriteLine("ERROR: COM class-id argument missing");
+                System.Console.WriteLine("ERROR: COM class-id or executable filename argument missing");
                 return 1;
             }
 
             // COM class to instantiate
             Type comCls = Type.GetTypeFromProgID(args[0]); // e.g. HNetCfg.FwPolicy2
+
+            if (comCls == null) {
+                // argument is not a COM CLSID, so assume that it's a EXE instead
+                System.Console.WriteLine("Starting {0} in an elevated (admin) process...");
+                ProcessStartInfo startInfo = new ProcessStartInfo(args[0]);
+                startInfo.Verb = "runas"; // activates elevated invocation
+                System.Diagnostics.Process.Start(startInfo);
+                System.Console.WriteLine("[success]");
+                return 0;
+            }
+
 
             {
                 System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
