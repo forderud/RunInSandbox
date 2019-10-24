@@ -10,25 +10,23 @@ namespace RunElevatedNet
     {
         static int Main(string[] args)
         {
-            if (args.Length < 1)
-            {
+            if (args.Length < 1) {
                 System.Console.WriteLine("ERROR: COM class-id or executable filename argument missing");
                 return 1;
             }
 
-            // COM class to instantiate
+            // check if argument is a COM class
             Type comCls = Type.GetTypeFromProgID(args[0]); // e.g. HNetCfg.FwPolicy2
 
             if (comCls == null) {
-                // argument is not a COM CLSID, so assume that it's a EXE instead
+                // argument is _not_ a COM CLSID, so assume that it's a EXE instead
                 System.Console.WriteLine("Starting {0} in an elevated (admin) process...");
                 ProcessStartInfo startInfo = new ProcessStartInfo(args[0]);
-                startInfo.Verb = "runas"; // activates elevated invocation
+                startInfo.Verb = "runas"; // activate elevated invocation
                 System.Diagnostics.Process.Start(startInfo);
                 System.Console.WriteLine("[success]");
                 return 0;
             }
-
 
             {
                 System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
@@ -41,7 +39,6 @@ namespace RunElevatedNet
                     // skip firewall testing
                 }
             }
-
             {
                 System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
                 object obj = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
@@ -58,12 +55,12 @@ namespace RunElevatedNet
         }
 
 
+        /** This function will be triggered if creating the "HNetCfg.FwPolicy2" COM class. */
         static void TestFirewall (INetFwPolicy2 firewallPolicy)
         {
             System.Console.WriteLine("Testing Windows firewall API...");
             // list existing rules
-            foreach (INetFwRule rule in firewallPolicy.Rules)
-            {
+            foreach (INetFwRule rule in firewallPolicy.Rules) {
                 Console.WriteLine("Firewall rule:\n  Name: {0}\n  Desc: {1}\n  Ports: {2}", rule.Name, rule.Description ?? "", rule.LocalPorts);
             }
 
