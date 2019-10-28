@@ -31,6 +31,7 @@ namespace RunElevatedNet
                 return 0;
             }
 
+#if false
             {
                 System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
                 object obj = Activator.CreateInstance(comCls); // non-elevated
@@ -42,6 +43,7 @@ namespace RunElevatedNet
                     // skip firewall testing
                 }
             }
+#endif
             {
                 System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
                 object obj = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
