@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using NetFwTypeLib;
+using NetFwTypeLib; //for firewall sample
+
 
 namespace RunElevatedNet
 {
-    /** COM Elevation Moniker sample code in C#. */
+    /** Sample code for launching an executable or COM class in an "elevated" process with admin privileges.
+        An User Account Control (UAC) prompt window will appear if the current process is not elevated.
+        Uses either the "runas" verb or "COM Elevation Moniker" mechanism to achieve elevation. */
     class Program
     {
         static int Main(string[] args)
