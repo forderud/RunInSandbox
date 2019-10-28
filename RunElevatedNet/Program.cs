@@ -31,29 +31,25 @@ namespace RunElevatedNet
                 return 0;
             }
 
-#if false
-            {
-                System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
-                object obj = Activator.CreateInstance(comCls); // non-elevated
-                System.Console.WriteLine("[success]");
-
-                try {
-                    TestFirewall((INetFwPolicy2)obj);
-                } catch (InvalidCastException) {
-                    // skip firewall testing
-                }
-            }
-#endif
-            {
+            // argument _is_ a COM CLSID, so launch COM class
+            bool launch_elevated = true;
+            object obj = null;
+            if (launch_elevated) {
                 System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
-                object obj = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
-                System.Console.WriteLine("[success]");
+                obj = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
+            } else {
+                System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
+                obj = Activator.CreateInstance(comCls); // non-elevated
 
-                try {
-                    TestFirewall((INetFwPolicy2)obj);
-                } catch (InvalidCastException) {
-                    // skip firewall testing
-                }
+            }
+            System.Console.WriteLine("[success]");
+
+
+            // sample code to exercise the Windows firewall API (to give an impression of how to call COM interfaces from .Net)
+            try {
+                TestFirewall((INetFwPolicy2)obj);
+            } catch (InvalidCastException) {
+                // skip firewall testing
             }
 
             return 0;
