@@ -23,7 +23,8 @@ namespace RunElevatedNet
             if (arg.Substring(0,4) == "http")
             {
                 System.Console.WriteLine(String.Format("Opening URL {0} in a web browser.", arg));
-                OpenBrowser(arg);
+                if (!OpenBrowser(arg))
+                    System.Console.WriteLine("ERROR: Unable to open web browser");
                 return 0;
             }
 
@@ -67,21 +68,19 @@ namespace RunElevatedNet
         /** Open a webpage using the default web browser. 
          * WARNING: Fails silently when running in low-integrity.
          * REF: https://github.com/googleapis/google-api-dotnet-client/blob/master/Src/Support/Google.Apis.Auth/OAuth2/LocalServerCodeReceiver.cs */
-        static void OpenBrowser(string url)
+        static bool OpenBrowser(string url)
         {
             // See https://stackoverflow.com/a/6040946/44360 for why this is required
             url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\*)" + "\"", @"$1$1\" + "\"");
             url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\+)$", @"$1$1");
-            Process proc = Process.Start(new ProcessStartInfo("cmd", $"/c start \"\" \"{url}\"") {
-                CreateNoWindow = true
-            });
+            Process proc = Process.Start(new ProcessStartInfo($"\"{url}\"") { CreateNoWindow = true });
 
-            if (proc == null)
-                throw new InvalidOperationException("Process.Start failed");
-
-            proc.WaitForExit();
-            if (proc.ExitCode != 0)
-                throw new InvalidOperationException(String.Format("Process.Start exited with code {0}", proc.ExitCode));
+            // check if process exits surprisingly fast
+            if (proc.WaitForExit(1000))
+            {
+                return (proc.ExitCode == 0);
+            }
+            return true;
         }
 
         /** This function will be triggered if creating the "HNetCfg.FwPolicy2" COM class. */
