@@ -18,13 +18,22 @@ namespace RunElevatedNet
                 return 1;
             }
 
+            string arg = args[0];
+
+            if (arg.Substring(0,4) == "http")
+            {
+                System.Console.WriteLine(String.Format("Opening URL {0} in a web browser.", arg));
+                OpenBrowser(arg);
+                return 0;
+            }
+
             // check if argument is a COM class
-            Type comCls = Type.GetTypeFromProgID(args[0]); // e.g. HNetCfg.FwPolicy2
+            Type comCls = Type.GetTypeFromProgID(arg); // e.g. HNetCfg.FwPolicy2
 
             if (comCls == null) {
                 // argument is _not_ a COM CLSID, so assume that it's a EXE instead
                 System.Console.WriteLine("Starting {0} in an elevated (admin) process...");
-                ProcessStartInfo startInfo = new ProcessStartInfo(args[0]);
+                ProcessStartInfo startInfo = new ProcessStartInfo(arg);
                 startInfo.Verb = "runas"; // activate elevated invocation
                 System.Diagnostics.Process.Start(startInfo);
                 System.Console.WriteLine("[success]");
@@ -55,6 +64,25 @@ namespace RunElevatedNet
             return 0;
         }
 
+        /** Open a webpage using the default web browser. 
+         * WARNING: Fails silently when running in low-integrity.
+         * REF: https://github.com/googleapis/google-api-dotnet-client/blob/master/Src/Support/Google.Apis.Auth/OAuth2/LocalServerCodeReceiver.cs */
+        static void OpenBrowser(string url)
+        {
+            // See https://stackoverflow.com/a/6040946/44360 for why this is required
+            url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\*)" + "\"", @"$1$1\" + "\"");
+            url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\+)$", @"$1$1");
+            Process proc = Process.Start(new ProcessStartInfo("cmd", $"/c start \"\" \"{url}\"") {
+                CreateNoWindow = true
+            });
+
+            if (proc == null)
+                throw new InvalidOperationException("Process.Start failed");
+
+            proc.WaitForExit();
+            if (proc.ExitCode != 0)
+                throw new InvalidOperationException(String.Format("Process.Start exited with code {0}", proc.ExitCode));
+        }
 
         /** This function will be triggered if creating the "HNetCfg.FwPolicy2" COM class. */
         static void TestFirewall (INetFwPolicy2 firewallPolicy)
