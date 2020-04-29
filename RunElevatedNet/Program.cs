@@ -66,8 +66,7 @@ namespace RunElevatedNet
         }
 
         /** Open a webpage using the default web browser. 
-         * WARNING: Fails silently when running in low-integrity.
-         * REF: https://github.com/googleapis/google-api-dotnet-client/blob/master/Src/Support/Google.Apis.Auth/OAuth2/LocalServerCodeReceiver.cs */
+         * REF: https://github.com/googleapis/google-api-dotnet-client/pull/1553 */
         static bool OpenBrowser(string url)
         {
             // See https://stackoverflow.com/a/6040946/44360 for why this is required
