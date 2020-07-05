@@ -176,9 +176,10 @@ enum IMPERSONATE_MOE {
 enum class IntegrityLevel {
     Default = 0,
     AppContainer = 1,            ///< dummy value to ease impl.
-    Low     = WinLowLabelSid,    ///< same as ConvertStringSidToSid("S-1-16-4096",..)
-    Medium  = WinMediumLabelSid, ///< same as ConvertStringSidToSid("S-1-16-8192",..)
-    High    = WinHighLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-12288",..)
+    Untrusted = WinUntrustedLabelSid,///< same as ConvertStringSidToSid("S-1-16-0",..)
+    Low       = WinLowLabelSid,    ///< same as ConvertStringSidToSid("S-1-16-4096",..)
+    Medium    = WinMediumLabelSid, ///< same as ConvertStringSidToSid("S-1-16-8192",..)
+    High      = WinHighLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-12288",..)
 };
 
 static std::wstring ToString (IntegrityLevel integrity) {
@@ -266,6 +267,30 @@ struct ImpersonateThread {
         TIL.Label.Attributes = SE_GROUP_INTEGRITY;
         TIL.Label.Sid = li_sid;
         WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(li_sid)));
+    }
+
+    /** Determine the integrity level for a process.
+    Based on https://github.com/chromium/chromium/blob/master/base/process/process_info_win.cc */
+    static IntegrityLevel GetProcessLevel(HANDLE process_token = GetCurrentProcessToken()) {
+        DWORD token_info_length = 0;
+        if (GetTokenInformation(process_token, TokenIntegrityLevel, NULL, 0, &token_info_length))
+            abort();
+
+        std::vector<char> token_info_buf(token_info_length);
+        auto* token_info = reinterpret_cast<TOKEN_MANDATORY_LABEL*>(token_info_buf.data());
+        if (!GetTokenInformation(process_token, TokenIntegrityLevel, token_info, token_info_length, &token_info_length))
+            abort();
+
+        DWORD integrity_level = *GetSidSubAuthority(token_info->Label.Sid, *GetSidSubAuthorityCount(token_info->Label.Sid) - 1);
+
+        if (integrity_level < SECURITY_MANDATORY_LOW_RID)
+            return IntegrityLevel::Untrusted;
+        if (integrity_level < SECURITY_MANDATORY_MEDIUM_RID)
+            return IntegrityLevel::Low;
+        else if (integrity_level < SECURITY_MANDATORY_HIGH_RID)
+            return IntegrityLevel::Medium;
+        else
+            return IntegrityLevel::High;
     }
 
     HandleWrap  m_token;
