@@ -14,7 +14,7 @@ int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]\n";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ExePath\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ExePath|URL\n";
         return -1;
     }
 
@@ -26,6 +26,7 @@ int wmain (int argc, wchar_t *argv[]) {
     // check if 1st argument is a COM class ProgID
     CLSID clsid = {};
     bool progid_provided = SUCCEEDED(CLSIDFromProgID(argv[arg_idx], &clsid));
+    bool url_provided = std::wstring(argv[arg_idx]).substr(0, 4) == L"http";
 
     if (progid_provided) {
         // initialize multi-threaded COM apartment
@@ -52,7 +53,7 @@ int wmain (int argc, wchar_t *argv[]) {
 
         arg_idx++;
         wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
-        wchar_t* pw   = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
+        wchar_t* pw = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
         CComPtr<IUnknown> obj = CoCreateAsUser_impersonate(clsid, mode, user, pw);
         //CComPtr<IUnknown> obj = CoCreateAsUser_dcom(clsid, user, pw);
 
@@ -69,6 +70,15 @@ int wmain (int argc, wchar_t *argv[]) {
 
         // try to make window visible
         SetComAttribute(obj, L"Visible", true);
+    } else if (url_provided) {
+        std::wcout << L"Opening URL " << argv[arg_idx] << " in default browser\n";
+        std::wcout << L"WARNING: Does not seem to work in low-integrity!\n";
+
+        int ret = (int)reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, NULL, argv[arg_idx], NULL, NULL, SW_SHOWNORMAL));
+        if (ret <= 32) {
+            std::wcout << L"ShellExecute failed with code " << ret << std::endl;
+            return ret;
+        }
     } else {
         std::wcout << L"Starting executable " << argv[arg_idx];
         std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
