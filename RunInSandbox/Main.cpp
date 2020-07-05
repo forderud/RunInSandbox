@@ -72,7 +72,8 @@ int wmain (int argc, wchar_t *argv[]) {
         SetComAttribute(obj, L"Visible", true);
     } else if (url_provided) {
         std::wcout << L"Opening URL " << argv[arg_idx] << " in default browser\n";
-        std::wcout << L"WARNING: Does not seem to work in low-integrity!\n";
+        if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
+            std::wcout << L"WARNING: Does not seem to work in low-integrity!\n";
 
         int ret = (int)reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, NULL, argv[arg_idx], NULL, NULL, SW_SHOWNORMAL));
         if (ret <= 32) {
