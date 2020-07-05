@@ -69,10 +69,15 @@ namespace RunElevatedNet
          * REF: https://github.com/googleapis/google-api-dotnet-client/pull/1553 */
         static bool OpenBrowser(string url)
         {
+            System.Console.WriteLine("WARNING: Does not seem to work in low integrity.");
+#if false
+            Process proc = Process.Start(url);
+#else
             // See https://stackoverflow.com/a/6040946/44360 for why this is required
             url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\*)" + "\"", @"$1$1\" + "\"");
             url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\+)$", @"$1$1");
             Process proc = Process.Start(new ProcessStartInfo($"\"{url}\"") { CreateNoWindow = true });
+#endif
 
             // check if process exits surprisingly fast
             if (proc.WaitForExit(1000))
