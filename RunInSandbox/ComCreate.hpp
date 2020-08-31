@@ -6,6 +6,29 @@
 #define DEBUG_COM_ACTIVATION
 
 
+std::wstring GetLocalServerPath (CLSID clsid) {
+    // build registry path
+    CComBSTR reg_path(L"CLSID\\");
+    reg_path.Append(clsid);
+    reg_path.Append(L"\\LocalServer32");
+
+    // extract COM class
+    CRegKey cls_reg;
+    if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ) != ERROR_SUCCESS)
+        return L"";
+
+    ULONG    exe_path_len = 0;
+    if (cls_reg.QueryStringValue(nullptr, nullptr, &exe_path_len) != ERROR_SUCCESS)
+        return L"";
+
+    std::wstring exe_path(exe_path_len, L'\0');
+    if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
+        return L"";
+    exe_path.resize(exe_path_len-1); // remove extra zero-termination
+    return exe_path;
+}
+
+
 /** Attempt to create a COM server that runds through a specific user account.
     NOTICE: Non-admin users need to be granted local DCOM "launch" and "activation" permission to the DCOM object to prevent E_ACCESSDENIED (General access denied error). Unfortunately, creation still fails with CO_E_SERVER_EXEC_FAILURE.
 
@@ -18,7 +41,8 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         impersonate.reset(new ImpersonateThread(user, passwd, mode));
     } else {
         // launch process in an AppContainer process.
-        ProcessHandles token = ProcCreate(L"C:\\Dev\\RunInSandbox\\x64\\Debug\\TestControl.exe", IntegrityLevel::AppContainer, 0, nullptr);
+        std::wstring exe_path = GetLocalServerPath(clsid);
+        ProcessHandles token = ProcCreate(exe_path.c_str(), IntegrityLevel::AppContainer, 0, nullptr);
         // impersonate the process thread
         impersonate.reset(new ImpersonateThread(std::move(token.thread), IMPERSONATE_ANONYMOUS));
     }

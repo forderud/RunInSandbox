@@ -64,7 +64,7 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
         // create new AppContainer process, based on STARTUPINFO
         si.Update(sec_cap);
 
-        auto cmdline = std::wstring() + L'"' + exe_path + L'"';
+        std::wstring cmdline = exe_path; // std::wstring() + L'"' + exe_path + L'"';
 #if 0
         // mimic how svchost passes "-Embedding" argument
         cmdline += L" -Embedding";
