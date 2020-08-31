@@ -16,7 +16,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 | | Token impersonation problems |
 |---------------------|-----------------------------------------------------------------------------|
 |Low integrity        | :white_check_mark: (confirmed to work)                                      |
-|AppContainer         | :x: Process is created but crashes immediately                              |
+|AppContainer         | :x: Process is created but COM servers won't activate in it                 |
 
 
 | | User impersonation problems |
