@@ -17,24 +17,10 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         // impersonate a different user
         impersonate.reset(new ImpersonateThread(user, passwd, mode));
     } else {
-        // impersonate an AppContainer
-#if 0
-        // WARNING: Does not work. CoCreateInstance will fail with E_OUTOFMEMORY
-        AppContainerWrap ac;
-        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
-        std::vector<HANDLE> saved_handles;
-        HandleWrap base_token;
-        HandleWrap ac_token = CreateLowBoxToken(base_token, TokenImpersonation, sec_cap, saved_handles);
-        impersonate.reset(new ImpersonateThread(std::move(ac_token), IMPERSONATE_USER));
-#else
-        // launch notepad in an AppContainer process.
-        // This is really overkill, since we only need the thread token
-        ProcessHandles token = ProcCreate(L"C:\\Windows\\System32\\notepad.exe", IntegrityLevel::AppContainer, 0, nullptr);
-
-        // impersonate the notepad thread
-        // WARNING: AppContainer property is _not_ propagated when calling CoCreateInstance
+        // launch process in an AppContainer process.
+        ProcessHandles token = ProcCreate(L"C:\\Dev\\RunInSandbox\\x64\\Debug\\TestControl.exe", IntegrityLevel::AppContainer, 0, nullptr);
+        // impersonate the process thread
         impersonate.reset(new ImpersonateThread(std::move(token.thread), IMPERSONATE_ANONYMOUS));
-#endif
     }
 
     CComPtr<IUnknown> obj;

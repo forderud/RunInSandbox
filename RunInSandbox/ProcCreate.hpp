@@ -61,28 +61,15 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
         AppContainerWrap ac;
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
 
-        const bool token_based = false;
-        if (!token_based) {
-            // create new AppContainer process, based on STARTUPINFO
-            // This seem to work correctly
-            si.Update(sec_cap);
+        // create new AppContainer process, based on STARTUPINFO
+        si.Update(sec_cap);
 
-            auto cmdline = std::wstring() + L'"' + exe_path + L'"';
+        auto cmdline = std::wstring() + L'"' + exe_path + L'"';
 #if 0
-            // mimic how svchost passes "-Embedding" argument
-            cmdline += L" -Embedding";
+        // mimic how svchost passes "-Embedding" argument
+        cmdline += L" -Embedding";
 #endif
-            WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.c_str()), NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
-        } else {
-            // create new AppContainer process, based on "LowBox" token
-            std::vector<HANDLE> saved_handles;
-            HandleWrap base_token;
-            HandleWrap ac_token = CreateLowBoxToken(base_token, TokenPrimary, sec_cap, saved_handles);
-
-            // WARNING: Process is created without any error, but crashes immediately afterwards
-            WIN32_CHECK(CreateProcessAsUser(ac_token, exe_path, nullptr, nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
-            //WIN32_CHECK(CreateProcessWithTokenW(ac_token, 0 /*LOGON_WITH_PROFILE*/, exe_path, nullptr, 0/*flags*/, nullptr /*env*/, nullptr /*cur-dir*/, nullptr, &pi));
-        }
+        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.c_str()), NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
     }
 
     // wait for process to initialize
