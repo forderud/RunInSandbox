@@ -46,14 +46,14 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
-    std::wstring arguments = exe_path;
-    // append extra arguments
-    for (int i = 0; i < argc; ++i) {
-        arguments += L" ";
-        arguments += argv[i];
-    }
-
     if (mode != IntegrityLevel::AppContainer) {
+        std::wstring arguments = exe_path;
+        // append extra arguments
+        for (int i = 0; i < argc; ++i) {
+            arguments += L" ";
+            arguments += argv[i];
+        }
+
         ImpersonateThread low_int(nullptr, nullptr, mode);
         std::wcout << L"Impersonation succeeded.\n";
         WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
