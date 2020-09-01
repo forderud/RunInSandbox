@@ -47,11 +47,16 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
     StartupInfoWrap si;
 
     if (mode != IntegrityLevel::AppContainer) {
-        std::wstring arguments = exe_path;
-        // append extra arguments
-        for (int i = 0; i < argc; ++i) {
-            arguments += L" ";
-            arguments += argv[i];
+        std::wstring arguments = L"\"" + std::wstring(exe_path) + L"\"";
+        if (argc == 0) {
+            // mimic how svchost passes "-Embedding" argument
+            arguments += L" -Embedding";
+        } else {
+            // append extra arguments
+            for (int i = 0; i < argc; ++i) {
+                arguments += L" ";
+                arguments += argv[i];
+            }
         }
 
         ImpersonateThread low_int(nullptr, nullptr, mode);
