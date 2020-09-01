@@ -69,6 +69,8 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
     }
 
     // wait for process to initialize
+    // CoCreateInstance will fail with REGDB_E_CLASSNOTREG until the AppContainer process has called CoRegisterClassObject
+    // TODO: Either call CoCreateInstance in a loop or have some sort of synchronization mechanism
     // ignore failure if process is not a GUI app
     WaitForInputIdle(pi.hProcess, INFINITE);
 
