@@ -35,14 +35,8 @@ private:
 };
 
 
-struct ProcessHandles {
-    HandleWrap process;
-    HandleWrap thread;
-};
-
-
 /** Launch a new process within an AppContainer. */
-static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int argc, wchar_t *argv[]) {
+static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int argc, wchar_t *argv[]) {
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
@@ -81,9 +75,8 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
     // wait a bit more (WaitForInputIdle doesn't seem to be sufficient)
     Sleep(200);
 
-    // return process & thread handle
-    ProcessHandles handles;
-    handles.process = std::move(pi.hProcess);
-    handles.thread = std::move(pi.hThread);
-    return handles;
+    // return process handle
+    HandleWrap proc;
+    std::swap(*&proc, pi.hProcess);
+    return proc;
 }
