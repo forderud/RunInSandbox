@@ -76,7 +76,8 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
     Sleep(200);
 
     // return process handle
-    HandleWrap proc;
+    HandleWrap proc, thread;
     std::swap(*&proc, pi.hProcess);
+    std::swap(*&thread, pi.hThread); // swap to avoid leak
     return proc;
 }
