@@ -168,10 +168,6 @@ private:
     std::vector<SID_AND_ATTRIBUTES> m_capabilities;
 };
 
-enum IMPERSONATE_MOE {
-    IMPERSONATE_USER,
-    IMPERSONATE_ANONYMOUS,
-};
 
 enum class IntegrityLevel {
     Default = 0,
@@ -234,11 +230,12 @@ struct ImpersonateThread {
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
-    ImpersonateThread(HandleWrap && token, IMPERSONATE_MOE mode) : m_token(std::move(token)) {
-        if (mode == IMPERSONATE_USER)
-            WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
-        else
-            WIN32_CHECK(ImpersonateAnonymousToken(m_token)); // change current thread integrity
+    ImpersonateThread(HandleWrap & handle) {
+        HandleWrap cur_token;
+        WIN32_CHECK(OpenProcessToken(handle, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
+        WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &m_token));
+
+        WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
     }
 
     ~ImpersonateThread() {

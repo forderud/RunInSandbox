@@ -49,7 +49,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         std::wstring exe_path = GetLocalServerPath(clsid);
         ProcessHandles token = ProcCreate(exe_path.c_str(), mode, 0, nullptr);
         // impersonate the process thread
-        impersonate.reset(new ImpersonateThread(std::move(token.thread), IMPERSONATE_ANONYMOUS));
+        impersonate.reset(new ImpersonateThread(token.process));
     }
 
     CComPtr<IUnknown> obj;
