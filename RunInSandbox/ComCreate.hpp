@@ -25,6 +25,10 @@ std::wstring GetLocalServerPath (CLSID clsid) {
     if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
         return L"";
     exe_path.resize(exe_path_len-1); // remove extra zero-termination
+
+    if (exe_path[0] == '"')
+        exe_path = exe_path.substr(1, exe_path.size()-2); // remove quotes
+
     return exe_path;
 }
 

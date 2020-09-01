@@ -65,7 +65,7 @@ static ProcessHandles ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, 
         si.Update(sec_cap);
 
         // mimic how svchost passes "-Embedding" argument
-        std::wstring cmdline = std::wstring(exe_path) + L" -Embedding";
+        std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\" -Embedding";
         WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.c_str()), NULL, NULL, FALSE, EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, (STARTUPINFO*)&si, &pi));
     }
 
