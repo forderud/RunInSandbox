@@ -16,7 +16,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 | | Token impersonation problems |
 |---------------------|-----------------------------------------------------------------------------|
 |Low integrity        | :white_check_mark: (confirmed to work)                                      |
-|AppContainer         | :x: Process is created but COM servers won't activate in it                 |
+|AppContainer         | :x: Process is created but CoGetClassObject activation gives E_ACCESSDENIED (*The machine-default permission settings do not grant Local Activation permission for the COM Server*)   |
 
 
 | | User impersonation problems |
