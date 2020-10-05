@@ -43,19 +43,20 @@ int wmain (int argc, wchar_t *argv[]) {
         std::wcout << L"Creating COM object " << argv[arg_idx];
         std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
 
+        CComPtr<IUnknown> obj;
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
             // launch "COM Elevation Moniker"-compatible COM class in elevated process
             // example COM class for testing: HNetCfg.FwOpenPort
-            CComPtr<IUnknown> a = CoCreateInstanceAsAdmin<IUnknown>(0, clsid);
+            obj = CoCreateInstanceAsAdmin<IUnknown>(0, clsid);
             std::wcout << L"COM server sucessfully created in elevated process.\n";
             return 0;
+        } else {
+            arg_idx++;
+            wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
+            wchar_t* pw = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
+            obj = CoCreateAsUser_impersonate(clsid, mode, user, pw);
+            //CComPtr<IUnknown> obj = CoCreateAsUser_dcom(clsid, user, pw);
         }
-
-        arg_idx++;
-        wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
-        wchar_t* pw = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
-        CComPtr<IUnknown> obj = CoCreateAsUser_impersonate(clsid, mode, user, pw);
-        //CComPtr<IUnknown> obj = CoCreateAsUser_dcom(clsid, user, pw);
 
         // try to add two numbers
         CComPtr< ISimpleCalculator> calc;
