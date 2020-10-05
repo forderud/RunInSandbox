@@ -22,6 +22,11 @@ HKCR
 			}
 			TypeLib = s '{1FC81ABC-F123-4DEE-9380-4B40032E0ACD}'
 			Version = s '1.0'
+			val LocalizedString = s '@%MODULE%,-102'
+			Elevation = s ''
+			{
+				val Enabled = d '1'
+			}
 		}
 	}
 }
