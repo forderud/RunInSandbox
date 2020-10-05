@@ -131,6 +131,8 @@ static CComPtr<T> CoCreateInstanceAsAdmin (HWND window, const IID & classId) {
     CHECK(::StringFromGUID2(classId, const_cast<wchar_t*>(name.data()), static_cast<int>(name.size())));
     name = L"Elevation:Administrator!new:" + name;
 
+    std::wcout << L"CoGetObject: " << name << L'\n';
+
     BIND_OPTS3 options = {};
     options.cbStruct = sizeof(options);
     options.hwnd = window;
