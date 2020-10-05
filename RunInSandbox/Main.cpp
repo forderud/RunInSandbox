@@ -49,7 +49,6 @@ int wmain (int argc, wchar_t *argv[]) {
             // example COM class for testing: HNetCfg.FwOpenPort
             obj = CoCreateInstanceAsAdmin<IUnknown>(0, clsid);
             std::wcout << L"COM server sucessfully created in elevated process.\n";
-            return 0;
         } else {
             arg_idx++;
             wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
