@@ -62,9 +62,10 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
             // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
 
             DWORD pid = {};
-            GetWindowThreadProcessId(GetShellWindow(), &pid);
+            WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
             HandleWrap parent_proc;
             parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
+            assert(parent_proc);
             si.SetParent(parent_proc);
 
             WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
