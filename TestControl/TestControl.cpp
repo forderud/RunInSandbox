@@ -2,20 +2,15 @@
 #include "../RunInSandbox/ComCreate.hpp"
 
 
-HRESULT STDMETHODCALLTYPE TestControl::CreateInstance (BOOL elevated, /*in*/BSTR progid, /*out*/IUnknown ** obj) {
-    if (!progid || !obj)
+HRESULT STDMETHODCALLTYPE TestControl::CreateInstance (BOOL elevated, /*in*/CLSID clsid, /*out*/IUnknown ** obj) {
+    if (!obj)
         return E_INVALIDARG;
 
     if (elevated) {
-        CLSID clsid = {};
-        HRESULT hr = CLSIDFromProgID(progid, &clsid);
-        if (FAILED(hr))
-            return hr;
-
         return CoCreateInstanceElevated<IUnknown>(NULL, clsid, obj);
     } else {
         CComPtr<IUnknown> res;
-        HRESULT hr = res.CoCreateInstance(progid);
+        HRESULT hr = res.CoCreateInstance(clsid);
         if (FAILED(hr))
             return hr;
 
