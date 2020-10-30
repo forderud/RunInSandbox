@@ -26,14 +26,14 @@ static bool IsProcessElevated () {
         abort();
 
     TOKEN_ELEVATION elevation = {};
-    DWORD cbSize = sizeof(elevation);
-    if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &cbSize))
+    DWORD ret_len = 0;
+    if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &ret_len))
         abort();
 
     {
         TOKEN_ELEVATION_TYPE elevation_type = {};
-        cbSize = sizeof(elevation_type);
-        if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &cbSize))
+        ret_len = 0;
+        if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
             abort();
 
         if (elevation.TokenIsElevated)
