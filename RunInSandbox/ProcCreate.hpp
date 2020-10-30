@@ -10,7 +10,7 @@ public:
         const DWORD attr_count = 2; // SECURITY_CAPABILITIES & PARENT_PROCESS
         SIZE_T attr_size = 0;
         InitializeProcThreadAttributeList(NULL, attr_count, 0, /*out*/&attr_size);
-        si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)new char[attr_size];
+        si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)new BYTE[attr_size]();
         WIN32_CHECK(InitializeProcThreadAttributeList(si.lpAttributeList, attr_count, 0, &attr_size));
     }
 
@@ -25,7 +25,7 @@ public:
     ~StartupInfoWrap() {
         if (si.lpAttributeList) {
             DeleteProcThreadAttributeList(si.lpAttributeList);
-            delete [] (char*)si.lpAttributeList;
+            delete [] (BYTE*)si.lpAttributeList;
             si.lpAttributeList = nullptr;
         }
     }
