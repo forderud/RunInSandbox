@@ -102,8 +102,7 @@ int wmain (int argc, wchar_t *argv[]) {
             return ret;
         }
     } else {
-        std::wcout << L"Starting executable " << progid;
-        std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
+        std::wcout << L"Starting executable " << progid << L" in " << ToString(mode).c_str() << L"...\n";
 
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
             SHELLEXECUTEINFOW info = {};
