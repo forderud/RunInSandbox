@@ -40,12 +40,14 @@ private:
 
 
 /** Launch a new process within an AppContainer. */
-static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int argc, wchar_t *argv[]) {
+static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int argc, wchar_t *argv[]) {
+    const std::wstring exe_path = _exe_path; // local copy for const_cast protection
+
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
     if (mode != IntegrityLevel::AppContainer) {
-        std::wstring arguments = L"\"" + std::wstring(exe_path) + L"\"";
+        std::wstring arguments = L"\"" + exe_path + L"\"";
         if (argc == 0) {
             // mimic how svchost passes "-Embedding" argument
             arguments += L" -Embedding";
@@ -68,12 +70,12 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
             assert(parent_proc);
             si.SetParent(parent_proc);
 
-            WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+            WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
             std::wcout << L"Creating process with explorer as parent to avoid elevation.\n";
         } else {
             ImpersonateThread low_int(nullptr, nullptr, mode);
             std::wcout << L"Impersonation succeeded.\n";
-            WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+            WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path.c_str(), const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
         }
     } else {
         AppContainerWrap ac;
