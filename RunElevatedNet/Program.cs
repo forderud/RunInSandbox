@@ -46,7 +46,7 @@ namespace RunElevatedNet
             object obj = null;
             if (launch_elevated) {
                 System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
-                obj = CoCreateInstanceAsAdmin((IntPtr)0, comCls); // elevated
+                obj = CoCreateInstanceElevated((IntPtr)0, comCls); // elevated
             } else {
                 System.Console.WriteLine("Creating a non-elevated (regular) COM class instance...");
                 obj = Activator.CreateInstance(comCls); // non-elevated
@@ -136,7 +136,7 @@ namespace RunElevatedNet
 
         /** C# port of COM Elevation Moniker sample in https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
         [return: MarshalAs(UnmanagedType.Interface)]
-        static object CoCreateInstanceAsAdmin(IntPtr parentWindow, Type comClass)
+        static object CoCreateInstanceElevated(IntPtr parentWindow, Type comClass)
         {
             // B formatting directive: returns {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx} 
             var monikerName = "Elevation:Administrator!new:" + comClass.GUID.ToString("B");

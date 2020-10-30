@@ -125,7 +125,7 @@ CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passw
 /** Create a AppID and elevation-enabled COM server in a admin process.
     REF: https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
 template <typename T>
-static CComPtr<T> CoCreateInstanceAsAdmin (HWND window, const IID & classId) {
+static CComPtr<T> CoCreateInstanceElevated (HWND window, const IID & classId) {
     std::wstring name;
     name.resize(39);
     CHECK(::StringFromGUID2(classId, const_cast<wchar_t*>(name.data()), static_cast<int>(name.size())));
