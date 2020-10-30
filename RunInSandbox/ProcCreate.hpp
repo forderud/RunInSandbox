@@ -18,8 +18,8 @@ public:
         WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, &sc, sizeof(sc), NULL, NULL));
     }
 
-    void SetParent(HANDLE process) {
-        WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, &process, sizeof(process), NULL, NULL));
+    void SetParent(HANDLE* process) {
+        WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, process, sizeof(HANDLE), NULL, NULL));
     }
 
     ~StartupInfoWrap() {
@@ -68,11 +68,10 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
             HandleWrap parent_proc;
             parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
             assert(parent_proc);
-            si.SetParent(parent_proc);
+            si.SetParent(&parent_proc);
 
-            // BUG: Writing to std::wcout here triggers a "The handle is invalid" error. Don't understand why.
-            WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
             std::wcout << L"Creating process with explorer as parent to avoid elevation.\n";
+            WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
         } else {
             ImpersonateThread low_int(nullptr, nullptr, mode);
             std::wcout << L"Impersonation succeeded.\n";
