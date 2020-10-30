@@ -58,7 +58,7 @@ int wmain (int argc, wchar_t *argv[]) {
         }
 
         // try to add two numbers
-        CComPtr< ISimpleCalculator> calc;
+        CComPtr<ISimpleCalculator> calc;
         obj.QueryInterface(&calc);
         if (calc) {
             int sum = 0;
@@ -70,6 +70,8 @@ int wmain (int argc, wchar_t *argv[]) {
 
         // try to make window visible
         SetComAttribute(obj, L"Visible", true);
+
+        Sleep(2000); // wait 2sec to keep the child process alive a bit
     } else if (url_provided) {
         std::wcout << L"Opening URL " << argv[arg_idx] << " in default browser\n";
         if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
