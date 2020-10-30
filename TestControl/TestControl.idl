@@ -7,6 +7,9 @@ import "ocidl.idl";
  uuid(570FBF3C-D853-435E-B761-6A264393B9DA)]
 interface ISimpleCalculator : IUnknown {
     HRESULT Add ([in] int a, [in] int b, [out,retval] int * sum);
+
+    [helpstring("For testing of nested COM object creation")]
+    HRESULT CreateInstance ([in] BOOL elevated, [in,string] BSTR progid, [out,retval] IUnknown ** obj);
 };
 
 
