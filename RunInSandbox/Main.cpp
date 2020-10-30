@@ -47,7 +47,7 @@ int wmain (int argc, wchar_t *argv[]) {
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
             // launch "COM Elevation Moniker"-compatible COM class in elevated process
             // example COM class for testing: HNetCfg.FwOpenPort
-            obj = CoCreateInstanceElevated<IUnknown>(0, clsid);
+            CHECK(CoCreateInstanceElevated<IUnknown>(0, clsid, &obj));
             std::wcout << L"COM server sucessfully created in elevated process.\n";
         } else {
             arg_idx++;

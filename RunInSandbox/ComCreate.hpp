@@ -125,10 +125,17 @@ CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passw
 /** Create a AppID and elevation-enabled COM server in a admin process.
     REF: https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
 template <typename T>
-static CComPtr<T> CoCreateInstanceElevated (HWND window, const IID & classId) {
+static HRESULT CoCreateInstanceElevated (HWND window, const IID & classId, T ** result) {
+    if (!result)
+        return E_INVALIDARG;
+    if (*result)
+        return E_INVALIDARG;
+
     std::wstring name;
     name.resize(39);
-    CHECK(::StringFromGUID2(classId, const_cast<wchar_t*>(name.data()), static_cast<int>(name.size())));
+    HRESULT hr = ::StringFromGUID2(classId, const_cast<wchar_t*>(name.data()), static_cast<int>(name.size()));
+    if (FAILED(hr))
+        return hr;
     name = L"Elevation:Administrator!new:" + name;
 
     std::wcout << L"CoGetObject: " << name << L'\n';
@@ -138,9 +145,7 @@ static CComPtr<T> CoCreateInstanceElevated (HWND window, const IID & classId) {
     options.hwnd = window;
     options.dwClassContext = CLSCTX_LOCAL_SERVER;
 
-    CComPtr<T> obj;
-    CHECK(::CoGetObject(name.c_str(), &options, __uuidof(T), reinterpret_cast<void**>(&obj)));
-    return obj;
+    return ::CoGetObject(name.c_str(), &options, __uuidof(T), reinterpret_cast<void**>(result));
 }
 
 

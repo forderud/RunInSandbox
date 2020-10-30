@@ -12,9 +12,7 @@ HRESULT STDMETHODCALLTYPE TestControl::CreateInstance (BOOL elevated, /*in*/BSTR
         if (FAILED(hr))
             return hr;
 
-        CComPtr<IUnknown> res = CoCreateInstanceElevated<IUnknown>(NULL, clsid);
-        *obj = res.Detach();
-        return S_OK;
+        return CoCreateInstanceElevated<IUnknown>(NULL, clsid, obj);
     } else {
         CComPtr<IUnknown> res;
         HRESULT hr = res.CoCreateInstance(progid);
