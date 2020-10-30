@@ -29,10 +29,11 @@ public:
         COM_INTERFACE_ENTRY(ISimpleCalculator)
     END_COM_MAP()
 
+#if 0
     BEGIN_CATEGORY_MAP(TestControl)
         IMPLEMENTED_CATEGORY(CATID_AppContainerCompatible)
     END_CATEGORY_MAP()
-private:
+#endif
 };
 
 OBJECT_ENTRY_AUTO(CLSID_TestControl, TestControl)
