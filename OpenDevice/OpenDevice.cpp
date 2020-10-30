@@ -1,30 +1,7 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
-
-/** RAII wrapper of Win32 "handle" objects. */
-class HandleWrap {
-public:
-    HandleWrap(HANDLE h) : handle(h) {
-    }
-
-    ~HandleWrap() {
-        if (handle) {
-            CloseHandle(handle);
-            handle = nullptr;
-        }
-    }
-
-    operator HANDLE () {
-        return handle;
-    }
-
-private:
-    HandleWrap(const HandleWrap &) = delete;
-    HandleWrap& operator = (const HandleWrap &) = delete;
-
-    HANDLE handle = nullptr;
-};
+#include "../RunInSandbox/Sandboxing.hpp"
 
 
 int main(int argc, char *argv[]) {
@@ -35,8 +12,8 @@ int main(int argc, char *argv[]) {
 
     std::string port = argv[1]; // e.g. "COM3";
 
-    HandleWrap handle = CreateFileA(port.c_str(), GENERIC_READ | GENERIC_WRITE, /*no sharing*/0,
-                                /*no security*/NULL, OPEN_EXISTING, /*no overlapped*/0, NULL);
+    HandleWrap handle;
+    handle = CreateFileA(port.c_str(), GENERIC_READ | GENERIC_WRITE, /*no sharing*/0, /*no security*/NULL, OPEN_EXISTING, /*no overlapped*/0, NULL);
     if (!handle) {
         std::cerr << "Unable to open " << port << "\n";
         return -1;
