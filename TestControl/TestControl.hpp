@@ -19,7 +19,7 @@ public:
 
     HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override;
 
-    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated) override;
+    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * high_integrity) override;
 
     HRESULT STDMETHODCALLTYPE CreateInstance (BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
 

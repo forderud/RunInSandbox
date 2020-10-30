@@ -291,6 +291,31 @@ struct ImpersonateThread {
             return IntegrityLevel::High;
     }
 
+    /** Check if a process is "elevated".
+        Please note that elevated processes might still run under medium or low integrity, so this is _not_ a reliable way of checking for administrative privileges. */
+    static bool IsProcessElevated (HANDLE process = GetCurrentProcess()) {
+        HandleWrap token;
+        if (!OpenProcessToken(process, TOKEN_QUERY, &token))
+            abort();
+
+        TOKEN_ELEVATION elevation = {};
+        DWORD ret_len = 0;
+        if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &ret_len))
+            abort();
+
+        {
+            TOKEN_ELEVATION_TYPE elevation_type = {};
+            ret_len = 0;
+            if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
+                abort();
+
+            if (elevation.TokenIsElevated)
+                assert(elevation_type == TokenElevationTypeFull);
+        }
+
+        return elevation.TokenIsElevated;
+    }
+
     HandleWrap  m_token;
     PROFILEINFO m_profile = {};
 };

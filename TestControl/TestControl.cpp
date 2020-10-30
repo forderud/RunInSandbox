@@ -3,31 +3,6 @@
 #include "../RunInSandbox/ComCreate.hpp"
 
 
-static bool IsProcessElevated () {
-    // TODO: Seem to always return true if the parent process is elevated
-    HandleWrap token;
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
-        abort();
-
-    TOKEN_ELEVATION elevation = {};
-    DWORD ret_len = 0;
-    if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &ret_len))
-        abort();
-
-    {
-        TOKEN_ELEVATION_TYPE elevation_type = {};
-        ret_len = 0;
-        if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
-            abort();
-
-        if (elevation.TokenIsElevated)
-            assert(elevation_type == TokenElevationTypeFull);
-    }
-
-    return elevation.TokenIsElevated;
-}
-
-
 TestControl::TestControl(){
 }
 
@@ -39,10 +14,12 @@ HRESULT STDMETHODCALLTYPE TestControl::Add(int a, int b, int * sum) {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated) {
-    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
+HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * high_integrity) {
+    *is_elevated = ImpersonateThread::IsProcessElevated();
 
-    *is_elevated = (proc_integrity >= IntegrityLevel::High);
+    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
+    *high_integrity = (proc_integrity >= IntegrityLevel::High);
+
     return S_OK;
 }
 

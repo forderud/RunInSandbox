@@ -9,7 +9,7 @@ interface ISimpleCalculator : IUnknown {
     HRESULT Add ([in] int a, [in] int b, [out,retval] int * sum);
 
     [helpstring("Check if object is running in an elevated process")]
-    HRESULT IsElevated ([out,retval] BOOL * is_elevated);
+    HRESULT IsElevated ([out] BOOL * is_elevated, [out] BOOL * high_integrity);
 
     [helpstring("For testing of nested COM object creation")]
     HRESULT CreateInstance ([in] BOOL elevated, [in] CLSID clsid, [out,retval] IUnknown ** obj);
