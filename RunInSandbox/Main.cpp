@@ -66,6 +66,10 @@ int wmain (int argc, wchar_t *argv[]) {
 
             std::wcout << L"Add(2, 3) returned " << sum << L".\n";
             assert(sum == 2 + 3);
+
+            BOOL is_elevated = false;
+            CHECK(calc->IsElevated(&is_elevated));
+            std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << std::endl;
         }
 
         // try to make window visible

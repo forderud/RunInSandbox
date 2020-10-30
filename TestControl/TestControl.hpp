@@ -24,6 +24,8 @@ public:
         return S_OK;
     }
 
+    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated) override;
+
     HRESULT STDMETHODCALLTYPE CreateInstance (BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
 
     DECLARE_REGISTRY_RESOURCEID(IDR_TestControl)
