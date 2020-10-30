@@ -57,9 +57,23 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
             }
         }
 
-        ImpersonateThread low_int(nullptr, nullptr, mode);
-        std::wcout << L"Impersonation succeeded.\n";
-        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+        if ((mode < IntegrityLevel::High) && ImpersonateThread::IsProcessElevated()) {
+            // use explorer.exe as parent process to escape existing UAC elevation
+            // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
+
+            DWORD pid = {};
+            GetWindowThreadProcessId(GetShellWindow(), &pid);
+            HandleWrap parent_proc;
+            parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
+            si.SetParent(parent_proc);
+
+            WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+            std::wcout << L"Creating process with explorer as parent to avoid elevation.\n";
+        } else {
+            ImpersonateThread low_int(nullptr, nullptr, mode);
+            std::wcout << L"Impersonation succeeded.\n";
+            WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+        }
     } else {
         AppContainerWrap ac;
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
