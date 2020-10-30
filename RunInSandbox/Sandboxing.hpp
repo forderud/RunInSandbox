@@ -123,6 +123,7 @@ public:
 
         // delete existing (if present)
         HRESULT hr = DeleteAppContainerProfile(PROFILE_NAME);
+        hr;
 
         if (FAILED(CreateAppContainerProfile(PROFILE_NAME, DISPLAY_NAME, DESCRIPTION,
             m_capabilities.empty() ? nullptr : m_capabilities.data(), (DWORD)m_capabilities.size(), &m_sid)))
