@@ -23,12 +23,12 @@ static bool IsProcessElevated () {
     // TODO: Seem to always return true if the parent process is elevated
     HandleWrap token;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
-        return E_ACCESSDENIED;
+        abort();
 
     TOKEN_ELEVATION elevation = {};
     DWORD cbSize = sizeof(TOKEN_ELEVATION);
     if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &cbSize))
-        return E_ACCESSDENIED;
+        abort();
 
     return elevation.TokenIsElevated;
 #endif
