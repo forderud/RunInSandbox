@@ -20,7 +20,7 @@ static void WIN32_CHECK(BOOL res) {
 /** Tag a folder path as writable by low-integrity processes.
     By default, only %USER PROFILE%\AppData\LocalLow is writable.
     Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
-static DWORD MakePathLowIntegrity(const WCHAR * path) {
+static DWORD MakePathLowIntegrity(std::wstring path) {
     ACL * sacl = nullptr; // system access control list
     PSECURITY_DESCRIPTOR SD = nullptr;
     {
@@ -34,7 +34,7 @@ static DWORD MakePathLowIntegrity(const WCHAR * path) {
     }
 
     // apply "low integrity" SACL
-    DWORD ret = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
+    DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.data()), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
     LocalFree(SD);
     if (ret == ERROR_SUCCESS)
         return ret; // success
