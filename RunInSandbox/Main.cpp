@@ -70,6 +70,19 @@ int wmain (int argc, wchar_t *argv[]) {
             BOOL is_elevated = false;
             CHECK(calc->IsElevated(&is_elevated));
             std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << std::endl;
+
+#if 0
+            // try to create child object in elevated process
+            // WARNING: Doesn't trigger UAC elevation if launched from a medium-integrity process that was launched from an elevated process
+            std::wcout << L"Creating child COM object " << progid << L" in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
+            CComPtr<IUnknown> child;
+            CHECK(calc->CreateInstance(true, clsid, &child));
+            CComPtr<ISimpleCalculator> child_calc;
+            child_calc = child;
+            is_elevated = false;
+            CHECK(child_calc->IsElevated(&is_elevated));
+            std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << std::endl;
+#endif
         }
 
         // try to make window visible
