@@ -29,4 +29,3 @@ library TestControl {
         [default] interface ISimpleCalculator;
     };
 };
-

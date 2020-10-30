@@ -3,6 +3,17 @@
 #include "../RunInSandbox/ComCreate.hpp"
 
 
+TestControl::TestControl(){
+}
+
+TestControl::~TestControl() {
+}
+
+HRESULT STDMETHODCALLTYPE TestControl::Add(int a, int b, int * sum) {
+    *sum = a + b;
+    return S_OK;
+}
+
 HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated) {
     HandleWrap token;
     if (!OpenProcessToken(GetCurrentProcess( ), TOKEN_QUERY, &token))

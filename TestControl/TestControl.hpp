@@ -13,16 +13,11 @@ class ATL_NO_VTABLE TestControl :
     public ISimpleCalculator
 {
 public:
-    TestControl(){
-    }
+    TestControl();
 
-    /*NOT virtual*/ ~TestControl() {
-    }
+    /*NOT virtual*/ ~TestControl();
 
-    HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override {
-        *sum = a + b;
-        return S_OK;
-    }
+    HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override;
 
     HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated) override;
 
