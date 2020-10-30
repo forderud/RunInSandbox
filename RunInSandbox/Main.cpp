@@ -25,7 +25,8 @@ int wmain (int argc, wchar_t *argv[]) {
 
     // check if 1st argument is a COM class ProgID
     CLSID clsid = {};
-    bool progid_provided = SUCCEEDED(CLSIDFromProgID(argv[arg_idx], &clsid));
+    std::wstring progid = argv[arg_idx];
+    bool progid_provided = SUCCEEDED(CLSIDFromProgID(progid.c_str(), &clsid));
     bool url_provided = std::wstring(argv[arg_idx]).substr(0, 4) == L"http";
 
     if (progid_provided) {
@@ -40,7 +41,7 @@ int wmain (int argc, wchar_t *argv[]) {
             abort();
     #endif
 
-        std::wcout << L"Creating COM object " << argv[arg_idx] << L" in " << ToString(mode).c_str() << L"...\n";
+        std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
 
         CComPtr<IUnknown> obj;
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
@@ -72,17 +73,17 @@ int wmain (int argc, wchar_t *argv[]) {
 
         Sleep(2000); // wait 2sec to keep the child process alive a bit
     } else if (url_provided) {
-        std::wcout << L"Opening URL " << argv[arg_idx] << " in default browser\n";
+        std::wcout << L"Opening URL " << progid << " in default browser\n";
         if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
             std::wcout << L"WARNING: Does not seem to work in low-integrity!\n";
 
-        int ret = (int)reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, NULL, argv[arg_idx], NULL, NULL, SW_SHOWNORMAL));
+        int ret = (int)reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, NULL, progid.c_str(), NULL, NULL, SW_SHOWNORMAL));
         if (ret <= 32) {
             std::wcout << L"ShellExecute failed with code " << ret << std::endl;
             return ret;
         }
     } else {
-        std::wcout << L"Starting executable " << argv[arg_idx];
+        std::wcout << L"Starting executable " << progid;
         std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
 
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
@@ -91,7 +92,7 @@ int wmain (int argc, wchar_t *argv[]) {
             info.fMask = 0;
             info.hwnd = NULL;
             info.lpVerb = L"runas";
-            info.lpFile = argv[arg_idx];
+            info.lpFile = progid.c_str();
             info.lpParameters = L"";
             info.nShow = SW_NORMAL;
             WIN32_CHECK(::ShellExecuteExW(&info));
@@ -100,7 +101,7 @@ int wmain (int argc, wchar_t *argv[]) {
         }
 
         int extra_args = argc - arg_idx - 1;
-        ProcCreate(argv[arg_idx], mode, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
+        ProcCreate(progid.c_str(), mode, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
     }
 
     std::wcout << L"[done]" << std::endl;
