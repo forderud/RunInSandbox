@@ -40,8 +40,7 @@ int wmain (int argc, wchar_t *argv[]) {
             abort();
     #endif
 
-        std::wcout << L"Creating COM object " << argv[arg_idx];
-        std::wcout << L" in " << ToString(mode).c_str() << L"...\n";
+        std::wcout << L"Creating COM object " << argv[arg_idx] << L" in " << ToString(mode).c_str() << L"...\n";
 
         CComPtr<IUnknown> obj;
         if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
