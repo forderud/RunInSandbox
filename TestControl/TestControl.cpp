@@ -4,22 +4,6 @@
 
 
 static bool IsProcessElevated () {
-#if 1
-    // Determine the integrity level for a process.
-    // Based on https://github.com/chromium/chromium/blob/master/base/process/process_info_win.cc */
-    HANDLE process_token = GetCurrentProcessToken();
-    DWORD token_info_length = 0;
-    if (GetTokenInformation(process_token, TokenIntegrityLevel, NULL, 0, &token_info_length))
-        abort();
-
-    std::vector<char> token_info_buf(token_info_length);
-    auto* token_info = reinterpret_cast<TOKEN_MANDATORY_LABEL*>(token_info_buf.data());
-    if (!GetTokenInformation(process_token, TokenIntegrityLevel, token_info, token_info_length, &token_info_length))
-        abort();
-
-    DWORD integrity_level = *GetSidSubAuthority(token_info->Label.Sid, *GetSidSubAuthorityCount(token_info->Label.Sid)-1);
-    return (integrity_level >= SECURITY_MANDATORY_HIGH_RID);
-#else
     // TODO: Seem to always return true if the parent process is elevated
     HandleWrap token;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
@@ -41,7 +25,6 @@ static bool IsProcessElevated () {
     }
 
     return elevation.TokenIsElevated;
-#endif
 }
 
 
@@ -57,7 +40,9 @@ HRESULT STDMETHODCALLTYPE TestControl::Add(int a, int b, int * sum) {
 }
 
 HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated) {
-    *is_elevated = IsProcessElevated();
+    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
+
+    *is_elevated = (proc_integrity >= IntegrityLevel::High);
     return S_OK;
 }
 
