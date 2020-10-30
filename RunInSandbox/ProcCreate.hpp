@@ -84,7 +84,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
 
         // mimic how svchost passes "-Embedding" argument
         std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\" -Embedding";
-        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.c_str()), nullptr, nullptr, TRUE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, TRUE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
     }
 
     // wait for process to initialize
