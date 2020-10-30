@@ -7,21 +7,25 @@ public:
     StartupInfoWrap() {
         si.StartupInfo.cb = sizeof(STARTUPINFOEX);
 
-        const DWORD attr_count = 1; // only SECURITY_CAPABILITIES
+        const DWORD attr_count = 2; // SECURITY_CAPABILITIES & PARENT_PROCESS
         SIZE_T attr_size = 0;
         InitializeProcThreadAttributeList(NULL, attr_count, 0, /*out*/&attr_size);
-        si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attr_size);
+        si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)new char[attr_size];
         WIN32_CHECK(InitializeProcThreadAttributeList(si.lpAttributeList, attr_count, 0, &attr_size));
     }
 
-    void Update(SECURITY_CAPABILITIES & sc) {
+    void SetSecurity(SECURITY_CAPABILITIES & sc) {
         WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, &sc, sizeof(sc), NULL, NULL));
+    }
+
+    void SetParent(HANDLE process) {
+        WIN32_CHECK(UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, &process, sizeof(process), NULL, NULL));
     }
 
     ~StartupInfoWrap() {
         if (si.lpAttributeList) {
             DeleteProcThreadAttributeList(si.lpAttributeList);
-            WIN32_CHECK(HeapFree(GetProcessHeap(), 0, si.lpAttributeList));
+            delete [] (char*)si.lpAttributeList;
             si.lpAttributeList = nullptr;
         }
     }
@@ -61,7 +65,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, int 
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
 
         // create new AppContainer process, based on STARTUPINFO
-        si.Update(sec_cap);
+        si.SetSecurity(sec_cap);
 
         // mimic how svchost passes "-Embedding" argument
         std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\" -Embedding";
