@@ -104,20 +104,6 @@ int wmain (int argc, wchar_t *argv[]) {
     } else {
         std::wcout << L"Starting executable " << progid << L" in " << ToString(mode).c_str() << L"...\n";
 
-        if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
-            SHELLEXECUTEINFOW info = {};
-            info.cbSize = sizeof(info);
-            info.fMask = 0;
-            info.hwnd = NULL;
-            info.lpVerb = L"runas";
-            info.lpFile = progid.c_str();
-            info.lpParameters = L"";
-            info.nShow = SW_NORMAL;
-            WIN32_CHECK(::ShellExecuteExW(&info));
-            std::wcout << L"Successfully created elevated process.\n";
-            return 0;
-        }
-
         int extra_args = argc - arg_idx - 1;
         ProcCreate(progid.c_str(), mode, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
     }

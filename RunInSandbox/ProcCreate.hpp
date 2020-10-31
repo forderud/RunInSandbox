@@ -46,7 +46,20 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
-    if (mode == IntegrityLevel::Medium) {
+    if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
+        // request UAC elevation
+        SHELLEXECUTEINFOW info = {};
+        info.cbSize = sizeof(info);
+        info.fMask = 0;
+        info.hwnd = NULL;
+        info.lpVerb = L"runas";
+        info.lpFile = exe_path.c_str();
+        info.lpParameters = L"";
+        info.nShow = SW_NORMAL;
+        WIN32_CHECK(::ShellExecuteExW(&info));
+        std::wcout << L"Successfully created elevated process.\n";
+        return {};
+    } else if (mode == IntegrityLevel::Medium) {
         HandleWrap parent_proc; // lifetime tied to "si"
         if (ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
