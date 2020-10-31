@@ -47,7 +47,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     } else {
         // launch process in an AppContainer process.
         std::wstring exe_path = GetLocalServerPath(clsid);
-        HandleWrap proc = ProcCreate(exe_path.c_str(), mode, 0, nullptr);
+        HandleWrap proc = ProcCreate(exe_path.c_str(), mode, true, 0, nullptr);
         // impersonate the process thread
         impersonate.reset(new ImpersonateThread(proc));
     }

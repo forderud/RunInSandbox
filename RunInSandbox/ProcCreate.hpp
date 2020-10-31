@@ -40,7 +40,7 @@ private:
 
 
 /** Launch a new process within an AppContainer. */
-static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int argc, wchar_t *argv[]) {
+static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, bool add_embedding, int argc, wchar_t *argv[]) {
     const std::wstring exe_path = _exe_path; // local copy for const_cast protection
 
     PROCESS_INFORMATION pi = {};
@@ -81,14 +81,16 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
         // create new AppContainer process, based on STARTUPINFO
         si.SetSecurity(&sec_cap);
 
-        // mimic how svchost passes "-Embedding" argument
-        std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\" -Embedding";
+        std::wstring cmdline;
+        if (add_embedding)
+            cmdline = L"\"" + exe_path + L"\" -Embedding"; // mimic how svchost passes "-Embedding" argument
+        else
+            cmdline = exe_path;
         WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
     } else {
         std::wstring arguments = L"\"" + exe_path + L"\"";
-        if (argc == 0) {
-            // mimic how svchost passes "-Embedding" argument
-            arguments += L" -Embedding";
+        if (add_embedding) {
+            arguments += L" -Embedding"; // mimic how svchost passes "-Embedding" argument
         } else {
             // append extra arguments
             for (int i = 0; i < argc; ++i) {
