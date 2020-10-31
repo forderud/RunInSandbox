@@ -40,8 +40,17 @@ private:
 
 
 /** Launch a new process within an AppContainer. */
-static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, bool add_embedding, int argc, wchar_t *argv[]) {
-    const std::wstring exe_path = _exe_path; // local copy for const_cast protection
+static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool add_embedding, int argc, wchar_t *argv[]) {
+    std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
+    if (add_embedding) {
+        cmdline += L" -Embedding"; // mimic how svchost passes "-Embedding" argument
+    } else {
+        // append extra arguments
+        for (int i = 0; i < argc; ++i) {
+            cmdline += L" ";
+            cmdline += argv[i];
+        }
+    }
 
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
@@ -53,7 +62,7 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, boo
         info.fMask = 0;
         info.hwnd = NULL;
         info.lpVerb = L"runas";
-        info.lpFile = exe_path.c_str();
+        info.lpFile = exe_path;
         info.lpParameters = L"";
         info.nShow = SW_NORMAL;
         WIN32_CHECK(::ShellExecuteExW(&info));
@@ -73,7 +82,7 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, boo
         }
 
         // processes are created with medium integrity as default, regardless of UAC settings
-        WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcessW(exe_path, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
     } else if (mode == IntegrityLevel::AppContainer) {
         AppContainerWrap ac;
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
@@ -81,27 +90,11 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, boo
         // create new AppContainer process, based on STARTUPINFO
         si.SetSecurity(&sec_cap);
 
-        std::wstring cmdline;
-        if (add_embedding)
-            cmdline = L"\"" + exe_path + L"\" -Embedding"; // mimic how svchost passes "-Embedding" argument
-        else
-            cmdline = exe_path;
-        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
     } else {
-        std::wstring arguments = L"\"" + exe_path + L"\"";
-        if (add_embedding) {
-            arguments += L" -Embedding"; // mimic how svchost passes "-Embedding" argument
-        } else {
-            // append extra arguments
-            for (int i = 0; i < argc; ++i) {
-                arguments += L" ";
-                arguments += argv[i];
-            }
-        }
-
         ImpersonateThread low_int(nullptr, nullptr, mode);
         std::wcout << L"Impersonation succeeded.\n";
-        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path.c_str(), const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
     }
 
     // wait for process to initialize
