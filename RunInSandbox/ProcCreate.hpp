@@ -59,18 +59,20 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
             }
         }
 
-        if ((mode < IntegrityLevel::High) && ImpersonateThread::IsProcessElevated()) {
-            // use explorer.exe as parent process to escape existing UAC elevation
-            // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
+        if (mode == IntegrityLevel::Medium) {
+            HandleWrap parent_proc; // lifetime tied to "si"
+            if (ImpersonateThread::IsProcessElevated()) {
+                // use explorer.exe as parent process to escape existing UAC elevation
+                // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
+                DWORD pid = {};
+                WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
+                parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
+                assert(parent_proc);
+                si.SetParent(&parent_proc);
+                std::wcout << L"Using explorer as parent process to escape elevation.\n";
+            }
 
-            DWORD pid = {};
-            WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
-            HandleWrap parent_proc;
-            parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
-            assert(parent_proc);
-            si.SetParent(&parent_proc);
-
-            std::wcout << L"Using explorer as parent process to escape elevation.\n";
+            // processes are created with medium integrity as default, regardless of UAC settings
             WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
         } else {
             ImpersonateThread low_int(nullptr, nullptr, mode);
