@@ -70,7 +70,7 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
             assert(parent_proc);
             si.SetParent(&parent_proc);
 
-            std::wcout << L"Creating process with explorer as parent to avoid elevation.\n";
+            std::wcout << L"Using explorer as parent process to escape elevation.\n";
             WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
         } else {
             ImpersonateThread low_int(nullptr, nullptr, mode);
