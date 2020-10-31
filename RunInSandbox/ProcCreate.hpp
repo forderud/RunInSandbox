@@ -46,7 +46,32 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
-    if (mode != IntegrityLevel::AppContainer) {
+    if (mode == IntegrityLevel::Medium) {
+        HandleWrap parent_proc; // lifetime tied to "si"
+        if (ImpersonateThread::IsProcessElevated()) {
+            // use explorer.exe as parent process to escape existing UAC elevation
+            // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
+            DWORD pid = {};
+            WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
+            parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
+            assert(parent_proc);
+            si.SetParent(&parent_proc);
+            std::wcout << L"Using explorer as parent process to escape elevation.\n";
+        }
+
+        // processes are created with medium integrity as default, regardless of UAC settings
+        WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+    } else if (mode == IntegrityLevel::AppContainer) {
+        AppContainerWrap ac;
+        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
+
+        // create new AppContainer process, based on STARTUPINFO
+        si.SetSecurity(sec_cap);
+
+        // mimic how svchost passes "-Embedding" argument
+        std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\" -Embedding";
+        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, TRUE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+    } else {
         std::wstring arguments = L"\"" + exe_path + L"\"";
         if (argc == 0) {
             // mimic how svchost passes "-Embedding" argument
@@ -59,36 +84,9 @@ static HandleWrap ProcCreate(const wchar_t * _exe_path, IntegrityLevel mode, int
             }
         }
 
-        if (mode == IntegrityLevel::Medium) {
-            HandleWrap parent_proc; // lifetime tied to "si"
-            if (ImpersonateThread::IsProcessElevated()) {
-                // use explorer.exe as parent process to escape existing UAC elevation
-                // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
-                DWORD pid = {};
-                WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
-                parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
-                assert(parent_proc);
-                si.SetParent(&parent_proc);
-                std::wcout << L"Using explorer as parent process to escape elevation.\n";
-            }
-
-            // processes are created with medium integrity as default, regardless of UAC settings
-            WIN32_CHECK(CreateProcessW(NULL, const_cast<wchar_t*>(exe_path.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
-        } else {
-            ImpersonateThread low_int(nullptr, nullptr, mode);
-            std::wcout << L"Impersonation succeeded.\n";
-            WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path.c_str(), const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
-        }
-    } else {
-        AppContainerWrap ac;
-        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
-
-        // create new AppContainer process, based on STARTUPINFO
-        si.SetSecurity(sec_cap);
-
-        // mimic how svchost passes "-Embedding" argument
-        std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\" -Embedding";
-        WIN32_CHECK(CreateProcess(nullptr, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, TRUE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+        ImpersonateThread low_int(nullptr, nullptr, mode);
+        std::wcout << L"Impersonation succeeded.\n";
+        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path.c_str(), const_cast<wchar_t*>(arguments.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
     }
 
     // wait for process to initialize
