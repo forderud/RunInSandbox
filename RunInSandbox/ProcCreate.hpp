@@ -2,6 +2,7 @@
 #include "Sandboxing.hpp"
 
 
+/** RAII wrapper OF STARTUPINFOEX. */
 class StartupInfoWrap {
 public:
     StartupInfoWrap() {
@@ -38,6 +39,37 @@ private:
     STARTUPINFOEX si = {};
 };
 
+/** RAII wrapper OF PROCESS_INFORMATION. */
+class ProcessInfoWrap {
+public:
+    ProcessInfoWrap() {
+    }
+
+    ~ProcessInfoWrap() {
+        if (pi.hThread) {
+            WIN32_CHECK(CloseHandle(pi.hThread));
+            pi.hThread = nullptr;
+            pi.dwThreadId = 0;
+        }
+        if (pi.hProcess) {
+            WIN32_CHECK(CloseHandle(pi.hProcess));
+            pi.hProcess = nullptr;
+            pi.dwProcessId = 0;
+        }
+    }
+
+    PROCESS_INFORMATION* operator& () {
+        return &pi;
+    }
+
+    PROCESS_INFORMATION* operator->() {
+        return &pi;
+    }
+
+private:
+    PROCESS_INFORMATION pi = {};
+};
+
 
 /** Launch a new process within an AppContainer. */
 static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool add_embedding, int argc, wchar_t *argv[]) {
@@ -52,7 +84,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool
         }
     }
 
-    PROCESS_INFORMATION pi = {};
+    ProcessInfoWrap pi;
     StartupInfoWrap si;
 
     constexpr BOOL INHERIT_HANDLES = FALSE;
@@ -104,14 +136,13 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool
     // CoCreateInstance will fail with REGDB_E_CLASSNOTREG until the AppContainer process has called CoRegisterClassObject
     // TODO: Either call CoCreateInstance in a loop or have some sort of synchronization mechanism
     // ignore failure if process is not a GUI app
-    WaitForInputIdle(pi.hProcess, INFINITE);
+    WaitForInputIdle(pi->hProcess, INFINITE);
 
     // wait a bit more (WaitForInputIdle doesn't seem to be sufficient)
     Sleep(200);
 
     // return process handle
-    HandleWrap proc, thread;
-    std::swap(*&proc, pi.hProcess);
-    std::swap(*&thread, pi.hThread); // swap to avoid leak
+    HandleWrap proc;
+    std::swap(*&proc, pi->hProcess);
     return proc;
 }
