@@ -55,6 +55,9 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool
     PROCESS_INFORMATION pi = {};
     StartupInfoWrap si;
 
+    constexpr BOOL INHERIT_HANDLES = FALSE;
+    constexpr DWORD CREATION_FLAGS = CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT; // CREATE_NEW_CONSOLE required for starting cmd.exe
+
     if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
         // request UAC elevation
         SHELLEXECUTEINFOW info = {};
@@ -82,7 +85,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool
         }
 
         // processes are created with medium integrity as default, regardless of UAC settings
-        WIN32_CHECK(CreateProcessW(exe_path, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, FALSE, CREATE_NEW_CONSOLE | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, CREATION_FLAGS, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     } else if (mode == IntegrityLevel::AppContainer) {
         AppContainerWrap ac;
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
@@ -90,11 +93,11 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool
         // create new AppContainer process, based on STARTUPINFO
         si.SetSecurity(&sec_cap);
 
-        WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), nullptr, nullptr, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, CREATION_FLAGS, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     } else {
         ImpersonateThread low_int(nullptr, nullptr, mode);
         std::wcout << L"Impersonation succeeded.\n";
-        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), nullptr/*proc.attr*/, nullptr/*thread attr*/, FALSE, EXTENDED_STARTUPINFO_PRESENT, nullptr/*env*/, nullptr/*cur-dir*/, (STARTUPINFO*)&si, &pi));
+        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, CREATION_FLAGS, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     }
 
     // wait for process to initialize
