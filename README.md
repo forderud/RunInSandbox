@@ -2,10 +2,10 @@
 Work-in-progress C++ code for launching executables and out-of-process COM server in a sandboxed [low-integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10)) or [AppContainer](https://docs.microsoft.com/en-us/windows/desktop/secauthz/appcontainer-for-legacy-applications-) process on the *same machine*. There's no need to create any additional user accounts.
 
 ## Executable sandboxing
-Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application in an AppContainer or low-integrity process. This works for `STARTUPINFOEX`-based process creation.
+Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application in an AppContainer, low-integrity, medium-integrity or high-integrity process. This works for `STARTUPINFOEX`-based process creation.
 
 ## COM sandboxing
-Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer or low-integrity process. The process will also run through a different user if username&password are provided. Unfortunately, AppContainer isolation doesn't work yet. Also, user impersonation only works for administrator accounts.
+Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The process will also run through a different user if username&password are provided. Unfortunately, AppContainer isolation doesn't work yet. Also, user impersonation only works for administrator accounts.
 
 Example usage:
 `RunInSandbox.exe li PowerPoint.Application` to start Microsoft PowerPoint in low-integrity mode.
