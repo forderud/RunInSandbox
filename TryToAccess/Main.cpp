@@ -12,10 +12,16 @@ static void TryOpenFile (std::string path) {
     if (!handle)
         throw std::runtime_error("Unable to open file");
 
-    // attempt to write to device
+    // attempt to read from device
     char buffer[] = "X";
+    DWORD bytesRead = 0;
+    BOOL ok = ReadFile(handle, buffer, sizeof(buffer), &bytesRead, /*no overlapped*/NULL);
+    if (!ok || (bytesRead == 0))
+        throw std::runtime_error("Read failed");
+
+    // attempt to write to device
     DWORD bytesWritten = 0;
-    BOOL ok = WriteFile(handle, buffer, sizeof(buffer), &bytesWritten, /*no overlapped*/NULL);
+    ok = WriteFile(handle, buffer, sizeof(buffer), &bytesWritten, /*no overlapped*/NULL);
     if (!ok || (bytesWritten == 0))
         throw std::runtime_error("Write failed");
 }
@@ -35,7 +41,7 @@ int main(int argc, char *argv[]) {
     try {
         if (argc == 2) {
             TryOpenFile(argv[1]); // e.g. "COM3";
-            std::cout << "File open and write succeeded\n";
+            std::cout << "File open, read & write succeeded\n";
         } else if (argc == 3) {
             TryNetworkConnection(argv[1], argv[2]);
             std::cout << "Network connection succeeded\n";
