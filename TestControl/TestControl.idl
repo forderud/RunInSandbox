@@ -11,6 +11,9 @@ interface ISimpleCalculator : IUnknown {
     [helpstring("Check if object is running in an elevated process")]
     HRESULT IsElevated ([out] BOOL * is_elevated, [out] BOOL * high_integrity);
 
+    [helpstring("Check if object has network access")]
+    HRESULT TestNetworkConnection([in] BSTR host, [in] USHORT port, [out,retval] BOOL * can_access);
+
     [helpstring("For testing of nested COM object creation")]
     HRESULT CreateInstance ([in] BOOL elevated, [in] CLSID clsid, [out,retval] IUnknown ** obj);
 };

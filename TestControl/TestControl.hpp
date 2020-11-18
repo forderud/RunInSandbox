@@ -21,6 +21,8 @@ public:
 
     HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * high_integrity) override;
 
+    HRESULT STDMETHODCALLTYPE TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/BOOL * can_access) override;
+
     HRESULT STDMETHODCALLTYPE CreateInstance (BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
 
     DECLARE_REGISTRY_RESOURCEID(IDR_TestControl)

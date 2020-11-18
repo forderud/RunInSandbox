@@ -73,6 +73,12 @@ int wmain (int argc, wchar_t *argv[]) {
             std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
 
 #if 0
+            BOOL has_network = false;
+            CComBSTR host = L"1.1.1.1"; // cloudflare
+            calc->TestNetworkConnection(host, 80, &has_network);
+            std::wcout << L"HasNetwork: " << (has_network ? L"true" : L"false") << L"\n";
+#endif
+#if 0
             // try to create child object in elevated process
             // WARNING: Doesn't trigger UAC elevation if launched from a medium-integrity process that was launched from an elevated process
             std::wcout << L"Creating child COM object " << progid << L" in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
