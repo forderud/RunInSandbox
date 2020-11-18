@@ -20,16 +20,26 @@ static void TryOpenFile (std::string path) {
         throw std::runtime_error("Write failed");
 }
 
+static void TryNetworkConnection (const std::string& host, std::string port) {
+    SocketWrap sock;
+    if (!sock.TryToConnect(host, stoi(port)))
+        throw std::runtime_error("unable to connect");
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr << "Device path argument mising\n";
         return -1;
     }
 
-    std::string port = argv[1]; // e.g. "COM3";
     try {
-        TryOpenFile(port);
-        std::cout << "File open and write succeeded\n";
+        if (argc == 2) {
+            TryOpenFile(argv[1]); // e.g. "COM3";
+            std::cout << "File open and write succeeded\n";
+        } else if (argc == 3) {
+            TryNetworkConnection(argv[1], argv[2]);
+            std::cout << "Network connection succeeded\n";
+        }
     } catch (const std::exception & e) {
         std::cerr << "ERROR: " << e.what() << std::endl;
         return -1;
