@@ -72,6 +72,14 @@ private:
 };
 
 
+static bool IsCMD (std::wstring path) {
+    for (size_t i = 0; i < path.size(); ++i)
+        path[i] = towlower(path[i]);
+
+    return path.substr(0, 23) == L"c:\\windows\\system32\\cmd";
+}
+
+
 /** Launch a new process within an AppContainer. */
 static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool add_embedding, int argc, wchar_t *argv[]) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
@@ -90,7 +98,8 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool
 
     constexpr BOOL INHERIT_HANDLES = FALSE;
     DWORD creation_flags = EXTENDED_STARTUPINFO_PRESENT;
-    creation_flags |= CREATE_NEW_CONSOLE; // required for starting cmd.exe
+    if (IsCMD(exe_path))
+        creation_flags |= CREATE_NEW_CONSOLE; // required for starting cmd.exe
 
     if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
         // request UAC elevation
