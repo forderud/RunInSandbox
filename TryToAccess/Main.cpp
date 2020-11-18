@@ -2,13 +2,14 @@
 #include <string>
 #include <Windows.h>
 #include "../RunInSandbox/Sandboxing.hpp"
+#include "../TestControl/ComSupport.hpp"
 #include "../Testcontrol/Socket.hpp"
 
 
 
-static void TryOpenFile (std::string path) {
+static void TryOpenFile (std::wstring path) {
     HandleWrap handle;
-    handle = CreateFileA(path.c_str(), GENERIC_READ | GENERIC_WRITE, /*no sharing*/0, /*no security*/NULL, OPEN_EXISTING, /*no overlapped*/0, NULL);
+    handle = CreateFile(path.c_str(), GENERIC_READ | GENERIC_WRITE, /*no sharing*/0, /*no security*/NULL, OPEN_EXISTING, /*no overlapped*/0, NULL);
     if (!handle)
         throw std::runtime_error("Unable to open file");
 
@@ -26,25 +27,25 @@ static void TryOpenFile (std::string path) {
         throw std::runtime_error("Write failed");
 }
 
-static void TryNetworkConnection (const std::string& host, std::string port) {
+static void TryNetworkConnection (const std::wstring& host, std::wstring port) {
     SocketWrap sock;
-    if (!sock.TryToConnect(host, stoi(port)))
+    if (!sock.TryToConnect(ToAscii(host), stoi(port)))
         throw std::runtime_error("unable to connect");
 }
 
-int main(int argc, char *argv[]) {
+int wmain(int argc, wchar_t *argv[]) {
     if (argc < 2) {
-        std::cerr << "Device path argument mising\n";
+        std::wcerr << L"Device path argument mising\n";
         return -1;
     }
 
     try {
         if (argc == 2) {
             TryOpenFile(argv[1]); // e.g. "COM3";
-            std::cout << "File open, read & write succeeded\n";
+            std::wcout << L"File open, read & write succeeded\n";
         } else if (argc == 3) {
             TryNetworkConnection(argv[1], argv[2]);
-            std::cout << "Network connection succeeded\n";
+            std::wcout << L"Network connection succeeded\n";
         }
     } catch (const std::exception & e) {
         std::cerr << "ERROR: " << e.what() << std::endl;
