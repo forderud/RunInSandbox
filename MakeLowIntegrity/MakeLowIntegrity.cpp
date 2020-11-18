@@ -21,7 +21,7 @@ static void WIN32_CHECK(BOOL res) {
     By default, only %USER PROFILE%\AppData\LocalLow is writable.
     Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
 static DWORD MakePathLowIntegrity(std::wstring path) {
-    ACL * sacl = nullptr; // system access control list
+    ACL * sacl = nullptr; // system access control list (weak ptr.)
     PSECURITY_DESCRIPTOR SD = nullptr;
     {
         // initialize "low integrity" System Access Control List (SACL)
