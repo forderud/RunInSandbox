@@ -1,4 +1,5 @@
 #pragma once
+#include <Shlobj.h>
 #include "Sandboxing.hpp"
 
 
