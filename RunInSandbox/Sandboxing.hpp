@@ -100,9 +100,9 @@ static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 class AppContainerWrap {
 public:
     AppContainerWrap() {
-#if 0
         const WELL_KNOWN_SID_TYPE capabilities[] = {
-            WinCapabilityInternetClientSid,
+            WinCapabilityInternetClientSid, // confirmed to enable client sockets
+#if 0
             WinCapabilityInternetClientServerSid,
             WinCapabilityPrivateNetworkClientServerSid,
             WinCapabilityPicturesLibrarySid,
@@ -112,11 +112,11 @@ public:
             WinCapabilitySharedUserCertificatesSid,
             WinCapabilityEnterpriseAuthenticationSid,
             WinCapabilityRemovableStorageSid,
+#endif
         };
         for (auto cap : capabilities) {
             AddCapability(cap);
         }
-#endif
         const wchar_t PROFILE_NAME[] = L"RunInSandbox.AppContainer";
         const wchar_t DISPLAY_NAME[] = L"RunInSandbox.AppContainer";
         const wchar_t DESCRIPTION[] = L"RunInSandbox AppContainer";
