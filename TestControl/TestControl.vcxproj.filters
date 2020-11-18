@@ -8,6 +8,7 @@
     <ClInclude Include="ComSupport.hpp" />
     <ClInclude Include="TestControl.hpp" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Socket.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AppID.rgs" />

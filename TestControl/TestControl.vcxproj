@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClInclude Include="ComSupport.hpp" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Socket.hpp" />
     <ClInclude Include="TestControl.hpp" />
   </ItemGroup>
   <ItemGroup>
