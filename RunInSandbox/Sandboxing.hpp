@@ -100,6 +100,7 @@ static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 class AppContainerWrap {
 public:
     AppContainerWrap() {
+        // https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations
         const WELL_KNOWN_SID_TYPE capabilities[] = {
             WinCapabilityInternetClientSid, // confirmed to enable client sockets
 #if 0
