@@ -4,19 +4,25 @@
 
 
 int wmain(int argc, wchar_t *argv[]) {
-    if (argc != 2) {
+    if (argc < 3) {
         std::wcout << L"Utility to make filesystem paths writable from low-integrity processes.\n";
-        std::wcout << L"Usage: GrantAccess <path>\n";
+        std::wcout << L"Usage: GrantAccess [li] <path>\n";
         return 1;
     }
 
-    std::wstring path = argv[1];
-    std::wcout << L"Making path low-integrity: " << path << std::endl;
+    std::wstring mode = argv[1];
+    std::wstring path = argv[2];
 
-    DWORD err = MakePathLowIntegrity(path.c_str());
-    if (err) {
-        _com_error error(err);
-        std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+    if (mode == L"li") {
+        std::wcout << L"Making path low-integrity: " << path << std::endl;
+        DWORD err = MakePathLowIntegrity(path.c_str());
+        if (err) {
+            _com_error error(err);
+            std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+            return -2;
+        }
+    } else {
+        std::wcerr << L"ERROR: Unknown mode " << mode << std::endl;
         return -2;
     }
 
