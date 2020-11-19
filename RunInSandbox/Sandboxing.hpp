@@ -165,7 +165,7 @@ public:
     ~AppContainerWrap() {
         for (auto &c : m_capabilities) {
             if (c.Sid) {
-                FreeSid(c.Sid);
+                free(c.Sid);
                 c.Sid = nullptr;
             }
         }
@@ -182,10 +182,7 @@ public:
     }
 
     void AddCapability(WELL_KNOWN_SID_TYPE capability) {
-        PSID sid = LocalAlloc(LPTR, SECURITY_MAX_SID_SIZE);
-        if (sid == nullptr)
-            abort();
-
+        PSID sid = malloc(SECURITY_MAX_SID_SIZE); // freed in destructor
         DWORD sidListSize = SECURITY_MAX_SID_SIZE;
         WIN32_CHECK(CreateWellKnownSid(capability, NULL, sid, &sidListSize));
 
