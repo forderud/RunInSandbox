@@ -134,11 +134,6 @@ public:
     }
 
     ~AppContainerWrap() {
-        if (m_sid) {
-            FreeSid(m_sid);
-            m_sid = nullptr;
-        }
-
         for (auto &c : m_capabilities) {
             if (c.Sid) {
                 FreeSid(c.Sid);
@@ -169,7 +164,7 @@ public:
     }
 
 private:
-    PSID                            m_sid = nullptr;
+    SidWrap                         m_sid;
     std::vector<SID_AND_ATTRIBUTES> m_capabilities;
 };
 
