@@ -98,6 +98,34 @@ protected:
 static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 
 
+/** RAII wrapper of Win32 API objects allocated with LocalAlloc. */
+template <class T>
+class LocalWrap {
+public:
+    LocalWrap() {
+    }
+    ~LocalWrap() {
+        if (obj) {
+            LocalFree(obj);
+            obj = nullptr;
+        }
+    }
+
+    operator T () {
+        return obj;
+    }
+    T* operator & () {
+        return &obj;
+    }
+
+private:
+    LocalWrap(const LocalWrap &) = delete;
+    LocalWrap& operator = (const LocalWrap &) = delete;
+
+    T obj = nullptr;
+};
+
+
 /** RAII class for encapsulating AppContainer configuration. */
 class AppContainerWrap {
 public:
@@ -231,6 +259,36 @@ static DWORD MakePathLowIntegrity(std::wstring path) {
                     // ERROR_FILE_NOT_FOUND ///< 2
                     // ERROR_ACCESS_DENIED  ///< 5
     return ret; // failure
+}
+
+
+/** Make file/folder accessible from a given AppContainer.
+    Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
+static DWORD MakePathAppContainer(PSID appContainer, const WCHAR * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
+    EXPLICIT_ACCESSW access = {};
+    {
+        access.grfAccessPermissions = accessMask;
+        access.grfAccessMode = GRANT_ACCESS;
+        access.grfInheritance = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE;
+        access.Trustee.pMultipleTrustee = nullptr;
+        access.Trustee.MultipleTrusteeOperation = NO_MULTIPLE_TRUSTEE;
+        access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+        access.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
+        access.Trustee.ptstrName = (WCHAR*)appContainer;
+    }
+
+    ACL * prevAcl = nullptr; // weak ptr.
+    DWORD status = GetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
+    if (status != ERROR_SUCCESS)
+        return status;
+
+    LocalWrap<ACL*> newAcl; // owning ptr.
+    status = SetEntriesInAclW(1, &access, prevAcl, &newAcl);
+    if (status != ERROR_SUCCESS)
+        return status;
+
+    status = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
+    return status; // ERROR_SUCCESS on success
 }
 
 

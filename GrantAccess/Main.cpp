@@ -6,7 +6,7 @@
 int wmain(int argc, wchar_t *argv[]) {
     if (argc < 3) {
         std::wcout << L"Utility to make filesystem paths writable from low-integrity processes.\n";
-        std::wcout << L"Usage: GrantAccess [li] <path>\n";
+        std::wcout << L"Usage: GrantAccess [ac|li] <path>\n";
         return 1;
     }
 
@@ -21,6 +21,10 @@ int wmain(int argc, wchar_t *argv[]) {
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
             return -2;
         }
+    } else if (mode == L"ac") {
+
+
+
     } else {
         std::wcerr << L"ERROR: Unknown mode " << mode << std::endl;
         return -2;
