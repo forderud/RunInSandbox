@@ -210,8 +210,9 @@ static IntegrityLevel FromString (std::wstring arg) {
 }
 
 /** Tag a folder path as writable by low-integrity processes.
-By default, only %USER PROFILE%\AppData\LocalLow is writable.
-Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
+    By default, only %USER PROFILE%\AppData\LocalLow is writable.
+    Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx
+    Equivalent to "icacls.exe  <path> /setintegritylevel Low" */
 static DWORD MakePathLowIntegrity(std::wstring path) {
     ACL * sacl = nullptr; // system access control list (weak ptr.)
     PSECURITY_DESCRIPTOR SD = nullptr;
