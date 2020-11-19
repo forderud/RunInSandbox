@@ -22,10 +22,22 @@ int wmain(int argc, wchar_t *argv[]) {
             return -2;
         }
     } else if (mode == L"ac") {
-        std::wcout << L"Making path accible by AppContainers: " << path << std::endl;
-        SidWrap sid;
-        WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &sid)); // ALL_APP_PACKAGES
-        DWORD err = MakePathAppContainer(sid, path.c_str());
+        SidWrap ac_sid;
+        if (argc > 3) {
+            std::wstring ac_name = argv[3];
+            std::wcout << L"Making path " << path << L" accessible by AppContainer " << ac_name << L".\n";
+            HRESULT hr = DeriveAppContainerSidFromAppContainerName(ac_name.c_str(), &ac_sid);
+            if (FAILED(hr)) {
+                _com_error error(hr);
+                std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << hr << L")" << std::endl;
+                return -2;
+            }
+        } else {
+            std::wcout << L"Making path " << path << L" accessible by all AppContainers.\n";
+            WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
+        }
+
+        DWORD err = MakePathAppContainer(ac_sid, path.c_str());
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
