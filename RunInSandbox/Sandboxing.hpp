@@ -103,6 +103,7 @@ class AppContainerWrap {
 public:
     AppContainerWrap() {
         // https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations
+        // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-well_known_sid_type
         const WELL_KNOWN_SID_TYPE capabilities[] = {
             WinCapabilityInternetClientSid, // confirmed to enable client sockets
 #if 0
