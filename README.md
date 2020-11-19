@@ -34,7 +34,7 @@ This approach passes a [`COSERVERINFO`](https://docs.microsoft.com/en-us/windows
 WARNING: **Does not work yet**. The StackOverflow [CoCreateInstanceEx returns S_OK with invalid credentials on Win2003](https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003) question seem to cover the same problem.
 -->
 
-## MakeLowIntegrity
+## GrantAccess
 Command-line tool to make a file or path writable by a low-integrity process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
 
 

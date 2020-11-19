@@ -15,11 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MakeLowIntegrity", "MakeLowIntegrity\MakeLowIntegrity.vcxproj", "{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunElevatedNet", "RunElevatedNet\RunElevatedNet.csproj", "{3D481B63-2EA5-49C4-B351-AD292BEA65AF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TryToAccess", "TryToAccess\TryToAccess.vcxproj", "{30B5888C-49F6-4E13-8E0A-2C2240B87553}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GrantAccess", "GrantAccess\GrantAccess.vcxproj", "{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,6 @@ Global
 		{D519401F-4A16-41A6-80AF-E3CAE2D9AE04}.Debug|x64.Build.0 = Debug|x64
 		{D519401F-4A16-41A6-80AF-E3CAE2D9AE04}.Release|x64.ActiveCfg = Release|x64
 		{D519401F-4A16-41A6-80AF-E3CAE2D9AE04}.Release|x64.Build.0 = Release|x64
-		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Debug|x64.ActiveCfg = Debug|x64
-		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Debug|x64.Build.0 = Debug|x64
-		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Release|x64.ActiveCfg = Release|x64
-		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Release|x64.Build.0 = Release|x64
 		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Debug|x64.ActiveCfg = Debug|x64
 		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Debug|x64.Build.0 = Debug|x64
 		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Release|x64.ActiveCfg = Release|x64
@@ -47,6 +43,10 @@ Global
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Debug|x64.Build.0 = Debug|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Release|x64.ActiveCfg = Release|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Release|x64.Build.0 = Release|x64
+		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Debug|x64.ActiveCfg = Debug|x64
+		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Debug|x64.Build.0 = Debug|x64
+		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Release|x64.ActiveCfg = Release|x64
+		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

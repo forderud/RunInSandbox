@@ -6,7 +6,7 @@
 int wmain(int argc, wchar_t *argv[]) {
     if (argc != 2) {
         std::wcout << L"Utility to make filesystem paths writable from low-integrity processes.\n";
-        std::wcout << L"Usage: MakeLowIntegrity <path>\n";
+        std::wcout << L"Usage: GrantAccess <path>\n";
         return 1;
     }
 
