@@ -114,7 +114,7 @@ int wmain (int argc, wchar_t *argv[]) {
         for (; arg_idx < argc; ++arg_idx)
             args.push_back(argv[arg_idx]);
 
-        ProcCreate(progid.c_str(), mode, false, args);
+        ProcCreate(progid.c_str(), mode, args);
     }
 
     std::wcout << L"[done]" << std::endl;

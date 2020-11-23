@@ -81,16 +81,12 @@ static bool IsCMD (std::wstring path) {
 
 
 /** Launch a new process within an AppContainer. */
-static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, bool add_embedding, const std::vector<std::wstring>& arguments) {
+static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
-    if (add_embedding) {
-        cmdline += L" -Embedding"; // mimic how svchost passes "-Embedding" argument
-    } else {
-        // append extra arguments
-        for (const auto & arg : arguments) {
-            cmdline += L" ";
-            cmdline += arg;
-        }
+    // append arguments
+    for (const auto & arg : arguments) {
+        cmdline += L" ";
+        cmdline += arg;
     }
 
     ProcessInfoWrap pi;
