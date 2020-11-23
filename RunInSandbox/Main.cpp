@@ -109,9 +109,12 @@ int wmain (int argc, wchar_t *argv[]) {
         }
     } else {
         std::wcout << L"Starting executable " << progid << L" in " << ToString(mode).c_str() << L"...\n";
+        arg_idx++;
+        std::vector<std::wstring> args;
+        for (; arg_idx < argc; ++arg_idx)
+            args.push_back(argv[arg_idx]);
 
-        int extra_args = argc - arg_idx - 1;
-        ProcCreate(progid.c_str(), mode, false, extra_args, extra_args > 0 ? &argv[arg_idx+1] : nullptr);
+        ProcCreate(progid.c_str(), mode, false, args);
     }
 
     std::wcout << L"[done]" << std::endl;
