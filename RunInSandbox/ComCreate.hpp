@@ -49,7 +49,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         impersonate.reset(new ImpersonateThread(proc));
     } else {
         // impersonate a different integrity (or user)
-        impersonate.reset(new ImpersonateThread(user, passwd, mode));
+        impersonate.reset(new ImpersonateThread(mode, user, passwd));
     }
 
     CComPtr<IUnknown> obj;
