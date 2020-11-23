@@ -40,16 +40,16 @@ std::wstring GetLocalServerPath (CLSID clsid) {
     REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
 CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, wchar_t* user, wchar_t* passwd) {
     std::unique_ptr<ImpersonateThread> impersonate;
-    bool implicit_process_create = true;
-    if (implicit_process_create && (mode != IntegrityLevel::AppContainer)) {
-        // impersonate a different user
-        impersonate.reset(new ImpersonateThread(user, passwd, mode));
-    } else {
-        // launch process in an AppContainer process.
+    bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
+    if (explicit_process_create) {
+        // launch COM server process manually
         std::wstring exe_path = GetLocalServerPath(clsid);
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
         // impersonate the process thread
         impersonate.reset(new ImpersonateThread(proc));
+    } else {
+        // impersonate a different integrity (or user)
+        impersonate.reset(new ImpersonateThread(user, passwd, mode));
     }
 
     CComPtr<IUnknown> obj;
