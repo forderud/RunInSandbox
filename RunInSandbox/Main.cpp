@@ -26,7 +26,9 @@ static void SetLaunchActPermissions(const wchar_t* app_id) {
     // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
     // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
     PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
-    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(L"O:BAG:BAD:(A;;0xb;;;WD)S:(ML;;NX;;;LW)", SDDL_REVISION_1, &low_integrity_sd, NULL))
+    std::wstring low_int_access = L"O:BAG:BAD:(A;;0xb;;;WD)";
+    low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
         abort();
 
     // Set launch/activation permissions
@@ -41,7 +43,7 @@ static void SetLaunchActPermissions(const wchar_t* app_id) {
 
 
 int wmain (int argc, wchar_t *argv[]) {
-#if 0
+#if 1
     SetLaunchActPermissions(L"{264FBADA-8FEF-44B7-801E-B728A1749B5A}");
 #endif
 
