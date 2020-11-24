@@ -5,7 +5,6 @@ HKCR
 		ForceRemove '%APPID%' = s 'TestControl Object'
 		{
 			val DllSurrogate = s ''
-			val LoadUserSettings = d 1
 		}
 	}
 }
