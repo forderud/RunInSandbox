@@ -10,7 +10,40 @@
 #include "../TestControl/TestControl_h.h"
 
 
+
+/** Enable launch/activation requests from all LOW IL clients.
+*   WARNING: Does not seem to work!
+    REF: https://docs.microsoft.com/nb-no/windows/win32/com/the-com-elevation-moniker */
+static void SetLaunchActPermissions(const wchar_t* app_id) {
+    // open registry path
+    CComBSTR reg_path(L"AppID\\");
+    reg_path.Append(app_id);
+
+    CRegKey appid_reg;
+    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
+        abort();
+
+    // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
+    PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(L"O:BAG:BAD:(A;;0xb;;;WD)S:(ML;;NX;;;LW)", SDDL_REVISION_1, &low_integrity_sd, NULL))
+        abort();
+
+    // Set launch/activation permissions
+    // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
+    DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
+    LONG lResult = RegSetValueExW(appid_reg, L"LaunchPermission", 0/*reserved*/, REG_BINARY, (BYTE*)low_integrity_sd, dwLen);
+    if (lResult != ERROR_SUCCESS)
+        abort();
+
+    LocalFree(low_integrity_sd);
+};
+
+
 int wmain (int argc, wchar_t *argv[]) {
+#if 0
+    SetLaunchActPermissions(L"{264FBADA-8FEF-44B7-801E-B728A1749B5A}");
+#endif
+
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]\n";
