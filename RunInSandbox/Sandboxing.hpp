@@ -240,7 +240,7 @@ static DWORD MakePathLowIntegrity(std::wstring path) {
     {
         // initialize "low integrity" System Access Control List (SACL)
         // Security Descriptor String interpretation: (based on sddl.h)
-        // SACL:(ace_type=Integrity label; ace_flags=; rights=SDDL_NO_WRITE_UP; object_guid=; inherit_object_guid=; account_sid=Low mandatory level)
+        // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=SDDL_NO_WRITE_UP (NW); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
         WIN32_CHECK(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"S:(ML;;NW;;;LW)", SDDL_REVISION_1, &SD, NULL));
         BOOL sacl_present = FALSE;
         BOOL sacl_defaulted = FALSE;
