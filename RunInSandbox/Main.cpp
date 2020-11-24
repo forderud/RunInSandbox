@@ -24,6 +24,7 @@ static void SetLaunchActPermissions(const wchar_t* app_id) {
         abort();
 
     // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
+    // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
     PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
     if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(L"O:BAG:BAD:(A;;0xb;;;WD)S:(ML;;NX;;;LW)", SDDL_REVISION_1, &low_integrity_sd, NULL))
         abort();
