@@ -36,7 +36,10 @@ int wmain (int argc, wchar_t *argv[]) {
 
     #if 0
         // attempt to disable COM security and enable cloaking
-        HRESULT hr = CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL/*reserved*/, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IDENTIFY, nullptr, EOAC_NONE /*EOAC_STATIC_CLOAKING*/, NULL/*reserved*/);
+        HRESULT hr = CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL/*reserved*/,
+            RPC_C_AUTHN_LEVEL_DEFAULT, ///< 
+            RPC_C_IMP_LEVEL_IDENTIFY,  ///< allow server to identify but not impersonate client
+            nullptr, EOAC_NONE /*EOAC_STATIC_CLOAKING*/, NULL/*reserved*/);
         if (FAILED(hr))
             abort();
     #endif
