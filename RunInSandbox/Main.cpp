@@ -30,6 +30,7 @@ static void SetLaunchActPermissions(const wchar_t* app_id) {
     std::wstring low_int_access = L"O:BA";// Owner: Built-in administrators (BA)
     low_int_access += L"G:BA";            // Group: Built-in administrators (BA)
     low_int_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
+    low_int_access += L"(A;;0xb;;;S-1-15-2-1)"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ALL_APP_PACKAGES (S-1-15-2-1))
     low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
     if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
         abort();
