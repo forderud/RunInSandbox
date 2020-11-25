@@ -34,10 +34,8 @@ std::wstring GetLocalServerPath (CLSID clsid) {
 
 
 /** Attempt to create a COM server that runds through a specific user account.
-    NOTICE: Non-admin users need to be granted local DCOM "launch" and "activation" permission to the DCOM object to prevent E_ACCESSDENIED (General access denied error). Unfortunately, creation still fails with CO_E_SERVER_EXEC_FAILURE.
-
-    WARNING: Does not seem to work. The process is launched with the correct user, but crashes immediately. Might be caused by incorrect env. vars. inherited from the parent process.
-    REF: https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ */
+    AppContainer problem:
+      Process is created but CoGetClassObject activation gives E_ACCESSDENIED (The machine-default permission settings do not grant Local Activation permission for the COM Server) */
 CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, wchar_t* user, wchar_t* passwd) {
     std::unique_ptr<ImpersonateThread> impersonate;
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
