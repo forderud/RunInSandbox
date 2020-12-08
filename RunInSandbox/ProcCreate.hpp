@@ -115,7 +115,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, cons
         if (ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
             // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
-            DWORD pid = {};
+            DWORD pid = 0;
             WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
             parent_proc = OpenProcess(PROCESS_CREATE_PROCESS, FALSE, pid);
             assert(parent_proc);
