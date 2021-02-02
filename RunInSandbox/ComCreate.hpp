@@ -6,7 +6,7 @@
 #define DEBUG_COM_ACTIVATION
 
 
-std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness) {
+static std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness) {
     // build registry path
     CComBSTR reg_path(L"CLSID\\");
     reg_path.Append(clsid);
@@ -28,6 +28,11 @@ std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness) {
 
     if (exe_path[0] == '"')
         exe_path = exe_path.substr(1, exe_path.size()-2); // remove quotes
+
+    // remove "/automation" (or other) argument if present
+    size_t idx = exe_path.find(L" /");
+    if (idx != exe_path.npos)
+        exe_path = exe_path.substr(0, idx);
 
     return exe_path;
 }
