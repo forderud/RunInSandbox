@@ -6,7 +6,7 @@
 #define DEBUG_COM_ACTIVATION
 
 
-std::wstring GetLocalServerPath (CLSID clsid) {
+std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness) {
     // build registry path
     CComBSTR reg_path(L"CLSID\\");
     reg_path.Append(clsid);
@@ -14,7 +14,7 @@ std::wstring GetLocalServerPath (CLSID clsid) {
 
     // extract COM class
     CRegKey cls_reg;
-    if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ) != ERROR_SUCCESS)
+    if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | bitness) != ERROR_SUCCESS)
         return L"";
 
     ULONG    exe_path_len = 0;
@@ -41,7 +41,10 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
     if (explicit_process_create) {
         // launch COM server process manually
-        std::wstring exe_path = GetLocalServerPath(clsid);
+        std::wstring exe_path = GetLocalServerPath(clsid, /*same bitness as client*/0);
+        if (exe_path.empty())
+            exe_path = GetLocalServerPath(clsid, KEY_WOW64_32KEY); // fallback to 32bit part of registry
+
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
         // impersonate the process thread
         impersonate.reset(new ImpersonateThread(proc));
