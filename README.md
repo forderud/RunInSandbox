@@ -8,7 +8,8 @@ Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application
 Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The process will also run through a different user if username&password are provided. Unfortunately, AppContainer isolation doesn't work yet. Also, user impersonation only works for administrator accounts.
 
 Example usage:
-`RunInSandbox.exe li PowerPoint.Application` to start Microsoft PowerPoint in a low-integrity process connected using COM automation.
+* `RunInSandbox.exe li TestControl.TestControl` to start the TestControl project in a low-integrity process and test its COM API.
+* `RunInSandbox.exe li PowerPoint.Application` to start Microsoft PowerPoint in a low-integrity process connected using COM automation.
 
 #### Client-side impersonation problems
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
