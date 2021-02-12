@@ -36,7 +36,7 @@ WARNING: **Does not work yet**. The StackOverflow [CoCreateInstanceEx returns S_
 -->
 
 ## GrantAccess
-Command-line tool to make a file or path writable by a low-integrity process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
+Command-line tool to make a file or path writable by AppContainers and low-integrity process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
 
 
 ## RunElevatedNet
