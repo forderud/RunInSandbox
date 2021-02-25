@@ -63,8 +63,9 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
     return std::tie(exe_path,app_id);
 }
 
-/** Enable DCOM launch & activation requests from AppContainer. */
-static void EnableLaunchActPermission (PSID appContainer, const wchar_t* app_id) {
+/** Enable DCOM launch & activation requests from ALL_APP_PACKAGES (AppContainer).
+    TODO: Append ACL instead of replacing it. */
+static void EnableLaunchActPermission (const wchar_t* app_id) {
     // open registry path
     CComBSTR reg_path(L"AppID\\");
     reg_path.Append(app_id);
@@ -73,8 +74,6 @@ static void EnableLaunchActPermission (PSID appContainer, const wchar_t* app_id)
     if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
         abort();
 
-    // TODO: Update AppID LaunchPermission registry key to grant appContainer local launch & activation permission
-#if 0
     // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
     // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
     // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
@@ -87,15 +86,14 @@ static void EnableLaunchActPermission (PSID appContainer, const wchar_t* app_id)
     if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
         abort();
 
-    // Set launch/activation permissions
+    // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
     // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
     DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
-    LONG lResult = RegSetValueExW(appid_reg, L"LaunchPermission", 0/*reserved*/, REG_BINARY, (BYTE*)low_integrity_sd, dwLen);
+    LONG lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)low_integrity_sd, dwLen);
     if (lResult != ERROR_SUCCESS)
         abort();
 
     LocalFree(low_integrity_sd);
-#endif
 };
 
 
@@ -117,7 +115,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) 
             WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
 
             MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
-            EnableLaunchActPermission(ac_sid, app_id.c_str());
+            EnableLaunchActPermission(app_id.c_str());
         }
 
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
