@@ -37,7 +37,7 @@ int wmain(int argc, wchar_t *argv[]) {
             WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
         }
 
-        DWORD err = MakePathAppContainer(ac_sid, path.c_str());
+        DWORD err = MakePathAppContainer(ac_sid, path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
