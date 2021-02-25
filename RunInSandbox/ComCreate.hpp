@@ -41,7 +41,7 @@ static std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness) {
 /** Attempt to create a COM server that runds through a specific user account.
     AppContainer problem:
       Process is created but CoGetClassObject activation gives E_ACCESSDENIED (The machine-default permission settings do not grant Local Activation permission for the COM Server) */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, wchar_t* user, wchar_t* passwd) {
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) {
     std::unique_ptr<ImpersonateThread> impersonate;
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
     if (explicit_process_create) {
@@ -55,7 +55,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         impersonate.reset(new ImpersonateThread(proc));
     } else {
         // impersonate a different integrity (or user)
-        impersonate.reset(new ImpersonateThread(mode, user, passwd));
+        impersonate.reset(new ImpersonateThread(mode));
     }
 
     CComPtr<IUnknown> obj;
@@ -71,58 +71,6 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
     CHECK(hr);
 #endif
-
-    return obj;
-}
-
-
-/** Attempt to create a COM server that runds through a specific user account.
-    WARNING: Does not seem to work. Fails silently and instead launches with the current user.
-    REF: https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003/54135347#54135347 */
-CComPtr<IUnknown> CoCreateAsUser_dcom(CLSID clsid, wchar_t* user, wchar_t* passwd) {
-    CComPtr<IUnknown> obj;
-    {
-#pragma warning(push)
-#pragma warning(disable: 4996) // _wgetenv: This function or variable may be unsafe. Consider using _wdupenv_s instead.
-        std::wstring computername = _wgetenv(L"COMPUTERNAME");
-#pragma warning(pop)
-        std::wstring domain = L"";
-
-        COAUTHIDENTITY id = {};
-        id.User = (USHORT*)user;
-        id.UserLength = (ULONG)wcslen(user);
-        id.Domain = (USHORT*)domain.c_str();
-        id.DomainLength = (ULONG)domain.length();
-        id.Password = (USHORT*)passwd;
-        id.PasswordLength = (ULONG)wcslen(passwd);
-        id.Flags = SEC_WINNT_AUTH_IDENTITY_UNICODE;
-
-        COAUTHINFO ai = {};
-        ai.dwAuthnSvc = RPC_C_AUTHN_WINNT; // RPC_C_AUTHN_DEFAULT;
-        ai.dwAuthzSvc = RPC_C_AUTHZ_NONE;
-        ai.pwszServerPrincName = nullptr; // (WCHAR*)computername.c_str();
-        ai.dwAuthnLevel = RPC_C_AUTHN_LEVEL_DEFAULT; //RPC_C_AUTHN_LEVEL_CALL;
-        ai.dwImpersonationLevel = RPC_C_IMP_LEVEL_IMPERSONATE;
-        ai.pAuthIdentityData = &id;
-        ai.dwCapabilities = EOAC_NONE; // EOAC_STATIC_CLOAKING;
-
-        COSERVERINFO si = {};
-        si.pAuthInfo = &ai;
-        si.pwszName = (WCHAR*)computername.c_str();
-
-#ifdef DEBUG_COM_ACTIVATION
-        CComPtr<IClassFactory> cf;
-        HRESULT hr = CoGetClassObject(clsid, CLSCTX_REMOTE_SERVER, &si, IID_IClassFactory, (void**)&cf);
-        CHECK(hr);
-        hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
-        CHECK(hr);
-#else
-        MULTI_QI mqi = { &IID_IUnknown, nullptr, E_FAIL };
-        HRESULT hr = CoCreateInstanceEx(clsid, nullptr, CLSCTX_REMOTE_SERVER /*| CLSCTX_ENABLE_CLOAKING | CLSCTX_ENABLE_AAA*/, &si, 1, &mqi);
-        CHECK(hr);
-        obj.Attach(mqi.pItf);
-#endif
-    }
 
     return obj;
 }

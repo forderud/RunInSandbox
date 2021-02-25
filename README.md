@@ -5,7 +5,7 @@ C++ code for launching executables and out-of-process COM server in a sandboxed 
 Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application in an AppContainer, low-integrity, medium-integrity or high-integrity process. This works for `STARTUPINFOEX`-based process creation.
 
 ## COM sandboxing
-Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The process will also run through a different user if username&password are provided.
+Run `RunInSandbox.exe [ac|li|mi|hi] ProgID` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process.
 
 Example usage:
 * `RunInSandbox.exe li TestControl.TestControl` to start the TestControl project in a low-integrity process and test its COM API.
@@ -19,21 +19,6 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 |Low integrity        | :white_check_mark: (confirmed to work)                                      |
 |AppContainer         | :heavy_exclamation_mark: Works if `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
-<!--
-| | User impersonation problems |
-|---------------------|-----------------------------------------------------------------------------|
-|Run as admin user    | :white_check_mark: (confirmed to work)                                      |
-|Run as non-admin user| :x: E_ACCESSDENIED (General access denied error) launch error, unless local DCOM "launch" and "activation" permission are granted. Still fail with CO_E_SERVER_EXEC_FAILURE (Server execution failed) after launch & activation permissions are granted. |
-
-WARNING: **Does not work yet**. Did submit StackOverflow [DCOM registration timeout when attempting to start a COM server through a different user](https://web.archive.org/web/20190112183231/https://stackoverflow.com/questions/54076028/dcom-registration-timeout-when-attempting-to-start-a-com-server-through-a-differ) question to request advise (link to cached version, since the question was deleted).
-
-Partial work-around: Use [`RunAs`](https://docs.microsoft.com/en-us/windows/desktop/com/runas) registry key to manually configure the user to run through. This also configures environment variable & registry properly, but launches the process in session 0 which prevents UI display.
-
-#### COAUTHINFO-based (DCOM) process creation problems
-This approach passes a [`COSERVERINFO`](https://docs.microsoft.com/en-us/windows/win32/api/objidl/ns-objidl-coserverinfo) parameter when creating the COM server. This parameter contains `COAUTHINFO`/`COAUTHIDENTITY` structures with the desired username & password for the COM server.
-
-WARNING: **Does not work yet**. The StackOverflow [CoCreateInstanceEx returns S_OK with invalid credentials on Win2003](https://stackoverflow.com/questions/10589440/cocreateinstanceex-returns-s-ok-with-invalid-credentials-on-win2003) question seem to cover the same problem.
--->
 
 ## GrantAccess
 Command-line tool to make a file or path writable by AppContainers and low-integrity process. Useful for whitelisting specific folders that should not be subject to application sandboxing.

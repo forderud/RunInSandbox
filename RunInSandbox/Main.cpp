@@ -53,7 +53,7 @@ int wmain (int argc, wchar_t *argv[]) {
 
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID\n";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ExePath|URL\n";
         return -1;
     }
@@ -94,10 +94,7 @@ int wmain (int argc, wchar_t *argv[]) {
             std::wcout << L"COM server sucessfully created in elevated process.\n";
         } else {
             arg_idx++;
-            wchar_t* user = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
-            wchar_t* pw = (argc > arg_idx) ? argv[arg_idx++] : nullptr;
-            obj = CoCreateAsUser_impersonate(clsid, mode, user, pw);
-            //CComPtr<IUnknown> obj = CoCreateAsUser_dcom(clsid, user, pw);
+            obj = CoCreateAsUser_impersonate(clsid, mode);
         }
 
         // try to add two numbers

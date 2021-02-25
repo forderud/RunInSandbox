@@ -292,16 +292,8 @@ static DWORD MakePathAppContainer(PSID appContainer, const WCHAR * path, ACCESS_
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateThread {
-    ImpersonateThread(IntegrityLevel integrity, const wchar_t* user = nullptr, const wchar_t* passwd = nullptr) {
-        if (user && passwd) {
-            // impersonate a different user
-            WIN32_CHECK(LogonUser(user, L""/*domain*/, passwd, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, &m_token));
-
-            // load associated user profile (doesn't work for current user)
-            m_profile.dwSize = sizeof(m_profile);
-            m_profile.lpUserName = const_cast<wchar_t*>(user);
-            //WIN32_CHECK(LoadUserProfile(m_token, &m_profile));
-        } else {
+    ImpersonateThread(IntegrityLevel integrity) {
+        {
             // current user
             HandleWrap cur_token;
             WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
