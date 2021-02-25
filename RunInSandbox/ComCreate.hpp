@@ -64,6 +64,20 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
 }
 
 
+static void GrantAppContainerPermissions(std::wstring exe_path, std::wstring app_id) {
+    SidWrap ac_sid;
+    WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
+
+    // Grant ALL_APPLICATION_PACKAGES read&execute permissions to the EXE
+    DWORD err = MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+    if (err != ERROR_SUCCESS) {
+        // ignore errors for now
+    }
+
+    // TODO: Update AppID LaunchPermission registry key to grant ALL_APPLICATION_PACKAGES local activation permission
+}
+
+
 /** Attempt to create a COM server that runds through a specific user account.
     AppContainer problem:
       Process is created but CoGetClassObject activation gives E_ACCESSDENIED (The machine-default permission settings do not grant Local Activation permission for the COM Server) */
@@ -75,6 +89,8 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) 
         std::wstring exe_path;
         std::wstring app_id;
         std::tie(exe_path, app_id) = GetLocalServerPath(clsid);
+
+        GrantAppContainerPermissions(exe_path, app_id);
 
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
         // impersonate the process thread
