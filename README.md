@@ -23,6 +23,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 * How to _append_ the DCOM `LaunchPermission` ACL instead of replacing it. Also, look for a less cryptic way of achieving the same.
 * How to programatically enable/disable networking for the AppContainer.
 * How to programatically enable removable media (USB stick) access for the AppContainer
+* Find solution for CoRegisterClassObject synchronization before calling CoCreateInstance.
 
 
 ## GrantAccess
