@@ -17,22 +17,25 @@ static std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness = 0/*same bi
     if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | bitness) != ERROR_SUCCESS)
         return L"";
 
-    ULONG    exe_path_len = 0;
-    if (cls_reg.QueryStringValue(nullptr, nullptr, &exe_path_len) != ERROR_SUCCESS)
-        return L"";
+    std::wstring exe_path;
+    {
+        ULONG exe_path_len = 0;
+        if (cls_reg.QueryStringValue(nullptr, nullptr, &exe_path_len) != ERROR_SUCCESS)
+            return L"";
 
-    std::wstring exe_path(exe_path_len, L'\0');
-    if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
-        return L"";
-    exe_path.resize(exe_path_len-1); // remove extra zero-termination
+        exe_path.resize(exe_path_len, L'\0');
+        if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
+            return L"";
+        exe_path.resize(exe_path_len - 1); // remove extra zero-termination
 
-    if (exe_path[0] == '"')
-        exe_path = exe_path.substr(1, exe_path.size()-2); // remove quotes
+        if (exe_path[0] == '"')
+            exe_path = exe_path.substr(1, exe_path.size() - 2); // remove quotes
 
-    // remove "/automation" (or other) argument if present
-    size_t idx = exe_path.find(L" /");
-    if (idx != exe_path.npos)
-        exe_path = exe_path.substr(0, idx);
+        // remove "/automation" (or other) argument if present
+        size_t idx = exe_path.find(L" /");
+        if (idx != exe_path.npos)
+            exe_path = exe_path.substr(0, idx);
+    }
 
     if (exe_path.empty() && (bitness == 0))
         exe_path = GetLocalServerPath(clsid, KEY_WOW64_32KEY); // fallback to 32bit part of registry
