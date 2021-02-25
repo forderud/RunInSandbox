@@ -16,7 +16,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 
 | | Token impersonation overview |
 |---------------------|-----------------------------------------------------------------------------|
-|Low integrity        | :white_check_mark: (confirmed to work)                                      |
+|Low integrity        | :white_check_mark: Always works.                                            |
 |AppContainer         | :heavy_exclamation_mark: Works if `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
 
