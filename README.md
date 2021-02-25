@@ -5,7 +5,7 @@ Work-in-progress C++ code for launching executables and out-of-process COM serve
 Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application in an AppContainer, low-integrity, medium-integrity or high-integrity process. This works for `STARTUPINFOEX`-based process creation.
 
 ## COM sandboxing
-Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The process will also run through a different user if username&password are provided. Unfortunately, AppContainer isolation doesn't work yet. Also, user impersonation only works for administrator accounts.
+Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [username] [password]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The process will also run through a different user if username&password are provided.
 
 Example usage:
 * `RunInSandbox.exe li TestControl.TestControl` to start the TestControl project in a low-integrity process and test its COM API.
@@ -14,10 +14,10 @@ Example usage:
 #### Client-side impersonation problems
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
-| | Token impersonation problems |
+| | Token impersonation overview |
 |---------------------|-----------------------------------------------------------------------------|
 |Low integrity        | :white_check_mark: (confirmed to work)                                      |
-|AppContainer         | :x: Process is created but CoGetClassObject activation gives E_ACCESSDENIED (*The machine-default permission settings do not grant Local Activation permission for the COM Server*)   |
+|AppContainer         | :heavy_exclamation_mark: Works `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
 <!--
 | | User impersonation problems |
