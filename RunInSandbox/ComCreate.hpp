@@ -63,29 +63,40 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
     return std::tie(exe_path,app_id);
 }
 
-
-static void GrantAppContainerPermissions(std::wstring exe_path, std::wstring app_id) {
-    SidWrap ac_sid;
-    WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
-
-    // Grant ALL_APPLICATION_PACKAGES read&execute permissions to the EXE
-    DWORD err = MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
-    if (err != ERROR_SUCCESS) {
-        // ignore errors for now
-    }
-
-
-    CComBSTR appid_path(L"AppID\\");
-    appid_path.Append(app_id.c_str());
+/** Enable DCOM launch & activation requests from AppContainer. */
+static void EnableLaunchActPermission (PSID appContainer, const wchar_t* app_id) {
+    // open registry path
+    CComBSTR reg_path(L"AppID\\");
+    reg_path.Append(app_id);
 
     CRegKey appid_reg;
-    if (appid_reg.Open(HKEY_CLASSES_ROOT, appid_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
+    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
         abort();
 
-    // TODO: Update AppID LaunchPermission registry key to grant ALL_APPLICATION_PACKAGES local activation permission
-    std::vector<uint8_t> acl;
-    //appid_reg.SetBinaryValue(L"LaunchPermission", acl.data(), (ULONG)acl.size());
-}
+    // TODO: Update AppID LaunchPermission registry key to grant appContainer local launch & activation permission
+#if 0
+    // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
+    // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
+    // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
+    PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
+    std::wstring low_int_access = L"O:BA";// Owner: Built-in administrators (BA)
+    low_int_access += L"G:BA";            // Group: Built-in administrators (BA)
+    low_int_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
+    low_int_access += L"(A;;0xb;;;S-1-15-2-1)"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ALL_APP_PACKAGES (S-1-15-2-1))
+    low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
+        abort();
+
+    // Set launch/activation permissions
+    // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
+    DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
+    LONG lResult = RegSetValueExW(appid_reg, L"LaunchPermission", 0/*reserved*/, REG_BINARY, (BYTE*)low_integrity_sd, dwLen);
+    if (lResult != ERROR_SUCCESS)
+        abort();
+
+    LocalFree(low_integrity_sd);
+#endif
+};
 
 
 /** Attempt to create a COM server that runds through a specific user account.
@@ -100,7 +111,14 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) 
         std::wstring app_id;
         std::tie(exe_path, app_id) = GetLocalServerPath(clsid);
 
-        GrantAppContainerPermissions(exe_path, app_id);
+        {
+            // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
+            SidWrap ac_sid;
+            WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
+
+            MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+            EnableLaunchActPermission(ac_sid, app_id.c_str());
+        }
 
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
         // impersonate the process thread

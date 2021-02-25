@@ -10,47 +10,7 @@
 #include "../TestControl/TestControl_h.h"
 
 
-
-/** Enable launch/activation requests from all LOW IL clients.
-*   WARNING: Does not seem to work!
-    REF: https://docs.microsoft.com/nb-no/windows/win32/com/the-com-elevation-moniker */
-static void SetLaunchActPermissions(const wchar_t* app_id) {
-    // open registry path
-    CComBSTR reg_path(L"AppID\\");
-    reg_path.Append(app_id);
-
-    CRegKey appid_reg;
-    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
-        abort();
-
-    // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
-    // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
-    // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
-    PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
-    std::wstring low_int_access = L"O:BA";// Owner: Built-in administrators (BA)
-    low_int_access += L"G:BA";            // Group: Built-in administrators (BA)
-    low_int_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
-    low_int_access += L"(A;;0xb;;;S-1-15-2-1)"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ALL_APP_PACKAGES (S-1-15-2-1))
-    low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
-    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
-        abort();
-
-    // Set launch/activation permissions
-    // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
-    DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
-    LONG lResult = RegSetValueExW(appid_reg, L"LaunchPermission", 0/*reserved*/, REG_BINARY, (BYTE*)low_integrity_sd, dwLen);
-    if (lResult != ERROR_SUCCESS)
-        abort();
-
-    LocalFree(low_integrity_sd);
-};
-
-
 int wmain (int argc, wchar_t *argv[]) {
-#if 0
-    SetLaunchActPermissions(L"{264FBADA-8FEF-44B7-801E-B728A1749B5A}");
-#endif
-
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID\n";
