@@ -74,7 +74,17 @@ static void GrantAppContainerPermissions(std::wstring exe_path, std::wstring app
         // ignore errors for now
     }
 
+
+    CComBSTR appid_path(L"AppID\\");
+    appid_path.Append(app_id.c_str());
+
+    CRegKey appid_reg;
+    if (appid_reg.Open(HKEY_CLASSES_ROOT, appid_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
+        abort();
+
     // TODO: Update AppID LaunchPermission registry key to grant ALL_APPLICATION_PACKAGES local activation permission
+    std::vector<uint8_t> acl;
+    //appid_reg.SetBinaryValue(L"LaunchPermission", acl.data(), (ULONG)acl.size());
 }
 
 
