@@ -2,30 +2,33 @@
 #include "Sandboxing.hpp"
 #include "ProcCreate.hpp"
 #include <atlbase.h>
+#include <tuple>
 #include "../TestControl/ComSupport.hpp"
 #define DEBUG_COM_ACTIVATION
 
-
-static std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness = 0/*same bitness as client*/) {
+/** Returns the COM EXE path and AppID GIUD string. */
+static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, REGSAM bitness = 0/*same bitness as client*/) {
     // build registry path
-    CComBSTR reg_path(L"CLSID\\");
-    reg_path.Append(clsid);
-    reg_path.Append(L"\\LocalServer32");
-
-    // extract COM class
-    CRegKey cls_reg;
-    if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | bitness) != ERROR_SUCCESS)
-        return L"";
+    CComBSTR clsid_path(L"CLSID\\");
+    clsid_path.Append(clsid);
 
     std::wstring exe_path;
     {
+        CComBSTR local_server_path = clsid_path;
+        local_server_path.Append(L"\\LocalServer32");
+
+        // extract COM class
+        CRegKey cls_reg;
+        if (cls_reg.Open(HKEY_CLASSES_ROOT, local_server_path, KEY_READ | bitness) != ERROR_SUCCESS)
+            return {L"", L""};
+
         ULONG exe_path_len = 0;
         if (cls_reg.QueryStringValue(nullptr, nullptr, &exe_path_len) != ERROR_SUCCESS)
-            return L"";
+            return {L"", L""};
 
         exe_path.resize(exe_path_len, L'\0');
         if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
-            return L"";
+            return {L"", L""};
         exe_path.resize(exe_path_len - 1); // remove extra zero-termination
 
         if (exe_path[0] == '"')
@@ -37,10 +40,27 @@ static std::wstring GetLocalServerPath (CLSID clsid, REGSAM bitness = 0/*same bi
             exe_path = exe_path.substr(0, idx);
     }
 
-    if (exe_path.empty() && (bitness == 0))
-        exe_path = GetLocalServerPath(clsid, KEY_WOW64_32KEY); // fallback to 32bit part of registry
+    std::wstring app_id;
+    if (!exe_path.empty()){
+        // extract COM class
+        CRegKey cls_reg;
+        if (cls_reg.Open(HKEY_CLASSES_ROOT, clsid_path, KEY_READ | bitness) != ERROR_SUCCESS)
+            abort();
 
-    return exe_path;
+        ULONG app_id_len = 0;
+        if (cls_reg.QueryStringValue(L"AppID", nullptr, &app_id_len) != ERROR_SUCCESS)
+            abort();
+
+        app_id.resize(app_id_len, L'\0');
+        if (cls_reg.QueryStringValue(L"AppID", const_cast<wchar_t*>(app_id.data()), &app_id_len) != ERROR_SUCCESS)
+            abort();
+        app_id.resize(app_id_len - 1); // remove extra zero-termination
+    }
+
+    if (exe_path.empty() && (bitness == 0))
+        std::tie(exe_path, app_id) = GetLocalServerPath(clsid, KEY_WOW64_32KEY); // fallback to 32bit part of registry
+
+    return std::tie(exe_path,app_id);
 }
 
 
@@ -52,7 +72,9 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) 
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
     if (explicit_process_create) {
         // launch COM server process manually
-        std::wstring exe_path = GetLocalServerPath(clsid);
+        std::wstring exe_path;
+        std::wstring app_id;
+        std::tie(exe_path, app_id) = GetLocalServerPath(clsid);
 
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
         // impersonate the process thread
