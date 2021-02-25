@@ -11,7 +11,7 @@ Example usage:
 * `RunInSandbox.exe li TestControl.TestControl` to start the TestControl project in a low-integrity process and test its COM API.
 * `RunInSandbox.exe li PowerPoint.Application` to start Microsoft PowerPoint in a low-integrity process connected using COM automation.
 
-#### Client-side impersonation problems
+#### Client-side impersonation
 This approach performs client-side user impersonation with `ImpersonateLoggedOnUser` for the current thread. Then the COM server is created with `CLSCTX_ENABLE_CLOAKING` to allow the COM server to be created with the current thread credentials.
 
 | | Token impersonation overview |
