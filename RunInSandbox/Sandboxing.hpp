@@ -135,6 +135,7 @@ public:
         const WELL_KNOWN_SID_TYPE capabilities[] = {
             WinCapabilityInternetClientSid, // confirmed to enable client sockets
 #if 0
+            WinCapabilityRemovableStorageSid, // have been unable to get this to work (see https://github.com/M2Team/Privexec/issues/31 for more info)
             WinCapabilityInternetClientServerSid,
             WinCapabilityPrivateNetworkClientServerSid,
             WinCapabilityPicturesLibrarySid,
@@ -143,7 +144,6 @@ public:
             WinCapabilityDocumentsLibrarySid,
             WinCapabilitySharedUserCertificatesSid,
             WinCapabilityEnterpriseAuthenticationSid,
-            WinCapabilityRemovableStorageSid,
 #endif
         };
         for (auto cap : capabilities)
