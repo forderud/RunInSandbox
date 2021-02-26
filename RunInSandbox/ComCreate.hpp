@@ -84,16 +84,14 @@ static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar
     low_int_access +=             ac_str_sid;
     low_int_access +=                     L")"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ac_str_sid)
     low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
-    PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
+    LocalWrap<PSECURITY_DESCRIPTOR> low_integrity_sd;
     if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
         abort();
 
     // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
     // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
     DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
-    LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)low_integrity_sd, dwLen);
-    LocalFree(low_integrity_sd);
-
+    LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)*&low_integrity_sd, dwLen);
     return lResult;
 };
 
