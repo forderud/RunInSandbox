@@ -261,7 +261,11 @@ static DWORD MakePathLowIntegrity(std::wstring path) {
 
 /** Make file/folder accessible from a given AppContainer.
     Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-static DWORD MakePathAppContainer(PSID appContainer, const WCHAR * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
+static DWORD MakePathAppContainer(const WCHAR * ac_str_sid, const WCHAR * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
+    // convert string SID to binary
+    SidWrap ac_sid;
+    WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
+
     EXPLICIT_ACCESSW access = {};
     {
         access.grfAccessPermissions = accessMask;
@@ -271,7 +275,7 @@ static DWORD MakePathAppContainer(PSID appContainer, const WCHAR * path, ACCESS_
         access.Trustee.MultipleTrusteeOperation = NO_MULTIPLE_TRUSTEE;
         access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
         access.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
-        access.Trustee.ptstrName = (WCHAR*)appContainer;
+        access.Trustee.ptstrName = (WCHAR*)*&ac_sid;
     }
 
     ACL * prevAcl = nullptr; // weak ptr.

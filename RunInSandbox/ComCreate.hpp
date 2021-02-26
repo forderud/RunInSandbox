@@ -65,7 +65,7 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
 
 /** Enable DCOM launch & activation requests from ALL_APP_PACKAGES (AppContainer).
     TODO: Append ACL instead of replacing it. */
-static LSTATUS EnableLaunchActPermission (const wchar_t* app_id) {
+static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
     // open registry path
     CComBSTR reg_path(L"AppID\\");
     reg_path.Append(app_id);
@@ -80,7 +80,9 @@ static LSTATUS EnableLaunchActPermission (const wchar_t* app_id) {
     std::wstring low_int_access = L"O:BA";// Owner: Built-in administrators (BA)
     low_int_access += L"G:BA";            // Group: Built-in administrators (BA)
     low_int_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
-    low_int_access += L"(A;;0xb;;;S-1-15-2-1)"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ALL_APP_PACKAGES (S-1-15-2-1))
+    low_int_access += L"(A;;0xb;;;";
+    low_int_access +=             ac_str_sid;
+    low_int_access +=                     L")"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ac_str_sid)
     low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
     PSECURITY_DESCRIPTOR low_integrity_sd = nullptr;
     if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
@@ -110,16 +112,15 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
 
         if (grant_appcontainer_permissions) {
             // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
-            SidWrap ac_sid;
-            WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
+            const wchar_t ac_str_sid[] = L"S-1-15-2-1"; // ALL_APP_PACKAGES
 
-            DWORD err = MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+            DWORD err = MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
                 std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=" << error.ErrorMessage() << L" (" << err << L")" << std::endl;
                 exit(-2);
             }
-            err = EnableLaunchActPermission(app_id.c_str());
+            err = EnableLaunchActPermission(ac_str_sid, app_id.c_str());
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
                 std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=" << error.ErrorMessage() << L" (" << err << L")" << std::endl;
