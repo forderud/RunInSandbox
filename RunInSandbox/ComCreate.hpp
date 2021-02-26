@@ -117,13 +117,13 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             DWORD err = MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
-                std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=" << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+                std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
                 exit(-2);
             }
             err = EnableLaunchActPermission(ac_str_sid, app_id.c_str());
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
-                std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=" << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+                std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
                 exit(-2);
             }
         }
