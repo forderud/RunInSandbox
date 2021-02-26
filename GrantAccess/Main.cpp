@@ -34,12 +34,11 @@ int wmain(int argc, wchar_t *argv[]) {
                 return -2;
             }
             // convert SID to string representation
-            wchar_t * sid_str_buf = nullptr;
+            LocalWrap<wchar_t*> sid_str_buf;
             BOOL ok = ConvertSidToStringSidW(ac_sid, &sid_str_buf);
             if (!ok)
                 abort();
             ac_str_sid = sid_str_buf;
-            LocalFree(sid_str_buf);
         } else {
             std::wcout << L"Making path " << path << L" accessible by all AppContainers.\n";
             ac_str_sid = L"S-1-15-2-1"; // ALL_APP_PACKAGES
