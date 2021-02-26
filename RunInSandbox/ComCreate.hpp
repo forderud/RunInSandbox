@@ -4,7 +4,7 @@
 #include <atlbase.h>
 #include <tuple>
 #include "../TestControl/ComSupport.hpp"
-#define DEBUG_COM_ACTIVATION
+//#define DEBUG_COM_ACTIVATION
 
 /** Returns the COM EXE path and AppID GIUD string. */
 static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, REGSAM bitness = 0/*same bitness as client*/) {
