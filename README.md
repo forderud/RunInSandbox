@@ -20,7 +20,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 |AppContainer         | Works if `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
 ### Outstanding challenges
-* How to _append_ the DCOM `LaunchPermission` ACL instead of replacing it. Also, look for a less cryptic way of achieving the same.
+* How to _append_ the DCOM `LaunchPermission` ACL instead of replacing it, so that existing permissions (if present) aren't lost. Also, look for a less cryptic way of achieving the same.
 * How to programatically enable/disable networking for the AppContainer.
 * How to programatically enable removable media (USB stick) access for the AppContainer
 * Find solution for CoRegisterClassObject synchronization before calling CoCreateInstance.
