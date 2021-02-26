@@ -65,7 +65,7 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
 
 /** Enable DCOM launch & activation requests from ALL_APP_PACKAGES (AppContainer).
     TODO: Append ACL instead of replacing it. */
-static void EnableLaunchActPermission (const wchar_t* app_id) {
+static LSTATUS EnableLaunchActPermission (const wchar_t* app_id) {
     // open registry path
     CComBSTR reg_path(L"AppID\\");
     reg_path.Append(app_id);
@@ -89,11 +89,10 @@ static void EnableLaunchActPermission (const wchar_t* app_id) {
     // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
     // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
     DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
-    LONG lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)low_integrity_sd, dwLen);
-    if (lResult != ERROR_SUCCESS)
-        abort();
-
+    LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)low_integrity_sd, dwLen);
     LocalFree(low_integrity_sd);
+
+    return lResult;
 };
 
 
@@ -114,8 +113,18 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             SidWrap ac_sid;
             WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES
 
-            MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
-            EnableLaunchActPermission(app_id.c_str());
+            DWORD err = MakePathAppContainer(ac_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+            if (err != ERROR_SUCCESS) {
+                _com_error error(err);
+                std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=" << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+                exit(-2);
+            }
+            err = EnableLaunchActPermission(app_id.c_str());
+            if (err != ERROR_SUCCESS) {
+                _com_error error(err);
+                std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=" << error.ErrorMessage() << L" (" << err << L")" << std::endl;
+                exit(-2);
+            }
         }
 
         HandleWrap proc = ProcCreate(exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
