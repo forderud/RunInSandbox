@@ -236,7 +236,7 @@ static IntegrityLevel FromString (std::wstring arg) {
     Equivalent to "icacls.exe  <path> /setintegritylevel Low" */
 static DWORD MakePathLowIntegrity(std::wstring path) {
     ACL * sacl = nullptr; // system access control list (weak ptr.)
-    PSECURITY_DESCRIPTOR SD = nullptr;
+    LocalWrap<PSECURITY_DESCRIPTOR> SD;
     {
         // initialize "low integrity" System Access Control List (SACL)
         // Security Descriptor String interpretation: (based on sddl.h)
@@ -249,7 +249,6 @@ static DWORD MakePathLowIntegrity(std::wstring path) {
 
     // apply "low integrity" SACL
     DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.data()), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
-    LocalFree(SD);
     if (ret == ERROR_SUCCESS)
         return ret; // success
 
