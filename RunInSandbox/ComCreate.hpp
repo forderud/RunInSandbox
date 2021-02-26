@@ -100,7 +100,7 @@ static void EnableLaunchActPermission (const wchar_t* app_id) {
 /** Attempt to create a COM server that runds through a specific user account.
     AppContainer problem:
       Process is created but CoGetClassObject activation gives E_ACCESSDENIED (The machine-default permission settings do not grant Local Activation permission for the COM Server) */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) {
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions) {
     std::unique_ptr<ImpersonateThread> impersonate;
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
     if (explicit_process_create) {
@@ -109,7 +109,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode) 
         std::wstring app_id;
         std::tie(exe_path, app_id) = GetLocalServerPath(clsid);
 
-        {
+        if (grant_appcontainer_permissions) {
             // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
             SidWrap ac_sid;
             WIN32_CHECK(ConvertStringSidToSid(L"S-1-15-2-1", &ac_sid)); // ALL_APP_PACKAGES

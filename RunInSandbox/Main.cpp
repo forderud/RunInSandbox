@@ -13,7 +13,7 @@
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID [-g]\n";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ExePath|URL\n";
         return -1;
     }
@@ -28,6 +28,15 @@ int wmain (int argc, wchar_t *argv[]) {
     std::wstring progid = argv[arg_idx];
     bool progid_provided = SUCCEEDED(CLSIDFromProgID(progid.c_str(), &clsid));
     bool url_provided = std::wstring(argv[arg_idx]).substr(0, 4) == L"http";
+    arg_idx++;
+
+    bool grant_appcontainer_permissions = false;
+    if (arg_idx < argc) {
+        if (std::wstring(argv[arg_idx]) == L"-g") {
+            grant_appcontainer_permissions = true;
+            arg_idx++;
+        }
+    }
 
     if (progid_provided) {
         // initialize multi-threaded COM apartment
@@ -43,8 +52,7 @@ int wmain (int argc, wchar_t *argv[]) {
             CHECK(CoCreateInstanceElevated<IUnknown>(0, clsid, &obj));
             std::wcout << L"COM server sucessfully created in elevated process.\n";
         } else {
-            arg_idx++;
-            obj = CoCreateAsUser_impersonate(clsid, mode);
+            obj = CoCreateAsUser_impersonate(clsid, mode, grant_appcontainer_permissions);
         }
 
         // try to add two numbers
@@ -99,7 +107,6 @@ int wmain (int argc, wchar_t *argv[]) {
         }
     } else {
         std::wcout << L"Starting executable " << progid << L" in " << ToString(mode).c_str() << L"...\n";
-        arg_idx++;
         std::vector<std::wstring> args;
         for (; arg_idx < argc; ++arg_idx)
             args.push_back(argv[arg_idx]);
