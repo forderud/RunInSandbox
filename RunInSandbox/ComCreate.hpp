@@ -141,12 +141,22 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
     CComPtr<IClassFactory> cf;
     HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
-    CHECK(hr);
+    if ((mode == IntegrityLevel::AppContainer) && (hr == E_ACCESSDENIED)) {
+        std::wcerr << L"ERROR: CoGetClassObject access denied when trying to create a new COM server instance. Have you remember to grant AppContainer permissions?" << std::endl;
+        exit(-3);
+    } else {
+        CHECK(hr);
+    }
     hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
     CHECK(hr);
 #else
     HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
-    CHECK(hr);
+    if ((mode == IntegrityLevel::AppContainer) && (hr == E_ACCESSDENIED)) {
+        std::wcerr << L"ERROR: CoCreateInstance access denied when trying to create a new COM server instance. Have you remember to grant AppContainer permissions?" << std::endl;
+        exit(-3);
+    } else {
+        CHECK(hr);
+    }
 #endif
 
     return obj;
