@@ -236,7 +236,7 @@ public:
         By default, only %USER PROFILE%\AppData\LocalLow is writable.
         Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx
         Equivalent to "icacls.exe  <path> /setintegritylevel Low" */
-    static DWORD MakePathLowIntegrity(std::wstring path) {
+    static DWORD MakePathLowIntegrity(const wchar_t * path) {
         ACL * sacl = nullptr; // system access control list (weak ptr.)
         LocalWrap<PSECURITY_DESCRIPTOR> SD;
         {
@@ -250,7 +250,7 @@ public:
         }
 
         // apply "low integrity" SACL
-        DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.data()), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
+        DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
         if (ret == ERROR_SUCCESS)
             return ret; // success
 
