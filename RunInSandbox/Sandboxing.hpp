@@ -261,7 +261,7 @@ public:
 
     /** Make file/folder accessible from a given AppContainer.
         Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-    static DWORD MakePathAppContainer(const WCHAR * ac_str_sid, const WCHAR * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
+    static DWORD MakePathAppContainer(const wchar_t * ac_str_sid, const wchar_t * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
         // convert string SID to binary
         SidWrap ac_sid;
         WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
@@ -275,11 +275,11 @@ public:
             access.Trustee.MultipleTrusteeOperation = NO_MULTIPLE_TRUSTEE;
             access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
             access.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
-            access.Trustee.ptstrName = (WCHAR*)*&ac_sid;
+            access.Trustee.ptstrName = (wchar_t*)*&ac_sid;
         }
 
         ACL * prevAcl = nullptr; // weak ptr.
-        DWORD status = GetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
+        DWORD status = GetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
         if (status != ERROR_SUCCESS)
             return status;
 
@@ -288,7 +288,7 @@ public:
         if (status != ERROR_SUCCESS)
             return status;
 
-        status = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
+        status = SetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
         return status; // ERROR_SUCCESS on success
     }
 
