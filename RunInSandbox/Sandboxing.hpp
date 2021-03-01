@@ -2,6 +2,7 @@
 #include <cassert>
 #include <vector>
 #include <Windows.h>
+#include <atlbase.h>
 #include <comdef.h>
 #include <versionhelpers.h>
 #include <aclapi.h> // for SE_FILE_OBJECT
@@ -290,6 +291,39 @@ static DWORD MakePathAppContainer(const WCHAR * ac_str_sid, const WCHAR * path, 
     status = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
     return status; // ERROR_SUCCESS on success
 }
+
+
+/** Enable DCOM launch & activation requests from ALL_APP_PACKAGES (AppContainer).
+TODO: Append ACL instead of replacing it. */
+static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
+    // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
+    // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
+    // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
+    std::wstring low_int_access = L"O:BA";// Owner: Built-in administrators (BA)
+    low_int_access += L"G:BA";            // Group: Built-in administrators (BA)
+    low_int_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
+    low_int_access += L"(A;;0xb;;;";
+    low_int_access +=             ac_str_sid;
+    low_int_access +=                     L")"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ac_str_sid)
+    low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
+    LocalWrap<PSECURITY_DESCRIPTOR> low_integrity_sd;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
+        abort();
+
+    // open registry path
+    CComBSTR reg_path(L"AppID\\");
+    reg_path.Append(app_id);
+
+    CRegKey appid_reg;
+    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
+        abort();
+
+    // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
+    // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
+    DWORD dwLen = GetSecurityDescriptorLength(low_integrity_sd);
+    LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)*&low_integrity_sd, dwLen);
+    return lResult;
+};
 
 
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
