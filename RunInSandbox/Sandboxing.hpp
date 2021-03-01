@@ -293,8 +293,8 @@ static DWORD MakePathAppContainer(const WCHAR * ac_str_sid, const WCHAR * path, 
 }
 
 
-/** Enable DCOM launch & activation requests from ALL_APP_PACKAGES (AppContainer).
-TODO: Append ACL instead of replacing it. */
+/** Enable DCOM launch & activation requests for a given AppContainer SID.
+    TODO: Append ACL instead of replacing it. */
 static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
     // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
     // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
