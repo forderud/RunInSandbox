@@ -356,8 +356,8 @@ struct ImpersonateThread {
         WIN32_CHECK(RevertToSelf());
     }
 
-    /** Create a low-integrity token associated with the current user.
-        Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx */
+    /** Adjust integrity level for the impersonation token.
+        Based on "Designing Applications to Run at a Low Integrity Level" https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10) */
     void ApplyIntegrity(IntegrityLevel integrity) {
         assert(integrity != IntegrityLevel::AppContainer);
 
