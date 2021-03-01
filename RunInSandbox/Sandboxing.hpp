@@ -67,6 +67,7 @@ private:
 static_assert(sizeof(HandleWrap) == sizeof(HANDLE), "HandleWrap size mismatch");
 
 
+/** RAII wrapper of Win32 Security IDentifier (SID) handles. */
 class SidWrap {
 public:
     SidWrap() {
@@ -92,6 +93,9 @@ public:
     }
 
 protected:
+    SidWrap (const SidWrap &) = delete;
+    SidWrap& operator = (const SidWrap &) = delete;
+
     PSID sid = nullptr;
 };
 static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
