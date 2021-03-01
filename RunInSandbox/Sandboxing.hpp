@@ -79,10 +79,12 @@ public:
         }
     }
 
-    void Allocate(DWORD size) {
-        SidWrap::~SidWrap();
-        new(this) SidWrap();
-        sid = LocalAlloc(LPTR, size);
+    void Create(WELL_KNOWN_SID_TYPE type) {
+        assert(!sid);
+
+        DWORD sid_size = SECURITY_MAX_SID_SIZE;
+        sid = LocalAlloc(LPTR, sid_size);
+        WIN32_CHECK(CreateWellKnownSid(type, nullptr, sid, &sid_size));
     }
 
     operator PSID () {
@@ -365,18 +367,14 @@ struct ImpersonateThread {
     void ApplyIntegrity(IntegrityLevel integrity) {
         assert(integrity != IntegrityLevel::AppContainer);
 
-        SidWrap li_sid;
-        {
-            DWORD sid_size = SECURITY_MAX_SID_SIZE;
-            li_sid.Allocate(sid_size);
-            WIN32_CHECK(CreateWellKnownSid(static_cast<WELL_KNOWN_SID_TYPE>(integrity), nullptr, li_sid, &sid_size));
-        }
+        SidWrap impersonation_sid;
+        impersonation_sid.Create(static_cast<WELL_KNOWN_SID_TYPE>(integrity));
 
         // reduce process integrity level
         TOKEN_MANDATORY_LABEL TIL = {};
         TIL.Label.Attributes = SE_GROUP_INTEGRITY;
-        TIL.Label.Sid = li_sid;
-        WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(li_sid)));
+        TIL.Label.Sid = impersonation_sid;
+        WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(impersonation_sid)));
     }
 
     /** Determine the integrity level for a process.
