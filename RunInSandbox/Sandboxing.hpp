@@ -234,15 +234,19 @@ class Permissions {
 public:
     /** Tag a folder path as writable by low-integrity processes.
         By default, only %USER PROFILE%\AppData\LocalLow is writable.
-        Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx
-        Equivalent to "icacls.exe  <path> /setintegritylevel Low" */
+        Based on "Designing Applications to Run at a Low Integrity Level" https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10)
+        Equivalent to "icacls.exe  <path> /setintegritylevel Low"
+
+    Limitations when running under medium integrity (e.g. from a non-admin command prompt):
+    * Will fail if only the "Administrators" group have full access to the path, even if the current user is a member of that group.
+    * Requires either the current user or the "Users" group to be granted full access to the path. */
     static DWORD MakePathLowIntegrity(const wchar_t * path) {
         ACL * sacl = nullptr; // system access control list (weak ptr.)
-        LocalWrap<PSECURITY_DESCRIPTOR> SD;
+        LocalWrap<PSECURITY_DESCRIPTOR> SD; // must outlive SetNamedSecurityInfo to avoid sporadic failures
         {
             // initialize "low integrity" System Access Control List (SACL)
             // Security Descriptor String interpretation: (based on sddl.h)
-            // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=SDDL_NO_WRITE_UP (NW); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
+            // SACL:(ace_type=Mandatory integrity Label (ML); ace_flags=; rights=SDDL_NO_WRITE_UP (NW); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
             WIN32_CHECK(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"S:(ML;;NW;;;LW)", SDDL_REVISION_1, &SD, NULL));
             BOOL sacl_present = FALSE;
             BOOL sacl_defaulted = FALSE;
@@ -251,12 +255,7 @@ public:
 
         // apply "low integrity" SACL
         DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
-        if (ret == ERROR_SUCCESS)
-            return ret; // success
-
-                        // ERROR_FILE_NOT_FOUND ///< 2
-                        // ERROR_ACCESS_DENIED  ///< 5
-        return ret; // failure
+        return ret; // ERROR_SUCCESS on success
     }
 
 
