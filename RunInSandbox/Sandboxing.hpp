@@ -353,11 +353,6 @@ struct ImpersonateThread {
     }
 
     ~ImpersonateThread() {
-        if (m_profile.lpUserName) {
-            // TODO: Defer profile unloading
-            //WIN32_CHECK(UnloadUserProfile(m_token, &m_profile));
-        }
-
         WIN32_CHECK(RevertToSelf());
     }
 
@@ -430,5 +425,4 @@ struct ImpersonateThread {
     }
 
     HandleWrap  m_token;
-    PROFILEINFO m_profile = {};
 };
