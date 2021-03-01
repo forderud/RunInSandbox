@@ -229,98 +229,102 @@ static IntegrityLevel FromString (std::wstring arg) {
     return IntegrityLevel::Default;
 }
 
-/** Tag a folder path as writable by low-integrity processes.
-    By default, only %USER PROFILE%\AppData\LocalLow is writable.
-    Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx
-    Equivalent to "icacls.exe  <path> /setintegritylevel Low" */
-static DWORD MakePathLowIntegrity(std::wstring path) {
-    ACL * sacl = nullptr; // system access control list (weak ptr.)
-    LocalWrap<PSECURITY_DESCRIPTOR> SD;
-    {
-        // initialize "low integrity" System Access Control List (SACL)
-        // Security Descriptor String interpretation: (based on sddl.h)
-        // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=SDDL_NO_WRITE_UP (NW); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
-        WIN32_CHECK(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"S:(ML;;NW;;;LW)", SDDL_REVISION_1, &SD, NULL));
-        BOOL sacl_present = FALSE;
-        BOOL sacl_defaulted = FALSE;
-        WIN32_CHECK(GetSecurityDescriptorSacl(SD, &sacl_present, &sacl, &sacl_defaulted));
+
+class Permissions {
+public:
+    /** Tag a folder path as writable by low-integrity processes.
+        By default, only %USER PROFILE%\AppData\LocalLow is writable.
+        Based on "Designing Applications to Run at a Low Integrity Level" https://msdn.microsoft.com/en-us/library/bb625960.aspx
+        Equivalent to "icacls.exe  <path> /setintegritylevel Low" */
+    static DWORD MakePathLowIntegrity(std::wstring path) {
+        ACL * sacl = nullptr; // system access control list (weak ptr.)
+        LocalWrap<PSECURITY_DESCRIPTOR> SD;
+        {
+            // initialize "low integrity" System Access Control List (SACL)
+            // Security Descriptor String interpretation: (based on sddl.h)
+            // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=SDDL_NO_WRITE_UP (NW); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
+            WIN32_CHECK(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"S:(ML;;NW;;;LW)", SDDL_REVISION_1, &SD, NULL));
+            BOOL sacl_present = FALSE;
+            BOOL sacl_defaulted = FALSE;
+            WIN32_CHECK(GetSecurityDescriptorSacl(SD, &sacl_present, &sacl, &sacl_defaulted));
+        }
+
+        // apply "low integrity" SACL
+        DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.data()), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
+        if (ret == ERROR_SUCCESS)
+            return ret; // success
+
+                        // ERROR_FILE_NOT_FOUND ///< 2
+                        // ERROR_ACCESS_DENIED  ///< 5
+        return ret; // failure
     }
 
-    // apply "low integrity" SACL
-    DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.data()), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
-    if (ret == ERROR_SUCCESS)
-        return ret; // success
 
-                    // ERROR_FILE_NOT_FOUND ///< 2
-                    // ERROR_ACCESS_DENIED  ///< 5
-    return ret; // failure
-}
+    /** Make file/folder accessible from a given AppContainer.
+        Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
+    static DWORD MakePathAppContainer(const WCHAR * ac_str_sid, const WCHAR * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
+        // convert string SID to binary
+        SidWrap ac_sid;
+        WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
 
+        EXPLICIT_ACCESSW access = {};
+        {
+            access.grfAccessPermissions = accessMask;
+            access.grfAccessMode = GRANT_ACCESS;
+            access.grfInheritance = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE;
+            access.Trustee.pMultipleTrustee = nullptr;
+            access.Trustee.MultipleTrusteeOperation = NO_MULTIPLE_TRUSTEE;
+            access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+            access.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
+            access.Trustee.ptstrName = (WCHAR*)*&ac_sid;
+        }
 
-/** Make file/folder accessible from a given AppContainer.
-    Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-static DWORD MakePathAppContainer(const WCHAR * ac_str_sid, const WCHAR * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
-    // convert string SID to binary
-    SidWrap ac_sid;
-    WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
+        ACL * prevAcl = nullptr; // weak ptr.
+        DWORD status = GetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
+        if (status != ERROR_SUCCESS)
+            return status;
 
-    EXPLICIT_ACCESSW access = {};
-    {
-        access.grfAccessPermissions = accessMask;
-        access.grfAccessMode = GRANT_ACCESS;
-        access.grfInheritance = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE;
-        access.Trustee.pMultipleTrustee = nullptr;
-        access.Trustee.MultipleTrusteeOperation = NO_MULTIPLE_TRUSTEE;
-        access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-        access.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
-        access.Trustee.ptstrName = (WCHAR*)*&ac_sid;
+        LocalWrap<ACL*> newAcl; // owning ptr.
+        status = SetEntriesInAclW(1, &access, prevAcl, &newAcl);
+        if (status != ERROR_SUCCESS)
+            return status;
+
+        status = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
+        return status; // ERROR_SUCCESS on success
     }
 
-    ACL * prevAcl = nullptr; // weak ptr.
-    DWORD status = GetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
-    if (status != ERROR_SUCCESS)
-        return status;
 
-    LocalWrap<ACL*> newAcl; // owning ptr.
-    status = SetEntriesInAclW(1, &access, prevAcl, &newAcl);
-    if (status != ERROR_SUCCESS)
-        return status;
+    /** Enable DCOM launch & activation requests for a given AppContainer SID.
+        TODO: Append ACL instead of replacing it. */
+    static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
+        // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
+        // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
+        // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
+        std::wstring ac_access = L"O:BA";// Owner: Built-in administrators (BA)
+        ac_access += L"G:BA";            // Group: Built-in administrators (BA)
+        ac_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
+        ac_access += L"(A;;0xb;;;";
+        ac_access +=             ac_str_sid;
+        ac_access +=                     L")"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ac_str_sid)
+        ac_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
+        LocalWrap<PSECURITY_DESCRIPTOR> ac_sd;
+        if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(ac_access.c_str(), SDDL_REVISION_1, &ac_sd, NULL))
+            abort();
 
-    status = SetNamedSecurityInfoW(const_cast<WCHAR*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
-    return status; // ERROR_SUCCESS on success
-}
+        // open registry path
+        CComBSTR reg_path(L"AppID\\");
+        reg_path.Append(app_id);
 
+        CRegKey appid_reg;
+        if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
+            abort();
 
-/** Enable DCOM launch & activation requests for a given AppContainer SID.
-    TODO: Append ACL instead of replacing it. */
-static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
-    // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
-    // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
-    // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
-    std::wstring ac_access = L"O:BA";// Owner: Built-in administrators (BA)
-    ac_access += L"G:BA";            // Group: Built-in administrators (BA)
-    ac_access += L"D:(A;;0xb;;;WD)"; // DACL: (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=Everyone (WD))
-    ac_access += L"(A;;0xb;;;";
-    ac_access +=             ac_str_sid;
-    ac_access +=                     L")"; // (ace_type=Allow (A); ace_flags=; rights=ACTIVATE_LOCAL | EXECUTE_LOCAL | EXECUTE (0xb); object_guid=; inherit_object_guid=; account_sid=ac_str_sid)
-    ac_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
-    LocalWrap<PSECURITY_DESCRIPTOR> ac_sd;
-    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(ac_access.c_str(), SDDL_REVISION_1, &ac_sd, NULL))
-        abort();
-
-    // open registry path
-    CComBSTR reg_path(L"AppID\\");
-    reg_path.Append(app_id);
-
-    CRegKey appid_reg;
-    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
-        abort();
-
-    // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
-    // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
-    DWORD dwLen = GetSecurityDescriptorLength(ac_sd);
-    LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)*&ac_sd, dwLen);
-    return lResult;
+        // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
+        // REF: https://docs.microsoft.com/en-us/windows/win32/com/launchpermission
+        DWORD dwLen = GetSecurityDescriptorLength(ac_sd);
+        LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)*&ac_sd, dwLen);
+        return lResult;
+    }
 };
 
 

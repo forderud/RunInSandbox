@@ -15,7 +15,7 @@ int wmain(int argc, wchar_t *argv[]) {
 
     if (mode == L"li") {
         std::wcout << L"Making path low-integrity: " << path << std::endl;
-        DWORD err = MakePathLowIntegrity(path.c_str());
+        DWORD err = Permissions::MakePathLowIntegrity(path.c_str());
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
@@ -44,7 +44,7 @@ int wmain(int argc, wchar_t *argv[]) {
             ac_str_sid = L"S-1-15-2-1"; // ALL_APP_PACKAGES
         }
 
-        DWORD err = MakePathAppContainer(ac_str_sid.c_str(), path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+        DWORD err = Permissions::MakePathAppContainer(ac_str_sid.c_str(), path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;

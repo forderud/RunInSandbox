@@ -79,13 +79,13 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
             const wchar_t ac_str_sid[] = L"S-1-15-2-1"; // ALL_APP_PACKAGES
 
-            DWORD err = MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+            DWORD err = Permissions::MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
                 std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
                 exit(-2);
             }
-            err = EnableLaunchActPermission(ac_str_sid, app_id.c_str());
+            err = Permissions::EnableLaunchActPermission(ac_str_sid, app_id.c_str());
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
                 std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
