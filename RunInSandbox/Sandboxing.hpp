@@ -12,13 +12,11 @@
 #include <Winternl.h>
 
 
-static void WIN32_CHECK(BOOL res, DWORD whitelisted_err = ERROR_SUCCESS) {
+static void WIN32_CHECK(BOOL res) {
     if (res)
         return;
 
     DWORD code = GetLastError();
-    if (code == whitelisted_err)
-        return;
 
     _com_error error(code);
     std::wcout << L"ERROR: " << error.ErrorMessage() << std::endl;
