@@ -66,14 +66,6 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
 /** Enable DCOM launch & activation requests from ALL_APP_PACKAGES (AppContainer).
     TODO: Append ACL instead of replacing it. */
 static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
-    // open registry path
-    CComBSTR reg_path(L"AppID\\");
-    reg_path.Append(app_id);
-
-    CRegKey appid_reg;
-    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
-        abort();
-
     // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
     // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
     // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
@@ -86,6 +78,14 @@ static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar
     low_int_access += L"S:(ML;;NX;;;LW)"; // SACL:(ace_type=Mandatory Label (ML); ace_flags=; rights=No Execute Up (NX); object_guid=; inherit_object_guid=; account_sid=Low mandatory level (LW))
     LocalWrap<PSECURITY_DESCRIPTOR> low_integrity_sd;
     if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(low_int_access.c_str(), SDDL_REVISION_1, &low_integrity_sd, NULL))
+        abort();
+
+    // open registry path
+    CComBSTR reg_path(L"AppID\\");
+    reg_path.Append(app_id);
+
+    CRegKey appid_reg;
+    if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ | KEY_WRITE) != ERROR_SUCCESS)
         abort();
 
     // Set AppID LaunchPermission registry key to grant appContainer local launch & activation permission
