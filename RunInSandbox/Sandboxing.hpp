@@ -159,12 +159,9 @@ public:
             AddCapability(cap);
 
         // delete existing (if present)
-        HRESULT hr = DeleteAppContainerProfile(name);
-        hr;
+        Delete(name);
 
-        if (FAILED(CreateAppContainerProfile(name, name, desc,
-            m_capabilities.empty() ? nullptr : m_capabilities.data(), (DWORD)m_capabilities.size(), &m_sid)))
-            abort();
+        Create(name, desc);
     }
 
     ~AppContainerWrap() {
@@ -174,6 +171,25 @@ public:
                 c.Sid = nullptr;
             }
         }
+    }
+
+    void Create(const wchar_t * name, const wchar_t * desc) {
+        assert(!m_sid);
+
+        // try to create new container
+        HRESULT hr = CreateAppContainerProfile(name, name, desc, m_capabilities.empty() ? nullptr : m_capabilities.data(), (DWORD)m_capabilities.size(), &m_sid);
+        if (HRESULT_CODE(hr) == ERROR_ALREADY_EXISTS) {
+            // fallback to opening existing container
+            hr = DeriveAppContainerSidFromAppContainerName(name, &m_sid);
+        }
+        if (FAILED(hr))
+            abort();
+    }
+
+    void Delete(const wchar_t * name) {
+        assert(!m_sid);
+        HRESULT hr = DeleteAppContainerProfile(name);
+        hr; // ignore error
     }
 
     /** Returns a non-owning security capability struct. */
