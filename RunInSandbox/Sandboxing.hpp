@@ -283,7 +283,7 @@ public:
 
     /** Make file/folder accessible from a given AppContainer.
         Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-    static DWORD MakePathAppContainer(const wchar_t * ac_str_sid, const wchar_t * path, ACCESS_MASK accessMask = FILE_ALL_ACCESS) {
+    static DWORD MakePathAppContainer(const wchar_t * ac_str_sid, const wchar_t * path, ACCESS_MASK accessMask) {
         // convert string SID to binary
         SidWrap ac_sid;
         WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
