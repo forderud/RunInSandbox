@@ -126,7 +126,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, cons
         // processes are created with medium integrity as default, regardless of UAC settings
         WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     } else if (mode == IntegrityLevel::AppContainer) {
-        AppContainerWrap ac;
+        AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
         SECURITY_CAPABILITIES sec_cap = ac.SecCap();
 
         // create new AppContainer process, based on STARTUPINFO

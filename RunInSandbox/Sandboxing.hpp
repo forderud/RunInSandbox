@@ -134,7 +134,7 @@ private:
 /** RAII class for encapsulating AppContainer configuration. */
 class AppContainerWrap {
 public:
-    AppContainerWrap() {
+    AppContainerWrap(const wchar_t * name, const wchar_t * desc) {
         // https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations
         // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-well_known_sid_type
         const WELL_KNOWN_SID_TYPE capabilities[] = {
@@ -154,15 +154,11 @@ public:
         for (auto cap : capabilities)
             AddCapability(cap);
 
-        const wchar_t PROFILE_NAME[] = L"RunInSandbox.AppContainer";
-        const wchar_t DISPLAY_NAME[] = L"RunInSandbox.AppContainer";
-        const wchar_t DESCRIPTION[] = L"RunInSandbox AppContainer";
-
         // delete existing (if present)
-        HRESULT hr = DeleteAppContainerProfile(PROFILE_NAME);
+        HRESULT hr = DeleteAppContainerProfile(name);
         hr;
 
-        if (FAILED(CreateAppContainerProfile(PROFILE_NAME, DISPLAY_NAME, DESCRIPTION,
+        if (FAILED(CreateAppContainerProfile(name, name, desc,
             m_capabilities.empty() ? nullptr : m_capabilities.data(), (DWORD)m_capabilities.size(), &m_sid)))
             abort();
     }
