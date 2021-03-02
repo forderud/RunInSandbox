@@ -62,7 +62,6 @@ public:
     PROCESS_INFORMATION* operator& () {
         return &pi;
     }
-
     PROCESS_INFORMATION* operator->() {
         return &pi;
     }
