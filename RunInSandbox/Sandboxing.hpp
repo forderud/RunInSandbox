@@ -73,6 +73,10 @@ public:
     SidWrap() {
     }
     ~SidWrap() {
+        Clear();
+    }
+
+    void Clear() {
         if (sid) {
             FreeSid(sid);
             sid = nullptr;
