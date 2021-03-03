@@ -22,7 +22,7 @@ public:
     }
 
     HRESULT STDMETHODCALLTYPE Ping () override {
-        std::wcout << L"Callback received..\n";
+        std::wcout << L"Callback received.\n";
         return S_OK;
     }
 
