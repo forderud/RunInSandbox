@@ -30,13 +30,13 @@ static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, RE
             return {L"", L""};
         exe_path.resize(exe_path_len - 1); // remove extra zero-termination
 
-        if (exe_path[0] == '"')
-            exe_path = exe_path.substr(1, exe_path.size() - 2); // remove quotes
+        if (exe_path[0] == '"') {
+            // remove quotes and "/automation" or "-activex" arguments
+            exe_path = exe_path.substr(1); // remove begin quote
 
-        // remove "/automation" (or other) argument if present
-        size_t idx = exe_path.find(L" /");
-        if (idx != exe_path.npos)
-            exe_path = exe_path.substr(0, idx);
+            size_t idx = exe_path.find('"');
+            exe_path = exe_path.substr(0, idx); // remove end quote and arguments
+        }
     }
 
     std::wstring app_id;
