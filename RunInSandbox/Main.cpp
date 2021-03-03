@@ -12,7 +12,7 @@
 
 class ATL_NO_VTABLE CallbackTest : 
     public CComObjectRootEx<CComMultiThreadModel>,
-    public CComCoClass<ICallbackTest>, // no registry entries
+    public CComCoClass<CallbackTest>, // no registry entries
     public ICallbackTest {
 public:
     CallbackTest () {
