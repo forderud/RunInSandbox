@@ -10,6 +10,36 @@
 #include "../TestControl/TestControl_h.h"
 
 
+class ATL_NO_VTABLE CallbackTest : 
+    public CComObjectRootEx<CComMultiThreadModel>,
+    public CComCoClass<ICallbackTest>, // no registry entries
+    public ICallbackTest {
+public:
+    CallbackTest () {
+    }
+
+    ~CallbackTest() {
+    }
+
+    HRESULT STDMETHODCALLTYPE Ping () override {
+        std::wcout << L"Callback received..\n";
+        return S_OK;
+    }
+
+
+    BEGIN_COM_MAP(CallbackTest)
+        COM_INTERFACE_ENTRY(ICallbackTest)
+    END_COM_MAP()
+};
+
+class RunInSandboxModule: public ATL::CAtlExeModuleT<RunInSandboxModule> {
+public:
+    //DECLARE_LIBID(LIBID_RunInSandboxModule)
+};
+
+RunInSandboxModule _AtlModule;
+
+
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
@@ -69,6 +99,11 @@ int wmain (int argc, wchar_t *argv[]) {
             CHECK(calc->IsElevated(&is_elevated, &high_integrity));
             std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
             std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
+
+            {
+                auto cb = CreateLocalInstance<CallbackTest>();
+                CHECK(calc->TestCallback(cb));
+            }
 
 #if 0
             BOOL has_network = false;

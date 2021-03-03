@@ -54,3 +54,17 @@ HRESULT STDMETHODCALLTYPE TestControl::CreateInstance (BOOL elevated, /*in*/CLSI
         return S_OK;
     }
 }
+
+HRESULT STDMETHODCALLTYPE TestControl::TestCallback(IUnknown * obj) {
+    if (!obj)
+        return E_INVALIDARG;
+
+    // cast callback pointer
+    CComPtr<ICallbackTest> tmp;
+    HRESULT hr = obj->QueryInterface(&tmp);
+    if (FAILED(hr))
+        return E_INVALIDARG;
+
+    // invoke callback
+    return tmp->Ping();
+}

@@ -3,6 +3,15 @@ import "ocidl.idl";
 
 
 [object,
+oleautomation, // use "automation" marshaler (oleaut32.dll)
+uuid(D3C91F02-27DB-483C-BE4E-3883E1B51B33)]
+interface ICallbackTest : IUnknown {
+    HRESULT Ping ();
+};
+
+
+
+[object,
  oleautomation, // use "automation" marshaler (oleaut32.dll)
  uuid(570FBF3C-D853-435E-B761-6A264393B9DA)]
 interface ISimpleCalculator : IUnknown {
@@ -16,6 +25,9 @@ interface ISimpleCalculator : IUnknown {
 
     [helpstring("For testing of nested COM object creation")]
     HRESULT CreateInstance ([in] BOOL elevated, [in] CLSID clsid, [out,retval] IUnknown ** obj);
+
+    [helpstring("For testing of COM callbacks")]
+    HRESULT TestCallback([in] IUnknown * obj);
 };
 
 
@@ -24,6 +36,8 @@ interface ISimpleCalculator : IUnknown {
  helpstring("TestControl module")]
 library TestControl {
     importlib("stdole2.tlb");
+
+    interface ICallbackTest;
 
     [version(1.0),
      uuid(F0DFBE77-1697-428E-A895-EFEE202B9333),
