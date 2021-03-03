@@ -70,8 +70,7 @@ int wmain (int argc, wchar_t *argv[]) {
 
     if (progid_provided) {
         // initialize multi-threaded COM apartment
-        if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
-            abort();
+        ComInitialize com(COINIT_MULTITHREADED);
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
 
