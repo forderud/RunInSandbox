@@ -36,6 +36,9 @@ public:
         return &si;
     }
 
+    StartupInfoWrap(const StartupInfoWrap&) = delete;
+    StartupInfoWrap& operator=(const StartupInfoWrap&) = delete;
+
 private:
     STARTUPINFOEX si = {};
 };
@@ -65,6 +68,9 @@ public:
     PROCESS_INFORMATION* operator->() {
         return &pi;
     }
+
+    ProcessInfoWrap(const ProcessInfoWrap&) = delete;
+    ProcessInfoWrap& operator=(const ProcessInfoWrap&) = delete;
 
 private:
     PROCESS_INFORMATION pi = {};
