@@ -444,3 +444,57 @@ struct ImpersonateThread {
 
     HandleWrap  m_token;
 };
+
+class RegQuery {
+public:
+    /** Get EXE path for a COM class. Input is on "{hex-guid}" format. Returns empty string if the COM class is DLL-based and on failure. */
+    static std::wstring GetExePath (const std::wstring & clsid, REGSAM bitness = 0/*same bitness as client*/) {
+        // extract COM class
+        std::wstring reg_path = L"CLSID\\" + clsid + L"\\LocalServer32";
+
+        CRegKey cls_reg;
+        if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path.c_str(), KEY_READ | bitness) != ERROR_SUCCESS)
+            return L""; // unknown CLSID
+
+        ULONG exe_path_len = 0;
+        if (cls_reg.QueryStringValue(nullptr, nullptr, &exe_path_len) != ERROR_SUCCESS)
+            return L""; // unknown key
+
+        std::wstring exe_path(exe_path_len, L'\0');
+        if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
+            abort(); // should never happen
+        exe_path.resize(exe_path_len - 1); // remove extra zero-termination
+
+        if (exe_path[0] == '"') {
+            // remove quotes and "/automation" or "-activex" arguments
+            exe_path = exe_path.substr(1); // remove begin quote
+
+            size_t idx = exe_path.find('"');
+            if (idx == exe_path.npos)
+                return L""; // malformed quoting
+            exe_path = exe_path.substr(0, idx); // remove end quote and arguments
+        }
+
+        return exe_path;
+    }
+
+    /** Get AppID GUID for a COM class. Both input & output is on "{hex-guid}" format. Returns empty string on failure. */
+    static std::wstring GetAppID (const std::wstring & clsid, REGSAM bitness = 0/*same bitness as client*/) {
+        // extract COM class
+        std::wstring reg_path = L"CLSID\\" + clsid;
+
+        CRegKey cls_reg;
+        if (cls_reg.Open(HKEY_CLASSES_ROOT, reg_path.c_str(), KEY_READ | bitness) != ERROR_SUCCESS)
+            return L""; // unknown CLSID
+
+        ULONG app_id_len = 0;
+        if (cls_reg.QueryStringValue(L"AppID", nullptr, &app_id_len) != ERROR_SUCCESS)
+            return L""; // AppID missing
+
+        std::wstring app_id(app_id_len, L'\0');
+        if (cls_reg.QueryStringValue(L"AppID", const_cast<wchar_t*>(app_id.data()), &app_id_len) != ERROR_SUCCESS)
+            abort(); // should never happen
+        app_id.resize(app_id_len - 1); // remove extra zero-termination
+        return app_id;
+    }
+};

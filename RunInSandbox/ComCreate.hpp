@@ -5,63 +5,6 @@
 #include "../TestControl/ComSupport.hpp"
 //#define DEBUG_COM_ACTIVATION
 
-/** Returns the COM EXE path and AppID GIUD string. */
-static std::tuple<std::wstring,std::wstring> GetLocalServerPath (CLSID clsid, REGSAM bitness = 0/*same bitness as client*/) {
-    // build registry path
-    CComBSTR clsid_path(L"CLSID\\");
-    clsid_path.Append(clsid);
-
-    std::wstring exe_path;
-    {
-        CComBSTR local_server_path = clsid_path;
-        local_server_path.Append(L"\\LocalServer32");
-
-        // extract COM class
-        CRegKey cls_reg;
-        if (cls_reg.Open(HKEY_CLASSES_ROOT, local_server_path, KEY_READ | bitness) != ERROR_SUCCESS)
-            return {L"", L""};
-
-        ULONG exe_path_len = 0;
-        if (cls_reg.QueryStringValue(nullptr, nullptr, &exe_path_len) != ERROR_SUCCESS)
-            return {L"", L""};
-
-        exe_path.resize(exe_path_len, L'\0');
-        if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
-            return {L"", L""};
-        exe_path.resize(exe_path_len - 1); // remove extra zero-termination
-
-        if (exe_path[0] == '"') {
-            // remove quotes and "/automation" or "-activex" arguments
-            exe_path = exe_path.substr(1); // remove begin quote
-
-            size_t idx = exe_path.find('"');
-            exe_path = exe_path.substr(0, idx); // remove end quote and arguments
-        }
-    }
-
-    std::wstring app_id;
-    if (!exe_path.empty()){
-        // extract COM class
-        CRegKey cls_reg;
-        if (cls_reg.Open(HKEY_CLASSES_ROOT, clsid_path, KEY_READ | bitness) != ERROR_SUCCESS)
-            abort();
-
-        ULONG app_id_len = 0;
-        if (cls_reg.QueryStringValue(L"AppID", nullptr, &app_id_len) != ERROR_SUCCESS)
-            abort();
-
-        app_id.resize(app_id_len, L'\0');
-        if (cls_reg.QueryStringValue(L"AppID", const_cast<wchar_t*>(app_id.data()), &app_id_len) != ERROR_SUCCESS)
-            abort();
-        app_id.resize(app_id_len - 1); // remove extra zero-termination
-    }
-
-    if (exe_path.empty() && (bitness == 0))
-        std::tie(exe_path, app_id) = GetLocalServerPath(clsid, KEY_WOW64_32KEY); // fallback to 32bit part of registry
-
-    return std::tie(exe_path,app_id);
-}
-
 
 /** Attempt to create a COM server that runds through a specific user account.
     AppContainer problem:
@@ -71,9 +14,18 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
     if (explicit_process_create) {
         // launch COM server process manually
-        std::wstring exe_path;
-        std::wstring app_id;
-        std::tie(exe_path, app_id) = GetLocalServerPath(clsid);
+        wchar_t clsid_str[39] = {};
+        int ok = StringFromGUID2(clsid, const_cast<wchar_t*>(clsid_str), static_cast<int>(std::size(clsid_str)));
+        if (!ok)
+            abort(); // should never happen
+
+        std::wstring exe_path = RegQuery::GetExePath(clsid_str);
+        if (exe_path.empty())
+            exe_path = RegQuery::GetExePath(clsid_str, KEY_WOW64_32KEY); // fallback to 32bit part of registry
+        if (exe_path.empty()) {
+            std::wcerr << L"ERROR: Unable to locate COM server EXE path." << std::endl;
+            exit(-2);
+        }
 
         if (grant_appcontainer_permissions) {
             // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
@@ -83,6 +35,12 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
                 std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
+                exit(-2);
+            }
+
+            std::wstring app_id = RegQuery::GetAppID(clsid_str);
+            if (app_id.empty()) {
+                std::wcerr << L"ERROR: Unable to locate COM server AppID." << std::endl;
                 exit(-2);
             }
             err = Permissions::EnableLaunchActPermission(ac_str_sid, app_id.c_str());
