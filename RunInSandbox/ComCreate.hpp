@@ -132,27 +132,27 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
 /** Create a AppID and elevation-enabled COM server in a admin process.
     REF: https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
 template <typename T>
-static HRESULT CoCreateInstanceElevated (HWND window, const IID & classId, T ** result) {
+static HRESULT CoCreateInstanceElevated (HWND window, const GUID clsid, T ** result) {
     if (!result)
         return E_INVALIDARG;
     if (*result)
         return E_INVALIDARG;
 
-    std::wstring name;
-    name.resize(39);
-    HRESULT hr = ::StringFromGUID2(classId, const_cast<wchar_t*>(name.data()), static_cast<int>(name.size()));
-    if (FAILED(hr))
-        return hr;
-    name = L"Elevation:Administrator!new:" + name;
+    wchar_t clsid_str[39] = {};
+    int ok = StringFromGUID2(clsid, const_cast<wchar_t*>(clsid_str), static_cast<int>(std::size(clsid_str)));
+    if (!ok)
+        abort(); // should never happen
 
-    std::wcout << L"CoGetObject: " << name << L'\n';
+    std::wstring obj_name = L"Elevation:Administrator!new:";
+    obj_name += clsid_str;
 
     BIND_OPTS3 options = {};
     options.cbStruct = sizeof(options);
     options.hwnd = window;
     options.dwClassContext = CLSCTX_LOCAL_SERVER;
 
-    return ::CoGetObject(name.c_str(), &options, __uuidof(T), reinterpret_cast<void**>(result));
+    //std::wcout << L"CoGetObject: " << obj_name << L'\n';
+    return ::CoGetObject(obj_name.c_str(), &options, __uuidof(T), reinterpret_cast<void**>(result));
 }
 
 
