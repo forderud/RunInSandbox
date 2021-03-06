@@ -5,7 +5,7 @@ C++ code for launching executables and out-of-process COM server in a sandboxed 
 Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application in an AppContainer, low-integrity, medium-integrity or high-integrity process. This works for `STARTUPINFOEX`-based process creation.
 
 ## COM sandboxing
-Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [-g]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
+Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [-dnd] [-g]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The `-dnd` option is used to enable OLE drag-and-drop through `RegisterDragDrop` which causes problems for AppContainer sandboxing. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
 
 Example usage:
 * `RunInSandbox.exe ac TestControl.TestControl -g` to start the TestControl project in a AppContainer process and test its COM API.
@@ -20,6 +20,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 |AppContainer         | Works if `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
 ### Outstanding challenges
+* Why is OLE drag-and-drop triggering 0x80070005 "Access is denied" exception in AppContainer processes.
 * How to _append_ the DCOM `LaunchPermission` ACL instead of replacing it, so that existing permissions (if present) aren't lost. Also, look for a less cryptic way of achieving the same.
 * How to apply `WinCapabilityRemovableStorageSid` to enable USB stick access for the AppContainer.
 * Find solution for CoRegisterClassObject synchronization before calling CoCreateInstance, so that we can remove the arbitrary `Sleep`.

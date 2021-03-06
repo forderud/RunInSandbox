@@ -33,6 +33,31 @@ public:
     END_COM_MAP()
 };
 
+
+class DropTarget : 
+    public CComObjectRootEx<CComSingleThreadModel>,
+    public CComCoClass<DropTarget>, // no registry entries
+    public IDropTarget
+{
+    BEGIN_COM_MAP(DropTarget)
+        COM_INTERFACE_ENTRY(IDropTarget)
+    END_COM_MAP()
+
+public:
+    HRESULT STDMETHODCALLTYPE DragEnter(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
+        return E_NOTIMPL;
+    }
+    HRESULT STDMETHODCALLTYPE DragOver(DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
+        return E_NOTIMPL;
+    }
+    HRESULT STDMETHODCALLTYPE DragLeave() override {
+        return E_NOTIMPL;
+    }
+    HRESULT STDMETHODCALLTYPE Drop(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
+        return E_NOTIMPL;
+    }
+};
+
 class RunInSandboxModule: public ATL::CAtlExeModuleT<RunInSandboxModule> {
 public:
     //DECLARE_LIBID(LIBID_RunInSandboxModule)
@@ -126,17 +151,27 @@ int wmain (int argc, wchar_t *argv[]) {
     arg_idx++;
 
     bool grant_appcontainer_permissions = false;
-    if (arg_idx < argc) {
+    bool drag_n_drop = false;
+    while (arg_idx < argc) {
         if (std::wstring(argv[arg_idx]) == L"-g") {
             grant_appcontainer_permissions = true;
-            arg_idx++;
+        } else if (std::wstring(argv[arg_idx]) == L"-dnd") {
+            drag_n_drop = true;
         }
+        arg_idx++;
     }
 
     if (progid_provided) {
         // initialize single-threaded COM apartment with OLE support
         OleInitialize(NULL);
         HWND wnd = FindWindowEx(HWND_MESSAGE, NULL, NULL, NULL); // invisible message-only window for COM apartment
+
+        // Enable OLE drag-and-drop
+        // Triggers 0x80070005 "Access is denied" exception in AppContainer process
+        // that then leads to 0x800706BE "The remote procedure call failed" in this process.
+        auto drop_target = CreateLocalInstance<DropTarget>();
+        if (drag_n_drop)
+            CHECK(RegisterDragDrop(wnd, drop_target));
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
         std::thread t(ThreadedComTests, clsid, mode, grant_appcontainer_permissions, wnd);
