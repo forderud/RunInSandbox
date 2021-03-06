@@ -49,31 +49,6 @@ REF: http://msdn.microsoft.com/en-us/library/windows/desktop/ms644360.aspx */
 extern "C" void SetOaNoCache();
 
 
-
-/** RAII class for COM initialization. */
-class ComInitialize {
-public:
-    ComInitialize (COINIT apartment /*= COINIT_MULTITHREADED*/) : m_initialized(false) {
-        // REF: https://msdn.microsoft.com/en-us/library/windows/desktop/ms695279.aspx
-        HRESULT hr = CoInitializeEx(NULL, apartment);
-        if (SUCCEEDED(hr))
-            m_initialized = true;
-
-#ifdef _DEBUG
-        SetOaNoCache();
-#endif
-    }
-
-    ~ComInitialize() {
-        if (m_initialized)
-            CoUninitialize();
-    }
-
-private:
-    bool m_initialized; ///< must uninitialize in dtor
-};
-
-
 /** Convenience function to create a locally implemented COM instance without the overhead of CoCreateInstance.
 The COM class does not need to be registred for construction to succeed. However, lack of registration can
 cause problems if transporting the class out-of-process. */
