@@ -20,7 +20,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 |AppContainer         | Works if `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
 ### Outstanding challenges
-* Why is OLE drag-and-drop triggering 0x80070005 "Access is denied" exception in AppContainer processes.
+* Why is `RegisterDragDrop` triggering 0x80070005 "Access is denied" exception in the AppContainer process.
 * How to _append_ the DCOM `LaunchPermission` ACL instead of replacing it, so that existing permissions (if present) aren't lost. Also, look for a less cryptic way of achieving the same.
 * How to apply `WinCapabilityRemovableStorageSid` to enable USB stick access for the AppContainer.
 * Find solution for CoRegisterClassObject synchronization before calling CoCreateInstance, so that we can remove the arbitrary `Sleep`.
