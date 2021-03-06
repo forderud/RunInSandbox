@@ -1,5 +1,6 @@
 #include <conio.h>
 #include <iostream>
+#include <thread>
 #include <Shlobj.h>
 #include <atlbase.h>
 #include <atlcom.h>
@@ -40,6 +41,70 @@ public:
 RunInSandboxModule _AtlModule;
 
 
+static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions, HWND wnd) {
+    CoInitializeEx(NULL, COINIT_MULTITHREADED);
+
+    CComPtr<IUnknown> obj;
+    if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
+        // launch "COM Elevation Moniker"-compatible COM class in elevated process
+        // example COM class for testing: HNetCfg.FwOpenPort
+        CHECK(CoCreateInstanceElevated<IUnknown>(0, clsid, &obj));
+        std::wcout << L"COM server sucessfully created in elevated process.\n";
+    } else {
+        obj = CoCreateAsUser_impersonate(clsid, mode, grant_appcontainer_permissions);
+    }
+
+    // try to add two numbers
+    CComPtr<ISimpleCalculator> calc;
+    obj.QueryInterface(&calc);
+    if (calc) {
+        int sum = 0;
+        CHECK(calc->Add(2, 3, &sum));
+
+        std::wcout << L"Add(2, 3) returned " << sum << L".\n";
+        assert(sum == 2 + 3);
+
+        BOOL is_elevated = false, high_integrity = false;
+        CHECK(calc->IsElevated(&is_elevated, &high_integrity));
+        std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
+        std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
+
+        {
+            auto cb = CreateLocalInstance<CallbackTest>();
+            CHECK(calc->TestCallback(cb));
+        }
+
+#if 0
+        BOOL has_network = false;
+        CComBSTR host = L"1.1.1.1"; // cloudflare
+        calc->TestNetworkConnection(host, 80, &has_network);
+        std::wcout << L"HasNetwork: " << (has_network ? L"true" : L"false") << L"\n";
+#endif
+#if 0
+        // try to create child object in elevated process
+        // WARNING: Doesn't trigger UAC elevation if launched from a medium-integrity process that was launched from an elevated process
+        std::wcout << L"Creating child COM object " << progid << L" in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
+        CComPtr<IUnknown> child;
+        CHECK(calc->CreateInstance(true, clsid, &child));
+        CComPtr<ISimpleCalculator> child_calc;
+        child_calc = child;
+        is_elevated = false, high_integrity = false;
+        CHECK(child_calc->IsElevated(&is_elevated, &high_integrity));
+        std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
+        std::wcout << L"Child HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
+#endif
+    }
+
+    // try to make window visible
+    SetComAttribute(obj, L"Visible", true);
+
+    Sleep(2000); // wait 2sec to keep the child process alive a bit
+
+    // signal that main thread should quit
+    PostMessage(wnd, WM_QUIT, 0, 0);
+}
+
+
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
@@ -71,64 +136,24 @@ int wmain (int argc, wchar_t *argv[]) {
     if (progid_provided) {
         // initialize single-threaded COM apartment with OLE support
         OleInitialize(NULL);
+        HWND wnd = FindWindowEx(HWND_MESSAGE, NULL, NULL, NULL); // invisible message-only window for COM apartment
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
+        std::thread t(ThreadedComTests, clsid, mode, grant_appcontainer_permissions, wnd);
 
-        CComPtr<IUnknown> obj;
-        if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
-            // launch "COM Elevation Moniker"-compatible COM class in elevated process
-            // example COM class for testing: HNetCfg.FwOpenPort
-            CHECK(CoCreateInstanceElevated<IUnknown>(0, clsid, &obj));
-            std::wcout << L"COM server sucessfully created in elevated process.\n";
-        } else {
-            obj = CoCreateAsUser_impersonate(clsid, mode, grant_appcontainer_permissions);
-        }
-
-        // try to add two numbers
-        CComPtr<ISimpleCalculator> calc;
-        obj.QueryInterface(&calc);
-        if (calc) {
-            int sum = 0;
-            CHECK(calc->Add(2, 3, &sum));
-
-            std::wcout << L"Add(2, 3) returned " << sum << L".\n";
-            assert(sum == 2 + 3);
-
-            BOOL is_elevated = false, high_integrity = false;
-            CHECK(calc->IsElevated(&is_elevated, &high_integrity));
-            std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-            std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
-
-            {
-                auto cb = CreateLocalInstance<CallbackTest>();
-                CHECK(calc->TestCallback(cb));
+        // pump messages until receiving WM_QUIT
+        MSG msg = {};
+        BOOL ret = false;
+        while((ret = GetMessage( &msg, NULL, 0, 0 )) != 0) { 
+            if (ret == -1) {
+                break; // break on error
+            } else {
+                TranslateMessage(&msg); 
+                DispatchMessage(&msg); 
             }
-
-#if 0
-            BOOL has_network = false;
-            CComBSTR host = L"1.1.1.1"; // cloudflare
-            calc->TestNetworkConnection(host, 80, &has_network);
-            std::wcout << L"HasNetwork: " << (has_network ? L"true" : L"false") << L"\n";
-#endif
-#if 0
-            // try to create child object in elevated process
-            // WARNING: Doesn't trigger UAC elevation if launched from a medium-integrity process that was launched from an elevated process
-            std::wcout << L"Creating child COM object " << progid << L" in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
-            CComPtr<IUnknown> child;
-            CHECK(calc->CreateInstance(true, clsid, &child));
-            CComPtr<ISimpleCalculator> child_calc;
-            child_calc = child;
-            is_elevated = false, high_integrity = false;
-            CHECK(child_calc->IsElevated(&is_elevated, &high_integrity));
-            std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-            std::wcout << L"Child HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
-#endif
         }
 
-        // try to make window visible
-        SetComAttribute(obj, L"Visible", true);
-
-        Sleep(2000); // wait 2sec to keep the child process alive a bit
+        t.join();
     } else if (url_provided) {
         std::wcout << L"Opening URL " << progid << " in default browser\n";
         if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
