@@ -405,12 +405,12 @@ struct ImpersonateThread {
     static IntegrityLevel GetProcessLevel(HANDLE process_token = GetCurrentProcessToken()) {
         DWORD token_info_length = 0;
         if (GetTokenInformation(process_token, TokenIntegrityLevel, NULL, 0, &token_info_length))
-            abort();
+            abort(); // should never happen
 
         std::vector<char> token_info_buf(token_info_length);
         auto* token_info = reinterpret_cast<TOKEN_MANDATORY_LABEL*>(token_info_buf.data());
         if (!GetTokenInformation(process_token, TokenIntegrityLevel, token_info, token_info_length, &token_info_length))
-            abort();
+            abort(); // should never happen
 
         DWORD integrity_level = *GetSidSubAuthority(token_info->Label.Sid, *GetSidSubAuthorityCount(token_info->Label.Sid) - 1);
 
@@ -429,18 +429,18 @@ struct ImpersonateThread {
     static bool IsProcessElevated (HANDLE process = GetCurrentProcess()) {
         HandleWrap token;
         if (!OpenProcessToken(process, TOKEN_QUERY, &token))
-            abort();
+            abort(); // should never happen
 
         TOKEN_ELEVATION elevation = {};
         DWORD ret_len = 0;
         if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &ret_len))
-            abort();
+            abort(); // should never happen
 
         {
             TOKEN_ELEVATION_TYPE elevation_type = {};
             ret_len = 0;
             if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
-                abort();
+                abort(); // should never happen
 
             if (elevation.TokenIsElevated)
                 assert(elevation_type == TokenElevationTypeFull);
