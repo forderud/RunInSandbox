@@ -168,12 +168,11 @@ int wmain (int argc, wchar_t *argv[]) {
         OleInitialize(NULL);
         HWND wnd = FindWindowEx(HWND_MESSAGE, NULL, NULL, NULL); // invisible message-only window for COM apartment
 
-        // Enable OLE drag-and-drop
-        // Triggers 0x80070005 "Access is denied" exception in AppContainer process
-        // that then leads to 0x800706BE "The remote procedure call failed" in this process.
         auto drop_target = CreateLocalInstance<DropTarget>();
         if (drag_n_drop) {
             std::wcout << L"Enabling OLE drag-and-drop.\n";
+            // Triggers 0x80070005 "Access is denied" exception in AppContainer process if this process is elevated (high integrity level)
+            // that then leads to 0x800706BE "The remote procedure call failed" in this process.
             CHECK(RegisterDragDrop(wnd, drop_target));
         }
 
