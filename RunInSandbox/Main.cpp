@@ -170,8 +170,10 @@ int wmain (int argc, wchar_t *argv[]) {
         // Triggers 0x80070005 "Access is denied" exception in AppContainer process
         // that then leads to 0x800706BE "The remote procedure call failed" in this process.
         auto drop_target = CreateLocalInstance<DropTarget>();
-        if (drag_n_drop)
+        if (drag_n_drop) {
+            std::wcout << L"Enabling OLE drag-and-drop.\n";
             CHECK(RegisterDragDrop(wnd, drop_target));
+        }
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
         std::thread t(ThreadedComTests, clsid, mode, grant_appcontainer_permissions, wnd);
