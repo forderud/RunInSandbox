@@ -138,6 +138,8 @@ int wmain (int argc, wchar_t *argv[]) {
         return -1;
     }
 
+    std::wcout << "Host is running in " << ToString(ImpersonateThread::GetProcessLevel()) << L".\n";
+
     int arg_idx = 1;
     IntegrityLevel mode = FromString(argv[arg_idx]);
     if (mode != IntegrityLevel::Default)
