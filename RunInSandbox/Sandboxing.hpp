@@ -67,46 +67,6 @@ private:
 static_assert(sizeof(HandleWrap) == sizeof(HANDLE), "HandleWrap size mismatch");
 
 
-/** RAII wrapper of Win32 Security IDentifier (SID) handles. */
-class SidWrap {
-public:
-    SidWrap() {
-    }
-    ~SidWrap() {
-        Clear();
-    }
-
-    void Clear() {
-        if (sid) {
-            FreeSid(sid);
-            sid = nullptr;
-        }
-    }
-
-    void Create(WELL_KNOWN_SID_TYPE type) {
-        assert(!sid);
-
-        DWORD sid_size = SECURITY_MAX_SID_SIZE;
-        sid = LocalAlloc(LPTR, sid_size);
-        WIN32_CHECK(CreateWellKnownSid(type, nullptr, sid, &sid_size));
-    }
-
-    operator PSID () {
-        return sid;
-    }
-    PSID* operator & () {
-        return &sid;
-    }
-
-protected:
-    SidWrap (const SidWrap &) = delete;
-    SidWrap& operator = (const SidWrap &) = delete;
-
-    PSID sid = nullptr;
-};
-static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
-
-
 /** RAII wrapper of Win32 API objects allocated with LocalAlloc. */
 template <class T>
 class LocalWrap {
@@ -133,6 +93,53 @@ private:
 
     T obj = nullptr;
 };
+
+
+/** RAII wrapper of Win32 Security IDentifier (SID) handles. */
+class SidWrap {
+public:
+    SidWrap() {
+    }
+    ~SidWrap() {
+        Clear();
+    }
+
+    void Clear() {
+        if (sid) {
+            FreeSid(sid);
+            sid = nullptr;
+        }
+    }
+
+    void Create(WELL_KNOWN_SID_TYPE type) {
+        assert(!sid);
+
+        DWORD sid_size = SECURITY_MAX_SID_SIZE;
+        sid = LocalAlloc(LPTR, sid_size);
+        WIN32_CHECK(CreateWellKnownSid(type, nullptr, sid, &sid_size));
+    }
+
+    std::wstring ToString() const {
+        LocalWrap<wchar_t*> name_str;
+        BOOL ok = ConvertSidToStringSidW(sid, &name_str);
+        assert(ok); ok;
+        return static_cast<wchar_t*>(name_str);
+    }
+
+    operator PSID () {
+        return sid;
+    }
+    PSID* operator & () {
+        return &sid;
+    }
+
+protected:
+    SidWrap (const SidWrap &) = delete;
+    SidWrap& operator = (const SidWrap &) = delete;
+
+    PSID sid = nullptr;
+};
+static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 
 
 /** RAII class for encapsulating AppContainer configuration. */
