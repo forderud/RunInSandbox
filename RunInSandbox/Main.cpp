@@ -67,6 +67,7 @@ RunInSandboxModule _AtlModule;
 
 
 static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions, HWND wnd) {
+    SetThreadDescription(GetCurrentThread(), L"COM thread (MTA)");
     CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
     CComPtr<IUnknown> obj;
