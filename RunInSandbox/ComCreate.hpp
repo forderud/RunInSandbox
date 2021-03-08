@@ -31,11 +31,17 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
             const wchar_t ac_str_sid[] = L"S-1-15-2-1"; // ALL_APP_PACKAGES
 
-            DWORD err = Permissions::MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
-            if (err != ERROR_SUCCESS) {
-                _com_error error(err);
-                std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
-                exit(-2);
+
+            DWORD existing_access = Permissions::TryAccessPath(ac_str_sid, exe_path.c_str());
+            if (((existing_access & GENERIC_READ) == GENERIC_READ) || ((existing_access & FILE_GENERIC_READ) == FILE_GENERIC_READ)) {
+                std::wcout << "AppContainer already have EXE access.\n";
+            } else {
+                DWORD err = Permissions::MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+                if (err != ERROR_SUCCESS) {
+                    _com_error error(err);
+                    std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
+                    exit(-2);
+                }
             }
 
             std::wstring app_id = RegQuery::GetAppID(clsid_str);
@@ -43,7 +49,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
                 std::wcerr << L"ERROR: Unable to locate COM server AppID." << std::endl;
                 exit(-2);
             }
-            err = Permissions::EnableLaunchActPermission(ac_str_sid, app_id.c_str());
+            DWORD err = Permissions::EnableLaunchActPermission(ac_str_sid, app_id.c_str());
             if (err != ERROR_SUCCESS) {
                 _com_error error(err);
                 std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;

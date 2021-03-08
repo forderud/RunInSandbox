@@ -44,6 +44,12 @@ int wmain(int argc, wchar_t *argv[]) {
             ac_str_sid = L"S-1-15-2-1"; // ALL_APP_PACKAGES
         }
 
+        DWORD existing_access = Permissions::TryAccessPath(ac_str_sid.c_str(), path.c_str());
+        if (((existing_access & GENERIC_READ) == GENERIC_READ) || ((existing_access & FILE_GENERIC_READ) == FILE_GENERIC_READ)) {
+            std::wcout << "AppContainer already have read access.\n";
+            return 0;
+        }
+
         DWORD err = Permissions::MakePathAppContainer(ac_str_sid.c_str(), path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
