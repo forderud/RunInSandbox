@@ -317,15 +317,17 @@ public:
 
             ACCESS_MASK GrantedAccess = 0;
             DWORD       Error = 0;
-            AUTHZ_ACCESS_REPLY AccessReply = {};
-            AccessReply.ResultListLength = 1;
-            AccessReply.GrantedAccessMask = &GrantedAccess; // array of granted access masks [size_is(ResultListLength)]
-            AccessReply.Error             = &Error;         // array of results [size_is(ResultListLength)]
+            {
+                AUTHZ_ACCESS_REPLY AccessReply = {};
+                AccessReply.ResultListLength = 1;
+                AccessReply.GrantedAccessMask = &GrantedAccess; // array of granted access masks [size_is(ResultListLength)]
+                AccessReply.Error             = &Error;         // array of results [size_is(ResultListLength)]
 
-            // perform access check
-            BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
-            if (!ok)
-                return 0;
+                // perform access check
+                BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
+                if (!ok)
+                    return 0;
+            }
 
             return GrantedAccess;
         }
