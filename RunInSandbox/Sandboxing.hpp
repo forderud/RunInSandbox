@@ -263,7 +263,7 @@ static IntegrityLevel FromString (std::wstring arg) {
 
 class Permissions {
 public:
-    /** Determine the resultging acces mask for a filesystem object when being requested by identity_sid.
+    /** Determine the resulting acces mask for a filesystem object when being requested by identity_sid.
         Based on https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-geteffectiverightsfromacla */
     class Check {
     public:
