@@ -265,65 +265,75 @@ class Permissions {
 public:
     /** Determine the resultging acces mask for a filesystem object when being requested by identity_sid.
         Based on https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-geteffectiverightsfromacla */
-    static ACCESS_MASK TryAccessPath(const wchar_t * identity_sid, const wchar_t* path) {
-        LocalWrap<PSECURITY_DESCRIPTOR> path_sd;
-        {
-            // Obtain information about the security of a file or directory. The returned info. is filtered by the caller's access rights.
-            DWORD length = 0;
-            BOOL ok = GetFileSecurity(path, OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, NULL, NULL, &length);
-            if (ok || (ERROR_INSUFFICIENT_BUFFER != ::GetLastError()))
-                return 0;
+    class Check {
+    public:
+        Check (const wchar_t * identity_sid) : m_autz_mgr(nullptr, AuthzFreeResourceManager), m_autz_client_ctx(nullptr, AuthzFreeContext) {
+            SidWrap identity_sid_bin;
+            WIN32_CHECK(ConvertStringSidToSid(identity_sid, &identity_sid_bin));
 
-            *&path_sd = LocalAlloc(LPTR, length);
-            ok = GetFileSecurity(path, OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, path_sd, length, &length);
-            if (!ok)
-                return 0;
+            {
+                AUTHZ_RESOURCE_MANAGER_HANDLE mgr_tmp = nullptr;
+                BOOL ok = AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &mgr_tmp);
+                if (!ok)
+                    return;
+                m_autz_mgr = {mgr_tmp, AuthzFreeResourceManager};
+            }
+
+            {
+                AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
+                LUID unusedId = {};
+                BOOL ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, unusedId, NULL, &tmp_ctx);
+                if (!ok)
+                    return;
+
+                m_autz_client_ctx = {tmp_ctx, AuthzFreeContext};
+            }
         }
 
-        SidWrap identity_sid_bin;
-        WIN32_CHECK(ConvertStringSidToSid(identity_sid, &identity_sid_bin));
+        ~Check() {
+        }
 
-        std::unique_ptr<std::remove_pointer<AUTHZ_RESOURCE_MANAGER_HANDLE>::type, decltype(&AuthzFreeResourceManager)> autz_mgr(nullptr, AuthzFreeResourceManager);
-        {
-            AUTHZ_RESOURCE_MANAGER_HANDLE mgr_tmp = nullptr;
-            BOOL ok = AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &mgr_tmp);
+        ACCESS_MASK TryAccessPath(const wchar_t* path) {
+            LocalWrap<PSECURITY_DESCRIPTOR> path_sd;
+            {
+                // Obtain information about the security of a file or directory. The returned info. is filtered by the caller's access rights.
+                DWORD length = 0;
+                BOOL ok = GetFileSecurity(path, OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, NULL, NULL, &length);
+                if (ok || (ERROR_INSUFFICIENT_BUFFER != ::GetLastError()))
+                    return 0;
+
+                *&path_sd = LocalAlloc(LPTR, length);
+                ok = GetFileSecurity(path, OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, path_sd, length, &length);
+                if (!ok)
+                    return 0;
+            }
+
+            AUTHZ_ACCESS_REQUEST AccessRequest = {};
+            AccessRequest.DesiredAccess = MAXIMUM_ALLOWED;
+            AccessRequest.PrincipalSelfSid = NULL;
+            AccessRequest.ObjectTypeList = NULL;
+            AccessRequest.ObjectTypeListLength = 0;
+            AccessRequest.OptionalArguments = NULL;
+
+            BYTE Buffer[1024] = {}; // TODO: Determine required buffer size
+            AUTHZ_ACCESS_REPLY AccessReply = {};
+            AccessReply.ResultListLength = 1;
+            AccessReply.GrantedAccessMask = (ACCESS_MASK*)Buffer;       // array of granted access masks
+            AccessReply.Error = (DWORD*)(Buffer + sizeof(ACCESS_MASK)); // array of results for each element of the array
+
+            // perform access check
+            BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
             if (!ok)
                 return 0;
-            autz_mgr = {mgr_tmp, AuthzFreeResourceManager};
+
+            return *AccessReply.GrantedAccessMask;
         }
-        
-        std::unique_ptr<std::remove_pointer<AUTHZ_CLIENT_CONTEXT_HANDLE>::type, decltype(&AuthzFreeContext)> autz_client_ctx(nullptr, AuthzFreeContext);
-        {
-            AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
-            LUID unusedId = {};
-            BOOL ok = AuthzInitializeContextFromSid(0, identity_sid_bin, autz_mgr.get(), NULL, unusedId, NULL, &tmp_ctx);
-            if (!ok)
-                return 0;
 
-            autz_client_ctx = {tmp_ctx, AuthzFreeContext};
-        }
-        
-        AUTHZ_ACCESS_REQUEST AccessRequest = {};
-        AccessRequest.DesiredAccess = MAXIMUM_ALLOWED;
-        AccessRequest.PrincipalSelfSid = NULL;
-        AccessRequest.ObjectTypeList = NULL;
-        AccessRequest.ObjectTypeListLength = 0;
-        AccessRequest.OptionalArguments = NULL;
+    private:
+        std::unique_ptr<std::remove_pointer<AUTHZ_RESOURCE_MANAGER_HANDLE>::type, decltype(&AuthzFreeResourceManager)> m_autz_mgr;
+        std::unique_ptr<std::remove_pointer<AUTHZ_CLIENT_CONTEXT_HANDLE>::type, decltype(&AuthzFreeContext)>           m_autz_client_ctx;
 
-        BYTE Buffer[1024] = {}; // TODO: Determine required buffer size
-        AUTHZ_ACCESS_REPLY AccessReply = {};
-        AccessReply.ResultListLength = 1;
-        AccessReply.GrantedAccessMask = (ACCESS_MASK*)Buffer;       // array of granted access masks
-        AccessReply.Error = (DWORD*)(Buffer + sizeof(ACCESS_MASK)); // array of results for each element of the array
-
-        // perform access check
-        BOOL ok = AuthzAccessCheck(0, autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
-        if (!ok)
-            return 0;
-            
-        return *AccessReply.GrantedAccessMask;
-    }
-
+    };
 
     /** Tag a folder path as writable by low-integrity processes.
         By default, only %USER PROFILE%\AppData\LocalLow is writable.
