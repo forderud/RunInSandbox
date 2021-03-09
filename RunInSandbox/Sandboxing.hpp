@@ -267,24 +267,26 @@ public:
         Based on https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-geteffectiverightsfromacla */
     class Check {
     public:
-        Check (const wchar_t * identity_sid) : m_autz_mgr(nullptr, AuthzFreeResourceManager), m_autz_client_ctx(nullptr, AuthzFreeContext) {
+        Check (const wchar_t * identity_sid) : m_autz_mgr(nullptr, nullptr), m_autz_client_ctx(nullptr, nullptr) {
             SidWrap identity_sid_bin;
-            WIN32_CHECK(ConvertStringSidToSid(identity_sid, &identity_sid_bin));
+            BOOL ok = ConvertStringSidToSid(identity_sid, &identity_sid_bin);
+            if (!ok)
+                throw std::runtime_error("ConvertStringSidToSid failure");
 
             {
                 AUTHZ_RESOURCE_MANAGER_HANDLE mgr_tmp = nullptr;
-                BOOL ok = AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &mgr_tmp);
+                ok = AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &mgr_tmp);
                 if (!ok)
-                    return;
+                    abort(); // should never happen
                 m_autz_mgr = {mgr_tmp, AuthzFreeResourceManager};
             }
 
             {
                 AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
                 LUID unusedId = {};
-                BOOL ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, unusedId, NULL, &tmp_ctx);
+                ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, unusedId, NULL, &tmp_ctx);
                 if (!ok)
-                    return;
+                    throw std::runtime_error("AuthzInitializeContextFromSid failure");
 
                 m_autz_client_ctx = {tmp_ctx, AuthzFreeContext};
             }
