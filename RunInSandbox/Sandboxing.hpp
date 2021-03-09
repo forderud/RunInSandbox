@@ -346,7 +346,6 @@ public:
     private:
         std::unique_ptr<std::remove_pointer<AUTHZ_RESOURCE_MANAGER_HANDLE>::type, decltype(&AuthzFreeResourceManager)> m_autz_mgr;
         std::unique_ptr<std::remove_pointer<AUTHZ_CLIENT_CONTEXT_HANDLE>::type, decltype(&AuthzFreeContext)>           m_autz_client_ctx;
-
     };
 
     /** Tag a folder path as writable by low-integrity processes.
