@@ -315,18 +315,19 @@ public:
             AccessRequest.ObjectTypeListLength = 0;
             AccessRequest.OptionalArguments = NULL;
 
-            BYTE Buffer[1024] = {}; // TODO: Determine required buffer size
+            ACCESS_MASK GrantedAccess = 0;
+            DWORD       Error = 0;
             AUTHZ_ACCESS_REPLY AccessReply = {};
             AccessReply.ResultListLength = 1;
-            AccessReply.GrantedAccessMask = (ACCESS_MASK*)Buffer;       // array of granted access masks
-            AccessReply.Error = (DWORD*)(Buffer + sizeof(ACCESS_MASK)); // array of results for each element of the array
+            AccessReply.GrantedAccessMask = &GrantedAccess; // array of granted access masks [size_is(ResultListLength)]
+            AccessReply.Error             = &Error;         // array of results [size_is(ResultListLength)]
 
             // perform access check
             BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
             if (!ok)
                 return 0;
 
-            return *AccessReply.GrantedAccessMask;
+            return GrantedAccess;
         }
 
         /** Based on https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-geteffectiverightsfromacla */
