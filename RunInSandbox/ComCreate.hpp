@@ -33,7 +33,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
 
 
             DWORD existing_access = Permissions::Check(ac_str_sid).TryAccessPath(exe_path.c_str());
-            if (((existing_access & GENERIC_READ) == GENERIC_READ) || ((existing_access & FILE_GENERIC_READ) == FILE_GENERIC_READ)) {
+            if (Permissions::Check::HasReadAccess(existing_access)) {
                 std::wcout << "AppContainer already have EXE access.\n";
             } else {
                 DWORD err = Permissions::MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);

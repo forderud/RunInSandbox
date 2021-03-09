@@ -329,6 +329,15 @@ public:
             return *AccessReply.GrantedAccessMask;
         }
 
+        /** Based on https://docs.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-geteffectiverightsfromacla */
+        static bool HasReadAccess (ACCESS_MASK mask) {
+            if ((mask & GENERIC_READ) == GENERIC_READ)
+                return true;
+            if ((mask & FILE_GENERIC_READ) == FILE_GENERIC_READ)
+                return true;
+            return false;
+        }
+
     private:
         std::unique_ptr<std::remove_pointer<AUTHZ_RESOURCE_MANAGER_HANDLE>::type, decltype(&AuthzFreeResourceManager)> m_autz_mgr;
         std::unique_ptr<std::remove_pointer<AUTHZ_CLIENT_CONTEXT_HANDLE>::type, decltype(&AuthzFreeContext)>           m_autz_client_ctx;

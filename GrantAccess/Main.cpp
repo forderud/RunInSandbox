@@ -45,7 +45,7 @@ int wmain(int argc, wchar_t *argv[]) {
         }
 
         DWORD existing_access = Permissions::Check(ac_str_sid.c_str()).TryAccessPath(path.c_str());
-        if (((existing_access & GENERIC_READ) == GENERIC_READ) || ((existing_access & FILE_GENERIC_READ) == FILE_GENERIC_READ)) {
+        if (Permissions::Check::HasReadAccess(existing_access)) {
             std::wcout << "AppContainer already have read access.\n";
             return 0;
         }
