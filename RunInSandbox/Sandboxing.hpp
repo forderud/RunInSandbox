@@ -310,20 +310,20 @@ public:
                     return 0;
             }
 
-            AUTHZ_ACCESS_REQUEST AccessRequest = {};
-            AccessRequest.DesiredAccess = MAXIMUM_ALLOWED;
-            AccessRequest.PrincipalSelfSid = NULL;
-            AccessRequest.ObjectTypeList = NULL;
-            AccessRequest.ObjectTypeListLength = 0;
-            AccessRequest.OptionalArguments = NULL;
-
             ACCESS_MASK GrantedAccess = 0;
             DWORD       Error = 0;
             {
+                AUTHZ_ACCESS_REQUEST AccessRequest = {};
+                AccessRequest.DesiredAccess = MAXIMUM_ALLOWED;
+                AccessRequest.PrincipalSelfSid = NULL;
+                AccessRequest.ObjectTypeList = NULL;
+                AccessRequest.ObjectTypeListLength = 0;
+                AccessRequest.OptionalArguments = NULL;
+
                 AUTHZ_ACCESS_REPLY AccessReply = {};
                 AccessReply.ResultListLength = 1;
-                AccessReply.GrantedAccessMask = &GrantedAccess; // array of granted access masks [size_is(ResultListLength)]
-                AccessReply.Error             = &Error;         // array of results [size_is(ResultListLength)]
+                AccessReply.GrantedAccessMask = &GrantedAccess; // [size_is(ResultListLength)]
+                AccessReply.Error             = &Error;         // [size_is(ResultListLength)]
 
                 // perform access check
                 BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
