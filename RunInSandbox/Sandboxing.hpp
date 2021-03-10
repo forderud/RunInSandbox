@@ -26,6 +26,7 @@ static void WIN32_CHECK(BOOL res) {
 }
 
 
+/** RAII wrapper of Win32 "handle" objects. */
 class HandleWrap {
 public:
     HandleWrap() {
@@ -39,7 +40,7 @@ public:
 
     ~HandleWrap() {
         if (handle) {
-            WIN32_CHECK(CloseHandle(handle));
+            CloseHandle(handle);
             handle = nullptr;
         }
     }
@@ -227,11 +228,11 @@ private:
 
 enum class IntegrityLevel {
     Default = 0,
-    AppContainer = 1,            ///< dummy value to ease impl.
+    AppContainer = 1,                ///< dummy value to ease impl.
     Untrusted = WinUntrustedLabelSid,///< same as ConvertStringSidToSid("S-1-16-0",..)
-    Low       = WinLowLabelSid,    ///< same as ConvertStringSidToSid("S-1-16-4096",..)
-    Medium    = WinMediumLabelSid, ///< same as ConvertStringSidToSid("S-1-16-8192",..)
-    High      = WinHighLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-12288",..)
+    Low       = WinLowLabelSid,      ///< same as ConvertStringSidToSid("S-1-16-4096",..)
+    Medium    = WinMediumLabelSid,   ///< same as ConvertStringSidToSid("S-1-16-8192",..)
+    High      = WinHighLabelSid,     ///< same as ConvertStringSidToSid("S-1-16-12288",..)
 };
 
 static std::wstring ToString (IntegrityLevel integrity) {
@@ -310,6 +311,10 @@ public:
                     return 0;
             }
 
+            return TryAccess(path_sd);
+        }
+
+        ACCESS_MASK TryAccess(PSECURITY_DESCRIPTOR sd) {
             ACCESS_MASK GrantedAccess = 0;
             DWORD       Error = 0;
             {
@@ -326,7 +331,7 @@ public:
                 AccessReply.Error             = &Error;         // [size_is(ResultListLength)]
 
                 // perform access check
-                BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, path_sd, NULL, 0, &AccessReply, NULL);
+                BOOL ok = AuthzAccessCheck(0, m_autz_client_ctx.get(), &AccessRequest, NULL, sd, NULL, 0, &AccessReply, NULL);
                 if (!ok)
                     return 0;
             }
@@ -343,6 +348,12 @@ public:
             return false;
         }
 
+        /** Special access control checking for COM. Must be kept in sync with EnableLaunchActPermission function below.
+            REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com */
+        static bool HasLaunchPermission(ACCESS_MASK mask) {
+            return (mask & COM_RIGHTS_EXECUTE) && (mask & COM_RIGHTS_EXECUTE_LOCAL) && (mask & COM_RIGHTS_ACTIVATE_LOCAL);
+        }
+
     private:
         std::unique_ptr<std::remove_pointer<AUTHZ_RESOURCE_MANAGER_HANDLE>::type, decltype(&AuthzFreeResourceManager)> m_autz_mgr;
         std::unique_ptr<std::remove_pointer<AUTHZ_CLIENT_CONTEXT_HANDLE>::type, decltype(&AuthzFreeContext)>           m_autz_client_ctx;
@@ -357,6 +368,9 @@ public:
     * Will fail if only the "Administrators" group have full access to the path, even if the current user is a member of that group.
     * Requires either the current user or the "Users" group to be granted full access to the path. */
     static DWORD MakePathLowIntegrity(const wchar_t * path) {
+        if (!path || (wcslen(path) == 0))
+            return ERROR_BAD_ARGUMENTS;
+
         ACL * sacl = nullptr; // system access control list (weak ptr.)
         LocalWrap<PSECURITY_DESCRIPTOR> SD; // must outlive SetNamedSecurityInfo to avoid sporadic failures
         {
@@ -378,6 +392,11 @@ public:
     /** Make file/folder accessible from a given AppContainer.
         Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
     static DWORD MakePathAppContainer(const wchar_t * ac_str_sid, const wchar_t * path, ACCESS_MASK accessMask) {
+        if (!ac_str_sid || (wcslen(ac_str_sid) == 0))
+            return ERROR_BAD_ARGUMENTS;
+        if (!path || (wcslen(path) == 0))
+            return ERROR_BAD_ARGUMENTS;
+
         // convert string SID to binary
         SidWrap ac_sid;
         WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
@@ -412,6 +431,11 @@ public:
     /** Enable DCOM launch & activation requests for a given AppContainer SID.
         TODO: Append ACL instead of replacing it. */
     static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
+        if (!ac_str_sid || (wcslen(ac_str_sid) == 0))
+            return ERROR_BAD_ARGUMENTS;
+        if (!app_id || (wcslen(app_id) == 0))
+            return ERROR_BAD_ARGUMENTS;
+
         // Allow World Local Launch/Activation permissions. Label the SD for LOW IL Execute UP
         // REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format
         // REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com
@@ -492,12 +516,12 @@ struct ImpersonateThread {
     static IntegrityLevel GetProcessLevel(HANDLE process_token = GetCurrentProcessToken()) {
         DWORD token_info_length = 0;
         if (GetTokenInformation(process_token, TokenIntegrityLevel, NULL, 0, &token_info_length))
-            abort(); // should never happen
+            abort(); // should never fail
 
         std::vector<char> token_info_buf(token_info_length);
         auto* token_info = reinterpret_cast<TOKEN_MANDATORY_LABEL*>(token_info_buf.data());
         if (!GetTokenInformation(process_token, TokenIntegrityLevel, token_info, token_info_length, &token_info_length))
-            abort(); // should never happen
+            abort(); // should never fail
 
         DWORD integrity_level = *GetSidSubAuthority(token_info->Label.Sid, *GetSidSubAuthorityCount(token_info->Label.Sid) - 1);
 
@@ -538,6 +562,7 @@ struct ImpersonateThread {
 
     HandleWrap  m_token;
 };
+
 
 class RegQuery {
 public:
