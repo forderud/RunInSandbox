@@ -30,9 +30,9 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         if (grant_appcontainer_permissions) {
             // grant ALL_APPLICATION_PACKAGES permission to the COM EXE & DCOM LaunchPermission
             const wchar_t ac_str_sid[] = L"S-1-15-2-1"; // ALL_APP_PACKAGES
+            Permissions::Check access_checker(ac_str_sid);
 
-
-            DWORD existing_access = Permissions::Check(ac_str_sid).TryAccessPath(exe_path.c_str());
+            DWORD existing_access = access_checker.TryAccessPath(exe_path.c_str());
             if (Permissions::Check::HasReadAccess(existing_access)) {
                 std::wcout << "AppContainer already have EXE access.\n";
             } else {
@@ -49,11 +49,38 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
                 std::wcerr << L"ERROR: Unable to locate COM server AppID." << std::endl;
                 exit(-2);
             }
-            DWORD err = Permissions::EnableLaunchActPermission(ac_str_sid, app_id.c_str());
-            if (err != ERROR_SUCCESS) {
-                _com_error error(err);
-                std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
-                exit(-2);
+
+            bool has_launch_perm = false;
+            {
+                // open registry path
+                CComBSTR reg_path(L"AppID\\");
+                reg_path.Append(app_id.c_str());
+
+                CRegKey appid_reg;
+                if (appid_reg.Open(HKEY_CLASSES_ROOT, reg_path, KEY_READ) != ERROR_SUCCESS) {
+                    std::wcerr << L"ERROR: Unable to open server AppID." << std::endl;
+                    exit(-2);
+                }
+                
+                ULONG launch_perm_len = 0;
+                appid_reg.QueryBinaryValue(L"LaunchPermission", nullptr, &launch_perm_len); // ignore failure
+                if (launch_perm_len > 0) {
+                    std::vector<BYTE> launch_perm_sd(launch_perm_len, 0);
+
+                    if (appid_reg.QueryBinaryValue(L"LaunchPermission", launch_perm_sd.data(), &launch_perm_len) == ERROR_SUCCESS) {
+                        ACCESS_MASK access = access_checker.TryAccess(launch_perm_sd.data());
+                        has_launch_perm = Permissions::Check::HasLaunchPermission(access);
+                    }
+                }
+            }
+
+            if (!has_launch_perm) {
+                DWORD err = Permissions::EnableLaunchActPermission(ac_str_sid, app_id.c_str());
+                if (err != ERROR_SUCCESS) {
+                    _com_error error(err);
+                    std::wcerr << L"ERROR: Failed to grant AppContainer AppID LaunchPermission, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
+                    exit(-2);
+                }
             }
         }
 
