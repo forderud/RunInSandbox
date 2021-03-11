@@ -32,8 +32,6 @@ public:
     HandleWrap() {
     }
 
-    HandleWrap(const HandleWrap & other) = delete;
-
     HandleWrap(HandleWrap && other) {
         std::swap(handle, other.handle);
     }
@@ -65,6 +63,8 @@ public:
     }
 
 private:
+    HandleWrap(const HandleWrap & other) = delete;
+
     HANDLE handle = nullptr;
 };
 static_assert(sizeof(HandleWrap) == sizeof(HANDLE), "HandleWrap size mismatch");
