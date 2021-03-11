@@ -46,12 +46,12 @@ public:
     }
 
     HandleWrap& operator = (HandleWrap && other) {
-        HandleWrap::~HandleWrap();
+        this->~HandleWrap();
         new(this) HandleWrap(std::move(other));
         return *this;
     }
     HandleWrap& operator = (HANDLE other) {
-        HandleWrap::~HandleWrap();
+        this->~HandleWrap();
         new(this) HandleWrap();
         handle = other;
         return *this;
