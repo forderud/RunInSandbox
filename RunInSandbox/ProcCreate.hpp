@@ -90,8 +90,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, cons
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     // append arguments
     for (const auto & arg : arguments) {
-        cmdline += L" ";
-        cmdline += arg;
+        cmdline += L" " + arg;
     }
 
     ProcessInfoWrap pi;
