@@ -71,7 +71,7 @@ static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appco
     CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
     CComPtr<IUnknown> obj;
-    if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
+    if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // launch "COM Elevation Moniker"-compatible COM class in elevated process
         // example COM class for testing: HNetCfg.FwOpenPort
         CHECK(CoCreateInstanceElevated<IUnknown>(0, clsid, &obj));

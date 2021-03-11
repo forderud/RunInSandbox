@@ -101,7 +101,7 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, cons
     if (IsCMD(exe_path))
         creation_flags |= CREATE_NEW_CONSOLE; // required for starting cmd.exe
 
-    if ((mode == IntegrityLevel::High) && !IsUserAnAdmin()) {
+    if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // request UAC elevation
         SHELLEXECUTEINFOW info = {};
         info.cbSize = sizeof(info);
