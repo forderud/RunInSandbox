@@ -429,7 +429,8 @@ public:
 
 
     /** Enable DCOM launch & activation requests for a given AppContainer SID.
-        TODO: Append ACL instead of replacing it. */
+        TODO: Update ACLs instead of replacing it.
+        REF: https://docs.microsoft.com/en-us/windows/win32/secauthz/modifying-the-acls-of-an-object-in-c-- */
     static LSTATUS EnableLaunchActPermission (const wchar_t* ac_str_sid, const wchar_t* app_id) {
         if (!ac_str_sid || (wcslen(ac_str_sid) == 0))
             return ERROR_BAD_ARGUMENTS;

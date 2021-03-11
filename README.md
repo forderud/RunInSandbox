@@ -21,7 +21,6 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 
 ### Outstanding challenges
 * Why is `RegisterDragDrop` triggering 0x80070005 "Access is denied" exception in the AppContainer process if the host is elevated (high-integrity level).
-* How to _append_ the DCOM `LaunchPermission` ACL instead of replacing it, so that existing permissions (if present) aren't lost. Also, look for a less cryptic way of achieving the same.
 * How to apply `WinCapabilityRemovableStorageSid` to enable USB stick access for the AppContainer.
 * Find solution for CoRegisterClassObject synchronization before calling CoCreateInstance, so that we can remove the arbitrary `Sleep`.
 
