@@ -23,7 +23,7 @@ public:
     }
 
     HRESULT STDMETHODCALLTYPE Ping () override {
-        std::wcout << L"Callback received.\n";
+        std::wcout << L"  Callback received.\n";
         return S_OK;
     }
 
@@ -97,8 +97,11 @@ static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appco
         std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
 
         {
+            // fails for AppContainers if host is elevated
+            std::wcout << L"Testing COM callback...\n";
             auto cb = CreateLocalInstance<CallbackTest>();
             CHECK(calc->TestCallback(cb));
+            std::wcout << L"[success]\n";
         }
 
 #if 0
