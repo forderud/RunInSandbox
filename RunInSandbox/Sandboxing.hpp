@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <tuple>
 #include <vector>
 #include <Windows.h>
 #include <atlbase.h>
@@ -464,6 +465,24 @@ public:
         DWORD dwLen = GetSecurityDescriptorLength(ac_sd);
         LSTATUS lResult = appid_reg.SetBinaryValue(L"LaunchPermission", (BYTE*)*&ac_sd, dwLen);
         return lResult;
+    }
+
+    /** Retrieve the account type, username & domain for a given SID. */
+    static std::tuple<SID_NAME_USE,std::wstring, std::wstring> LookupSID(SID* sid) {
+        std::wstring name(128, L'\0');
+        auto name_len = (DWORD)name.size();
+        std::wstring domain(128, L'\0');
+        auto domain_len = (DWORD)name.size();
+        SID_NAME_USE snu = {};
+        BOOL ok = LookupAccountSidW(NULL, sid, const_cast<wchar_t*>(name.data()), &name_len, const_cast<wchar_t*>(domain.data()), &domain_len, &snu);
+        if (!ok) {
+            DWORD err = GetLastError();
+            HRESULT hr = HRESULT_FROM_WIN32(err); hr;
+            return {};
+        }
+        name.resize(name_len);
+        domain.resize(domain_len);
+        return {snu, name, domain};
     }
 };
 
