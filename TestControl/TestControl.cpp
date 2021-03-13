@@ -68,3 +68,13 @@ HRESULT STDMETHODCALLTYPE TestControl::TestCallback(IUnknown * obj) {
     // invoke callback
     return tmp->Ping();
 }
+
+HRESULT STDMETHODCALLTYPE TestControl::MoveMouseCursor(int x_pos, int y_pos) {
+    // will fail without WINSTA_WRITEATTRIBUTES access
+    BOOL ok = SetCursorPos(x_pos, y_pos);
+    if (!ok) {
+        DWORD err = GetLastError();
+        return HRESULT_FROM_WIN32(err);
+    }
+    return S_OK;
+}

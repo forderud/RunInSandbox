@@ -28,6 +28,9 @@ interface ISimpleCalculator : IUnknown {
 
     [helpstring("For testing of COM callbacks")]
     HRESULT TestCallback([in] IUnknown * obj);
+
+    [helpstring("Move the mouse cursor")]
+    HRESULT MoveMouseCursor([in] int x_pos, [in] int y_pos);
 };
 
 
