@@ -270,18 +270,12 @@ public:
     class Check {
     public:
         Check (const wchar_t * identity_sid) : m_autz_mgr(nullptr, nullptr), m_autz_client_ctx(nullptr, nullptr) {
+            Initialize();
+
             SidWrap identity_sid_bin;
             BOOL ok = ConvertStringSidToSid(identity_sid, &identity_sid_bin);
             if (!ok)
                 throw std::runtime_error("ConvertStringSidToSid failure");
-
-            {
-                AUTHZ_RESOURCE_MANAGER_HANDLE mgr_tmp = nullptr;
-                ok = AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &mgr_tmp);
-                if (!ok)
-                    abort(); // should never happen
-                m_autz_mgr = {mgr_tmp, AuthzFreeResourceManager};
-            }
 
             {
                 AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
@@ -355,6 +349,14 @@ public:
         }
 
     private:
+        void Initialize() {
+            AUTHZ_RESOURCE_MANAGER_HANDLE mgr_tmp = nullptr;
+            BOOL ok = AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &mgr_tmp);
+            if (!ok)
+                abort(); // should never happen
+            m_autz_mgr = { mgr_tmp, AuthzFreeResourceManager };
+        }
+
         std::unique_ptr<std::remove_pointer<AUTHZ_RESOURCE_MANAGER_HANDLE>::type, decltype(&AuthzFreeResourceManager)> m_autz_mgr;
         std::unique_ptr<std::remove_pointer<AUTHZ_CLIENT_CONTEXT_HANDLE>::type, decltype(&AuthzFreeContext)>           m_autz_client_ctx;
     };
