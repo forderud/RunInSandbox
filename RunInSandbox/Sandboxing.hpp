@@ -285,8 +285,7 @@ public:
 
             {
                 AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
-                LUID unusedId = {};
-                ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, unusedId, NULL, &tmp_ctx);
+                ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, {}, NULL, &tmp_ctx);
                 if (!ok)
                     throw std::runtime_error("AuthzInitializeContextFromSid failure");
 
