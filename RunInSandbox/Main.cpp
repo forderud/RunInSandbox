@@ -187,6 +187,13 @@ int wmain (int argc, wchar_t *argv[]) {
             // that then leads to 0x800706BE "The remote procedure call failed" in this process.
             auto drop_target = CreateLocalInstance<DropTarget>();
             CHECK(RegisterDragDrop(wnd, drop_target));
+
+#if 0
+            // enable drag-and-drop from elevated host (doesn't solve the problem)
+            BOOL ok = ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
+            ok = ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
+            ok = ChangeWindowMessageFilter(0x0049, MSGFLT_ADD); // WM_COPYGLOBALDATA
+#endif
         }
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
