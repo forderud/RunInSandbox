@@ -3,7 +3,6 @@
 #include "ProcCreate.hpp"
 #include <tuple>
 #include "../TestControl/ComSupport.hpp"
-//#define DEBUG_COM_ACTIVATION
 
 
 /** Attempt to create a COM server that runds through a specific user account.
@@ -97,21 +96,8 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         }
     }
 
-    CComPtr<IUnknown> obj;
     // create COM object in a separate process
-#ifdef DEBUG_COM_ACTIVATION
-    // open Event Viewer, "Windows Logs" -> "System" log to see details on failures
-    CComPtr<IClassFactory> cf;
-    HRESULT hr = CoGetClassObject(clsid, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING, NULL, IID_IClassFactory, (void**)&cf);
-    if ((mode == IntegrityLevel::AppContainer) && (hr == E_ACCESSDENIED)) {
-        std::wcerr << L"ERROR: CoGetClassObject access denied when trying to create a new COM server instance. Have you remember to grant AppContainer permissions?" << std::endl;
-        exit(-3);
-    } else {
-        CHECK(hr);
-    }
-    hr = cf->CreateInstance(nullptr, IID_IUnknown, (void**)&obj);
-    CHECK(hr);
-#else
+    CComPtr<IUnknown> obj;
     HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
     if ((mode == IntegrityLevel::AppContainer) && (hr == E_ACCESSDENIED)) {
         std::wcerr << L"ERROR: CoCreateInstance access denied when trying to create a new COM server instance. Have you remember to grant AppContainer permissions?" << std::endl;
@@ -119,7 +105,6 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     } else {
         CHECK(hr);
     }
-#endif
 
     return obj;
 }
