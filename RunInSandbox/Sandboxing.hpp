@@ -539,7 +539,7 @@ struct ImpersonateThread {
         WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
 
         HandleWrap shell_proc;
-        shell_proc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+        shell_proc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_CREATE_PROCESS, FALSE, pid); // QUERY_INFORMATION needed for impersonation & CREATE_PROCESS for parent-process setting
         assert(shell_proc);
         return shell_proc;
     }
