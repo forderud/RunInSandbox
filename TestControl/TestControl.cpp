@@ -74,7 +74,8 @@ HRESULT STDMETHODCALLTYPE TestControl::MoveMouseCursor(int x_pos, int y_pos) {
     BOOL ok = SetCursorPos(x_pos, y_pos);
     if (!ok) {
         DWORD err = GetLastError();
-        return HRESULT_FROM_WIN32(err);
+        // TODO: Figure out why err==0 here
+        return E_ACCESSDENIED;
     }
     return S_OK;
 }
