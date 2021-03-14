@@ -491,11 +491,11 @@ public:
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateThread {
-    ImpersonateThread(IntegrityLevel integrity) {
+    ImpersonateThread(IntegrityLevel integrity, HANDLE proc = GetCurrentProcess()) {
         {
             // current user
             HandleWrap cur_token;
-            WIN32_CHECK(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
+            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
             WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &m_token));
         }
 
@@ -530,6 +530,20 @@ struct ImpersonateThread {
         TIL.Label.Attributes = SE_GROUP_INTEGRITY;
         TIL.Label.Sid = impersonation_sid;
         WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(impersonation_sid)));
+    }
+
+    static HandleWrap GetShellProc() {
+        assert(ImpersonateThread::IsProcessElevated());
+
+        // use explorer.exe as parent process to escape UAC elevation
+        // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
+        DWORD pid = 0;
+        WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
+
+        HandleWrap shell_proc;
+        shell_proc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+        assert(shell_proc);
+        return shell_proc;
     }
 
     /** Determine the integrity level for a process.
