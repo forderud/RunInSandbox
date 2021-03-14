@@ -533,8 +533,6 @@ struct ImpersonateThread {
     }
 
     static HandleWrap GetShellProc() {
-        assert(ImpersonateThread::IsProcessElevated());
-
         // use explorer.exe as parent process to escape UAC elevation
         // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
         DWORD pid = 0;
