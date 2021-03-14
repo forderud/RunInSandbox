@@ -104,9 +104,8 @@ static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appco
             std::wcout << L"[success]\n";
         }
 
-        if (mode != IntegrityLevel::AppContainer) {
-            // fails silently in low integrity
-            // fails silently in medium integrity if host is elevated
+        if (mode >= IntegrityLevel::Medium) {
+            // fails in medium integrity if host is elevated
             std::wcout << L"Moving mouse cursor to top-left corner...\n";
             HRESULT hr = calc->MoveMouseCursor(0, 0);
             if (FAILED(hr))
