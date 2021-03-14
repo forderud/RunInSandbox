@@ -149,9 +149,6 @@ static HandleWrap ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, cons
     // ignore failure if process is not a GUI app
     WaitForInputIdle(pi->hProcess, INFINITE);
 
-    // wait a bit more (WaitForInputIdle doesn't seem to be sufficient)
-    Sleep(200);
-
     // return process handle
     HandleWrap proc;
     std::swap(*&proc, pi->hProcess);

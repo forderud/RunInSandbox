@@ -22,7 +22,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 ### Outstanding challenges
 * Why is `RegisterDragDrop` triggering 0x80070005 "Access is denied" exception in the AppContainer process if the host is elevated (high-integrity level).
 * How to apply `WinCapabilityRemovableStorageSid` to enable USB stick access for the AppContainer.
-* Find solution for CoRegisterClassObject synchronization before calling CoCreateInstance, so that we can remove the arbitrary `Sleep`.
+* Investigate if `WaitForInputIdle` is sufficient `CoRegisterClassObject` synchronization before calling `CoCreateInstance`.
 * Why is `SetCursorPos` failing at medium-integrity if the host is elevated (high-integrity level).
 
 
