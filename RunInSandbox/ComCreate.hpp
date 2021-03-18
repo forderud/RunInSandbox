@@ -96,6 +96,17 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         }
     }
 
+    if (explicit_process_create) {
+        // Suggestions from Microsoft on how to handle potential CoCreateInstance failures in connection to explicit process creation:
+        // There’s no notification or subscription for COM server availability after launch as OOP.
+        // So the common approach – in case if you start the server process manually and the try to obtain the object’s pointer – is
+        // - Start the process
+        // - Start a loop with prudential wait interval
+        // - Try-and-fail for the HRESULT calling CoCreateInstance
+        //
+        //  Havin a loop with, I’d say, 500 msecs waiting quantum and max waiting limit of 10 tries would provide the expected flexibility in execution delay.
+    }
+
     // create COM object in a separate process
     CComPtr<IUnknown> obj;
     HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
