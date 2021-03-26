@@ -1,6 +1,5 @@
 #pragma once
 #include <Shlobj.h>
-#include "Sandboxing.hpp"
 
 
 /** RAII wrapper OF STARTUPINFOEX. */
@@ -86,7 +85,7 @@ static bool IsCMD (std::wstring path) {
 
 
 /** Launch a new process within an AppContainer. */
-static void ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
+static void ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     // append arguments
     for (const auto & arg : arguments) {
@@ -94,7 +93,6 @@ static void ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std:
     }
 
     ProcessInfoWrap pi;
-    StartupInfoWrap si;
 
     constexpr BOOL INHERIT_HANDLES = FALSE;
     DWORD creation_flags = EXTENDED_STARTUPINFO_PRESENT;
@@ -114,7 +112,7 @@ static void ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std:
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
         return;
-    } else if (mode == IntegrityLevel::Medium) {
+    } else if ((mode == IntegrityLevel::Medium) || (mode == IntegrityLevel::AppContainer)) {
         HandleWrap parent_proc; // lifetime tied to "si"
         if (ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
@@ -125,14 +123,6 @@ static void ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std:
         }
 
         // processes are created with medium integrity as default, regardless of UAC settings
-        WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
-    } else if (mode == IntegrityLevel::AppContainer) {
-        // create new AppContainer process, based on STARTUPINFO
-        AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
-
-        SECURITY_CAPABILITIES sec_cap = ac.SecCap(); // need to outlive CreateProcess
-        si.SetSecurity(&sec_cap);
-
         WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     } else {
         ImpersonateThread low_int(mode);

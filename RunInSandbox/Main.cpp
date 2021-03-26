@@ -198,7 +198,19 @@ int wmain (int argc, wchar_t *argv[]) {
         for (; arg_idx < argc; ++arg_idx)
             args.push_back(argv[arg_idx]);
 
-        ProcCreate(progid.c_str(), mode, args);
+        StartupInfoWrap si;
+
+        std::unique_ptr<AppContainerWrap> ac;
+        SECURITY_CAPABILITIES sec_cap = {}; // need to outlive CreateProcess
+        if (mode == IntegrityLevel::AppContainer) {
+            // create new AppContainer process, based on STARTUPINFO
+            ac.reset(new AppContainerWrap(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer"));
+
+            sec_cap = ac->SecCap(); // need to outlive CreateProcess
+            si.SetSecurity(&sec_cap);
+        }
+
+        ProcCreate(si, progid.c_str(), mode, args);
     }
 
     std::wcout << L"[done]" << std::endl;
