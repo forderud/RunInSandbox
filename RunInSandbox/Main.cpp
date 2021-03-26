@@ -183,17 +183,17 @@ int wmain (int argc, wchar_t *argv[]) {
         OleInitialize(NULL);
         HWND wnd = FindWindowEx(HWND_MESSAGE, NULL, NULL, NULL); // invisible message-only window for COM apartment
 
+        // adjust COM security to allow OLE drag-and-drop
+        HRESULT hr = CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL/*reserved*/,
+            RPC_C_AUTHN_LEVEL_DEFAULT, ///< 
+            RPC_C_IMP_LEVEL_IDENTIFY,  ///< allow server to identify but not impersonate client
+            nullptr, EOAC_NONE/*capabilities*/, NULL/*reserved*/);
+        if (FAILED(hr))
+            abort();
+
         if (drag_n_drop) {
             std::wcout << L"Enabling OLE drag-and-drop.\n";
-#if 0
-            // enable drag-and-drop from elevated host (doesn't solve the problem)
-            // REF: https://www.codeproject.com/Articles/104528/How-to-Enable-Drag-and-Drop-for-an-Elevated-MFC-Ap
-            WIN32_CHECK(ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD));
-            WIN32_CHECK(ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD));
-            WIN32_CHECK(ChangeWindowMessageFilter(0x0049, MSGFLT_ADD)); // WM_COPYGLOBALDATA
-#endif
-            // Triggers 0x80070005 "Access is denied" exception in AppContainer process if this process is elevated (high integrity level)
-            // that then leads to 0x800706BE "The remote procedure call failed" in this process.
+            // Triggers 0x80070005 "Access is denied" exception in AppContainer process if this process is elevated (high integrity level) unless COM security is tweaked
             auto drop_target = CreateLocalInstance<DropTarget>();
             CHECK(RegisterDragDrop(wnd, drop_target));
         }
