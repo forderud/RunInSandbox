@@ -127,10 +127,10 @@ static void ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std:
         // processes are created with medium integrity as default, regardless of UAC settings
         WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     } else if (mode == IntegrityLevel::AppContainer) {
-        AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
-        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
-
         // create new AppContainer process, based on STARTUPINFO
+        AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
+
+        SECURITY_CAPABILITIES sec_cap = ac.SecCap(); // need to outlive CreateProcess
         si.SetSecurity(&sec_cap);
 
         WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
@@ -145,10 +145,8 @@ static void ProcCreate(const wchar_t * exe_path, IntegrityLevel mode, const std:
 /** Create and kill an AppContainer process, just to get a process handle that can later be impersonated. */
 static HandleWrap CreateAndKillAppContainerProcess (AppContainerWrap & ac, const wchar_t * exe_path) {
     StartupInfoWrap si;
-    {
-        SECURITY_CAPABILITIES sec_cap = ac.SecCap();
-        si.SetSecurity(&sec_cap);
-    }
+    SECURITY_CAPABILITIES sec_cap = ac.SecCap(); // need to outlive CreateProcess
+    si.SetSecurity(&sec_cap);
 
     // create new AppContainer process in suspended state
     ProcessInfoWrap pi;
