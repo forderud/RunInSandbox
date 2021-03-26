@@ -165,7 +165,7 @@ public:
         for (auto &c : m_capabilities) {
             if (c.Sid) {
                 HLOCAL fail = LocalFree(c.Sid);
-                assert(!fail);
+                assert(!fail); fail;
                 c.Sid = nullptr;
             }
         }
