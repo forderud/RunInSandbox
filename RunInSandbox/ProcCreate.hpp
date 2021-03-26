@@ -151,9 +151,8 @@ static HandleWrap CreateAndKillAppContainerProcess (AppContainerWrap & ac, const
     }
 
     // create new AppContainer process in suspended state
-    std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     ProcessInfoWrap pi;
-    WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, EXTENDED_STARTUPINFO_PRESENT | CREATE_SUSPENDED, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+    WIN32_CHECK(CreateProcess(exe_path, nullptr, /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, EXTENDED_STARTUPINFO_PRESENT | CREATE_SUSPENDED, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
 
     // Kill process since we're only interested in the handle for now.
     // The COM runtime will later recreate the process when calling CoCreateInstance.
