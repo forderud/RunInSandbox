@@ -13,6 +13,7 @@
 #include <authz.h>
 #pragma comment(lib, "authz.lib")
 #include <Winternl.h>
+#pragma comment(lib, "onecoreuap.lib") // for DeriveCapabilitySidsFromName
 
 
 static void WIN32_CHECK(BOOL res) {
@@ -151,23 +152,8 @@ class AppContainerWrap {
 public:
     AppContainerWrap(const wchar_t * name, const wchar_t * desc) {
         // https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations
-        // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-well_known_sid_type
-        const WELL_KNOWN_SID_TYPE capabilities[] = {
-            WinCapabilityInternetClientSid, // confirmed to enable client sockets
-#if 0
-            WinCapabilityRemovableStorageSid, // have been unable to get this to work (see https://github.com/M2Team/Privexec/issues/31 for more info)
-            WinCapabilityInternetClientServerSid,
-            WinCapabilityPrivateNetworkClientServerSid,
-            WinCapabilityPicturesLibrarySid,
-            WinCapabilityVideosLibrarySid,
-            WinCapabilityMusicLibrarySid,
-            WinCapabilityDocumentsLibrarySid,
-            WinCapabilitySharedUserCertificatesSid,
-            WinCapabilityEnterpriseAuthenticationSid,
-#endif
-        };
-        for (auto cap : capabilities)
-            AddCapability(cap);
+        AddCapability(L"internetClient");   // confirmed to enable client sockets (but not ping)
+        AddCapability(L"removableStorage"); // have been unable to get this to work (see https://github.com/M2Team/Privexec/issues/31 for more info)
 
         // delete existing (if present)
         Delete(name);
@@ -178,7 +164,8 @@ public:
     ~AppContainerWrap() {
         for (auto &c : m_capabilities) {
             if (c.Sid) {
-                free(c.Sid);
+                HLOCAL fail = LocalFree(c.Sid);
+                assert(!fail);
                 c.Sid = nullptr;
             }
         }
@@ -213,12 +200,30 @@ public:
         return sc;
     }
 
-    void AddCapability(WELL_KNOWN_SID_TYPE capability) {
-        PSID sid = malloc(SECURITY_MAX_SID_SIZE); // freed in destructor
-        DWORD sidListSize = SECURITY_MAX_SID_SIZE;
-        WIN32_CHECK(CreateWellKnownSid(capability, NULL, sid, &sidListSize));
+    void AddCapability(const wchar_t * cap_name) {
+        PSID * cap_group_sid = nullptr;
+        DWORD cap_group_sid_len = 0;
+        PSID * cap_sids = nullptr;
+        DWORD cap_sids_len = 0;
+        WIN32_CHECK(DeriveCapabilitySidsFromName(cap_name, &cap_group_sid, &cap_group_sid_len, &cap_sids, &cap_sids_len));
 
-        m_capabilities.push_back({ sid, SE_GROUP_ENABLED });
+        // forward all capability SIDs (only one in practice)
+        for (size_t i = 0; i < cap_sids_len; ++i)
+            m_capabilities.push_back({cap_sids[i], SE_GROUP_ENABLED});
+
+        // clean up cap_sids array (entries will be cleaned up in the destuctor)
+        HLOCAL fail = LocalFree(cap_sids);
+        assert(!fail);
+        cap_sids = nullptr;
+
+        // clean up cap_group_sid entries & array
+        for (size_t i = 0; i < cap_group_sid_len; ++i) {
+            fail = LocalFree(cap_group_sid[i]);
+            assert(!fail);
+        }
+        fail = LocalFree(cap_group_sid);
+        assert(!fail);
+        cap_group_sid = nullptr;
     }
 
 private:
