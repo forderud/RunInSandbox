@@ -20,9 +20,8 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 |AppContainer         | Works if `ALL_APPLICATION_PACKAGES` have been granted read&execute permissions for the COM EXE _and_ the corresponding `LaunchPermission` AppID registry key grant `ALL_APPLICATION_PACKAGES` local activation permission.  |
 
 ### Outstanding challenges
-* Why is `RegisterDragDrop` in the host process triggering 0x80070005 "Access is denied" exception in the AppContainer process _if_ the host is elevated (high-integrity level).
-* Why is `SetCursorPos` failing at medium-integrity _if_ the host is elevated (high-integrity level).
 * How to apply `removableStorage` capability to enable USB stick access for the AppContainer.
+* Why is `SetCursorPos` failing at medium-integrity _if_ the host is elevated (high-integrity level).
 
 
 ## GrantAccess
