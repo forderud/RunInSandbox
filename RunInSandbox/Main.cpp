@@ -67,10 +67,7 @@ public:
 RunInSandboxModule _AtlModule;
 
 
-static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions, HWND wnd) {
-    SetThreadDescription(GetCurrentThread(), L"COM thread (MTA)");
-    CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
+static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions) {
     CComPtr<IUnknown> obj;
     if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // launch "COM Elevation Moniker"-compatible COM class in elevated process
@@ -139,9 +136,6 @@ static void ThreadedComTests (CLSID clsid, IntegrityLevel mode, bool grant_appco
     SetComAttribute(obj, L"Visible", true);
 
     Sleep(2000); // wait 2sec to keep the child process alive a bit
-
-    // signal that main thread should quit
-    PostMessage(wnd, WM_QUIT, 0, 0);
 }
 
 
@@ -168,12 +162,9 @@ int wmain (int argc, wchar_t *argv[]) {
     arg_idx++;
 
     bool grant_appcontainer_permissions = false;
-    bool drag_n_drop = false;
     while (arg_idx < argc) {
         if (std::wstring(argv[arg_idx]) == L"-g") {
             grant_appcontainer_permissions = true;
-        } else if (std::wstring(argv[arg_idx]) == L"-dnd") {
-            drag_n_drop = true;
         }
         arg_idx++;
     }
@@ -191,7 +182,7 @@ int wmain (int argc, wchar_t *argv[]) {
         if (FAILED(hr))
             abort();
 
-        if (drag_n_drop) {
+        {
             std::wcout << L"Enabling OLE drag-and-drop.\n";
             // Triggers 0x80070005 "Access is denied" exception in AppContainer process if this process is elevated (high integrity level) unless COM security is tweaked
             auto drop_target = CreateLocalInstance<DropTarget>();
@@ -199,21 +190,7 @@ int wmain (int argc, wchar_t *argv[]) {
         }
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
-        std::thread t(ThreadedComTests, clsid, mode, grant_appcontainer_permissions, wnd);
-
-        // pump messages until receiving WM_QUIT
-        MSG msg = {};
-        BOOL ret = false;
-        while((ret = GetMessage( &msg, NULL, 0, 0 )) != 0) { 
-            if (ret == -1) {
-                break; // break on error
-            } else {
-                TranslateMessage(&msg); 
-                DispatchMessage(&msg); 
-            }
-        }
-
-        t.join();
+        ComTests(clsid, mode, grant_appcontainer_permissions);
     } else if (url_provided) {
         std::wcout << L"Opening URL " << progid << " in default browser\n";
         if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
