@@ -16,17 +16,10 @@ class ATL_NO_VTABLE CallbackTest :
     public CComCoClass<CallbackTest>, // no registry entries
     public ICallbackTest {
 public:
-    CallbackTest () {
-    }
-
-    ~CallbackTest() {
-    }
-
     HRESULT STDMETHODCALLTYPE Ping () override {
         std::wcout << L"  Callback received.\n";
         return S_OK;
     }
-
 
     BEGIN_COM_MAP(CallbackTest)
         COM_INTERFACE_ENTRY(ICallbackTest)
@@ -38,12 +31,7 @@ public:
 class DropTarget : 
     public CComObjectRootEx<CComSingleThreadModel>,
     public CComCoClass<DropTarget>, // no registry entries
-    public IDropTarget
-{
-    BEGIN_COM_MAP(DropTarget)
-        COM_INTERFACE_ENTRY(IDropTarget)
-    END_COM_MAP()
-
+    public IDropTarget {
 public:
     HRESULT STDMETHODCALLTYPE DragEnter(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
         return E_NOTIMPL;
@@ -57,6 +45,10 @@ public:
     HRESULT STDMETHODCALLTYPE Drop(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
         return E_NOTIMPL;
     }
+
+    BEGIN_COM_MAP(DropTarget)
+        COM_INTERFACE_ENTRY(IDropTarget)
+    END_COM_MAP()
 };
 
 class RunInSandboxModule: public ATL::CAtlExeModuleT<RunInSandboxModule> {
