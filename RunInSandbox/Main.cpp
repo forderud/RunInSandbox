@@ -11,6 +11,7 @@
 #include "../TestControl/TestControl_h.h"
 
 
+/** COM callback test class. */
 class ATL_NO_VTABLE CallbackTest : 
     public CComObjectRootEx<CComMultiThreadModel>,
     public CComCoClass<CallbackTest>, // no registry entries
@@ -27,7 +28,7 @@ public:
 };
 
 
-/** Dummy class for enabling OLE drag-and-drop that's not used for anything. */
+/** Dummy class for enabling OLE drag-and-drop. Not used for anything. */
 class DropTarget : 
     public CComObjectRootEx<CComSingleThreadModel>,
     public CComCoClass<DropTarget>, // no registry entries
@@ -52,8 +53,6 @@ public:
 };
 
 class RunInSandboxModule: public ATL::CAtlExeModuleT<RunInSandboxModule> {
-public:
-    //DECLARE_LIBID(LIBID_RunInSandboxModule)
 };
 
 RunInSandboxModule _AtlModule;
