@@ -70,7 +70,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
     }
 
     // try to add two numbers
-    CComPtr<ISimpleCalculator> calc;
+    CComPtr<ITestInterface> calc;
     obj.QueryInterface(&calc);
     if (calc) {
         int sum = 0;
@@ -114,7 +114,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         std::wcout << L"Creating child COM object " << progid << L" in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
         CComPtr<IUnknown> child;
         CHECK(calc->CreateInstance(true, clsid, &child));
-        CComPtr<ISimpleCalculator> child_calc;
+        CComPtr<ITestInterface> child_calc;
         child_calc = child;
         is_elevated = false, high_integrity = false;
         CHECK(child_calc->IsElevated(&is_elevated, &high_integrity));

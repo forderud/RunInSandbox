@@ -10,7 +10,7 @@ DEFINE_GUID(CATID_AppContainerCompatible, 0x59fb2056, 0xd625, 0x48d0, 0xa9, 0x44
 class ATL_NO_VTABLE TestControl :
     public CComObjectRootEx<CComMultiThreadModel>, // also compatible with single-threaded apartment
     public CComCoClass<TestControl, &CLSID_TestControl>,
-    public ISimpleCalculator
+    public ITestInterface
 {
 public:
     TestControl();
@@ -32,7 +32,7 @@ public:
     DECLARE_REGISTRY_RESOURCEID(IDR_TestControl)
 
     BEGIN_COM_MAP(TestControl)
-        COM_INTERFACE_ENTRY(ISimpleCalculator)
+        COM_INTERFACE_ENTRY(ITestInterface)
     END_COM_MAP()
 
 #if 0
