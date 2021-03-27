@@ -112,7 +112,7 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
         return {};
-    } else if ((mode == IntegrityLevel::Medium) || (mode == IntegrityLevel::AppContainer)) {
+    } else {
         HandleWrap parent_proc; // lifetime tied to "si"
         if (ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
@@ -122,12 +122,15 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
             std::wcout << L"Using explorer as parent process to escape elevation.\n";
         }
 
-        // processes are created with medium integrity as default, regardless of UAC settings
-        WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
-    } else {
-        ImpersonateThread low_int(mode);
-        std::wcout << L"Impersonation succeeded.\n";
-        WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+        if (mode != IntegrityLevel::Default) {
+            // impersonate desired integrity level
+            ImpersonateThread low_int(mode);
+            std::wcout << L"Impersonation succeeded.\n";
+            WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+        } else {
+            // use STARTUPINFO to determine integrity level
+            WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+        }
     }
 
     // wait for process to initialize
