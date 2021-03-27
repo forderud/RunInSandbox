@@ -96,10 +96,12 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
             // fails in medium integrity if host is elevated
             std::wcout << L"Moving mouse cursor to top-left corner...\n";
             HRESULT hr = test->MoveMouseCursor(0, 0);
-            if (FAILED(hr))
-                std::wcout << L"[FAILED]\n";
-            else
+            if (FAILED(hr)) {
+                _com_error err(hr);
+                std::wcout << L"[FAILED] " << err.ErrorMessage() << std::endl;
+            } else {
                 std::wcout << L"[success]\n";
+            }
         }
 
 #if 0
