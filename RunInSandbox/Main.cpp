@@ -82,7 +82,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         BOOL is_elevated = false, is_high_il = false;
         CHECK(test->IsElevated(&is_elevated, &is_high_il));
         std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-        std::wcout << L"HighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
+        std::wcout << L"IsHighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
 
         {
             // fails for AppContainers if host is elevated
@@ -119,7 +119,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         is_elevated = false, is_high_il = false;
         CHECK(child_test->IsElevated(&is_elevated, &is_high_il));
         std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-        std::wcout << L"Child HighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
+        std::wcout << L"Child IsHighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
 #endif
     }
 
