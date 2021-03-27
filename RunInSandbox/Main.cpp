@@ -208,6 +208,8 @@ int wmain (int argc, wchar_t *argv[]) {
 
             sec_cap = ac->SecCap(); // need to outlive CreateProcess
             si.SetSecurity(&sec_cap);
+
+            mode = IntegrityLevel::Default; // avoid double-impersonation
         }
 
         ProcCreate(si, progid.c_str(), mode, args);
