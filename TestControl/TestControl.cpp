@@ -14,11 +14,11 @@ HRESULT STDMETHODCALLTYPE TestControl::Add(int a, int b, int * sum) {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * high_integrity) {
+HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
 
     IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
-    *high_integrity = (proc_integrity >= IntegrityLevel::High);
+    *is_high_il = (proc_integrity >= IntegrityLevel::High);
 
     return S_OK;
 }

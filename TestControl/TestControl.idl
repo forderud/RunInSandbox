@@ -18,7 +18,7 @@ interface ITestInterface : IUnknown {
     HRESULT Add ([in] int a, [in] int b, [out,retval] int * sum);
 
     [helpstring("Check if object is running in an elevated process")]
-    HRESULT IsElevated ([out] BOOL * is_elevated, [out] BOOL * high_integrity);
+    HRESULT IsElevated ([out] BOOL * is_elevated, [out] BOOL * is_high_il);
 
     [helpstring("Check if object has network access")]
     HRESULT TestNetworkConnection([in] BSTR host, [in] USHORT port, [out,retval] BOOL * can_access);

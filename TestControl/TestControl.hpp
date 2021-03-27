@@ -19,7 +19,7 @@ public:
 
     HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override;
 
-    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * high_integrity) override;
+    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) override;
 
     HRESULT STDMETHODCALLTYPE TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/BOOL * can_access) override;
 

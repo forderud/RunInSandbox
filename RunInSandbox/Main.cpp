@@ -79,10 +79,10 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         std::wcout << L"Add(2, 3) returned " << sum << L".\n";
         assert(sum == 2 + 3);
 
-        BOOL is_elevated = false, high_integrity = false;
-        CHECK(test->IsElevated(&is_elevated, &high_integrity));
+        BOOL is_elevated = false, is_high_il = false;
+        CHECK(test->IsElevated(&is_elevated, &is_high_il));
         std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-        std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
+        std::wcout << L"HighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
 
         {
             // fails for AppContainers if host is elevated
@@ -116,10 +116,10 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         CHECK(test->CreateInstance(true, clsid, &child));
         CComPtr<ITestInterface> child_test;
         child_test = child;
-        is_elevated = false, high_integrity = false;
-        CHECK(child_test->IsElevated(&is_elevated, &high_integrity));
+        is_elevated = false, is_high_il = false;
+        CHECK(child_test->IsElevated(&is_elevated, &is_high_il));
         std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-        std::wcout << L"Child HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
+        std::wcout << L"Child HighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
 #endif
     }
 
