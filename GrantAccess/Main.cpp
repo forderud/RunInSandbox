@@ -5,7 +5,7 @@
 
 int wmain(int argc, wchar_t *argv[]) {
     if (argc < 3) {
-        std::wcout << L"Utility to make filesystem paths writable from AppContainers and low-integrity processes.\n";
+        std::wcout << L"Utility to make filesystem paths writable from AppContainers and low integrity level processes.\n";
         std::wcout << L"Usage: GrantAccess [ac|li] <path>\n";
         return 1;
     }
@@ -14,7 +14,7 @@ int wmain(int argc, wchar_t *argv[]) {
     std::wstring path = argv[2];
 
     if (mode == L"li") {
-        std::wcout << L"Making path low-integrity: " << path << std::endl;
+        std::wcout << L"Making path low IL: " << path << std::endl;
         DWORD err = Permissions::MakePathLowIntegrity(path.c_str());
         if (err != ERROR_SUCCESS) {
             _com_error error(err);

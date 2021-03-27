@@ -245,9 +245,9 @@ static std::wstring ToString (IntegrityLevel integrity) {
     switch (integrity) {
     case IntegrityLevel::Default:      return L"default";
     case IntegrityLevel::AppContainer: return L"AppContainer";
-    case IntegrityLevel::Low:          return L"low integrity";
-    case IntegrityLevel::Medium:       return L"medium integrity";
-    case IntegrityLevel::High:         return L"high integrity";
+    case IntegrityLevel::Low:          return L"low IL";
+    case IntegrityLevel::Medium:       return L"medium IL";
+    case IntegrityLevel::High:         return L"high IL";
     }
 
     abort(); // never reached

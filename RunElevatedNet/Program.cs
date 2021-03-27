@@ -69,7 +69,7 @@ namespace RunElevatedNet
          * REF: https://github.com/googleapis/google-api-dotnet-client/pull/1553 */
         static bool OpenBrowser(string url)
         {
-            System.Console.WriteLine("WARNING: Does not seem to work in low integrity.");
+            System.Console.WriteLine("WARNING: Does not seem to work in low integrity level.");
 #if false
             Process proc = Process.Start(url);
 #else
