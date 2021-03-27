@@ -92,7 +92,7 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_  LPCWSTR pszCmdLine) {
 #else
 
 // EXE Entry Point
-int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd) {
+int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd/*=SW_SHOWDEFAULT*/) {
     return _AtlModule.WinMain(nShowCmd);
 }
 #endif
