@@ -83,10 +83,17 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             }
         }
 
-        AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
-        HandleWrap proc = CreateAndKillAppContainerProcess(ac, exe_path.c_str());
-        // impersonate the process handle
-        impersonate.reset(new ImpersonateThread(proc));
+        if (mode == IntegrityLevel::AppContainer) {
+            AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
+            HandleWrap proc = CreateAndKillAppContainerProcess(ac, exe_path.c_str());
+            // impersonate the process handle
+            impersonate.reset(new ImpersonateThread(proc));
+        } else {
+            StartupInfoWrap si;
+            HandleWrap proc = ProcCreate(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
+            // impersonate the process handle
+            impersonate.reset(new ImpersonateThread(proc));
+        }
     } else {
         if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
             // escape elevation & impersonate integrity
