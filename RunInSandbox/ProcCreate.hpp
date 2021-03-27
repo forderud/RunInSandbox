@@ -114,7 +114,7 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
         return {};
     } else {
         HandleWrap parent_proc; // lifetime tied to "si"
-        if (ImpersonateThread::IsProcessElevated()) {
+        if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
             // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
             parent_proc = ImpersonateThread::GetShellProc();
