@@ -5,7 +5,7 @@ Sample C++ project for launching executables and out-of-process COM servers in a
 Run `RunInSandbox.exe [ac|li|mi|hi] ExePath` to launch the `ExePath` application in an AppContainer, low IL, medium IL or high IL process. This works for `STARTUPINFOEX`-based process creation.
 
 ## COM sandboxing
-Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [-g]` to launch the `ProgID` COM server in an AppContainer, low-integrity, medium-integrity or high-integrity process. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
+Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [-g]` to launch the `ProgID` COM server in an AppContainer, low IL, medium IL or high IL process. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
 
 Example usage:
 * `RunInSandbox.exe ac TestControl.TestControl -g` to start the TestControl project in a AppContainer process and test its COM API.
