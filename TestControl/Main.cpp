@@ -91,7 +91,11 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_  LPCWSTR pszCmdLine) {
 
 #else
 
-// EXE Entry Point
+// EXE Entry Point (console subsystem)
+int wmain(int /*argc*/, wchar_t * /*argv*/[]) {
+    return _AtlModule.WinMain(SW_SHOWDEFAULT);
+}
+// EXE Entry Point (windows subsystem)
 int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd/*=SW_SHOWDEFAULT*/) {
     return _AtlModule.WinMain(nShowCmd);
 }
