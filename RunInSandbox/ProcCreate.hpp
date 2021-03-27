@@ -85,7 +85,7 @@ static bool IsCMD (std::wstring path) {
 
 
 /** Launch a new process within an AppContainer. */
-static void ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
+static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     // append arguments
     for (const auto & arg : arguments) {
@@ -111,7 +111,7 @@ static void ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Integrity
         info.nShow = SW_NORMAL;
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
-        return;
+        return {};
     } else if ((mode == IntegrityLevel::Medium) || (mode == IntegrityLevel::AppContainer)) {
         HandleWrap parent_proc; // lifetime tied to "si"
         if (ImpersonateThread::IsProcessElevated()) {
@@ -129,6 +129,15 @@ static void ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Integrity
         std::wcout << L"Impersonation succeeded.\n";
         WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
     }
+
+    // wait for process to initialize
+    // ignore failure if process is not a GUI app
+    WaitForInputIdle(pi->hProcess, INFINITE);
+
+    // return process handle
+    HandleWrap proc;
+    std::swap(*&proc, pi->hProcess);
+    return proc;
 }
 
 
