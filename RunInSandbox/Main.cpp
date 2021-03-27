@@ -70,17 +70,17 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
     }
 
     // try to add two numbers
-    CComPtr<ITestInterface> calc;
-    obj.QueryInterface(&calc);
-    if (calc) {
+    CComPtr<ITestInterface> test;
+    obj.QueryInterface(&test);
+    if (test) {
         int sum = 0;
-        CHECK(calc->Add(2, 3, &sum));
+        CHECK(test->Add(2, 3, &sum));
 
         std::wcout << L"Add(2, 3) returned " << sum << L".\n";
         assert(sum == 2 + 3);
 
         BOOL is_elevated = false, high_integrity = false;
-        CHECK(calc->IsElevated(&is_elevated, &high_integrity));
+        CHECK(test->IsElevated(&is_elevated, &high_integrity));
         std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
 
@@ -88,14 +88,14 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
             // fails for AppContainers if host is elevated
             std::wcout << L"Testing COM callback...\n";
             auto cb = CreateLocalInstance<CallbackTest>();
-            CHECK(calc->TestCallback(cb));
+            CHECK(test->TestCallback(cb));
             std::wcout << L"[success]\n";
         }
 
         if (mode >= IntegrityLevel::Medium) {
             // fails in medium integrity if host is elevated
             std::wcout << L"Moving mouse cursor to top-left corner...\n";
-            HRESULT hr = calc->MoveMouseCursor(0, 0);
+            HRESULT hr = test->MoveMouseCursor(0, 0);
             if (FAILED(hr))
                 std::wcout << L"[FAILED]\n";
             else
@@ -105,19 +105,19 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
 #if 0
         BOOL has_network = false;
         CComBSTR host = L"1.1.1.1"; // cloudflare
-        calc->TestNetworkConnection(host, 80, &has_network);
+        test->TestNetworkConnection(host, 80, &has_network);
         std::wcout << L"HasNetwork: " << (has_network ? L"true" : L"false") << L"\n";
 #endif
 #if 0
         // try to create child object in elevated process
         // WARNING: Doesn't trigger UAC elevation if launched from a medium-integrity process that was launched from an elevated process
-        std::wcout << L"Creating child COM object " << progid << L" in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
+        std::wcout << L"Creating child COM object in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
         CComPtr<IUnknown> child;
-        CHECK(calc->CreateInstance(true, clsid, &child));
-        CComPtr<ITestInterface> child_calc;
-        child_calc = child;
+        CHECK(test->CreateInstance(true, clsid, &child));
+        CComPtr<ITestInterface> child_test;
+        child_test = child;
         is_elevated = false, high_integrity = false;
-        CHECK(child_calc->IsElevated(&is_elevated, &high_integrity));
+        CHECK(child_test->IsElevated(&is_elevated, &high_integrity));
         std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"Child HighIntegrity: " << (high_integrity ? L"true" : L"false") << L"\n";
 #endif
