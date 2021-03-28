@@ -632,6 +632,17 @@ public:
             exe_path = exe_path.substr(0, idx); // remove end quote and arguments
         }
 
+        auto to_lower = [](std::wstring str) {
+            for (wchar_t & c : str)
+                c = towlower(c);
+            return str;
+        };
+
+        // remove "/automation" arguments after unquoted ".exe" (necessary for PowerPoint)
+        size_t idx = to_lower(exe_path).find(L".exe "); // trailing whitespace deliberate
+        if (idx != exe_path.npos)
+            exe_path = exe_path.substr(0, idx+4);
+
         return exe_path;
     }
 
