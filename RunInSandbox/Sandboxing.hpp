@@ -65,7 +65,7 @@ public:
     }
 
 private:
-    HandleWrap(const HandleWrap & other) = delete;
+    HandleWrap(const HandleWrap &) = delete;
 
     HANDLE handle = nullptr;
 };
@@ -585,14 +585,14 @@ struct ImpersonateThread {
         if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &ret_len))
             abort(); // should never happen
 
-        {
+        if (elevation.TokenIsElevated) {
             TOKEN_ELEVATION_TYPE elevation_type = {};
             ret_len = 0;
             if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
                 abort(); // should never happen
 
-            if (elevation.TokenIsElevated)
-                assert(elevation_type == TokenElevationTypeFull);
+            // elevation_type is usually TokenElevationTypeFull, or
+            // TokenElevationTypeDefault if UAC is disabled.
         }
 
         return elevation.TokenIsElevated;
