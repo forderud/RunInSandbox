@@ -622,11 +622,11 @@ public:
             abort(); // should never happen
         exe_path.resize(exe_path_len - 1); // remove extra zero-termination
 
-        if (exe_path[0] == '"') {
+        if (exe_path[0] == L'"') {
             // remove quotes and "/automation" or "-activex" arguments
             exe_path = exe_path.substr(1); // remove begin quote
 
-            size_t idx = exe_path.find('"');
+            size_t idx = exe_path.find(L'"');
             if (idx == exe_path.npos)
                 return L""; // malformed quoting
             exe_path = exe_path.substr(0, idx); // remove end quote and arguments
