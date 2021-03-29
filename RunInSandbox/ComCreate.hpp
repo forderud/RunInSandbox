@@ -100,7 +100,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             impersonate.reset(new ImpersonateThread(mode, ImpersonateThread::GetShellProc()));
         } else {
             // impersonate desired integrity
-            impersonate.reset(new ImpersonateThread(mode));
+            impersonate.reset(new ImpersonateThread(mode, GetCurrentProcess()));
         }
     }
 

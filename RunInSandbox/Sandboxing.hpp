@@ -496,7 +496,7 @@ public:
 /** RAII class for temporarily impersonating users & integrity levels for the current thread.
     Intended to be used together with CLSCTX_ENABLE_CLOAKING when creating COM objects. */
 struct ImpersonateThread {
-    ImpersonateThread(IntegrityLevel integrity, HANDLE proc = GetCurrentProcess()) {
+    ImpersonateThread(IntegrityLevel integrity, HANDLE proc) {
         {
             // current user
             HandleWrap cur_token;

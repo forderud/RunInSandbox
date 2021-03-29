@@ -124,7 +124,7 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
 
         if (mode != IntegrityLevel::Default) {
             // impersonate desired integrity level
-            ImpersonateThread low_int(mode);
+            ImpersonateThread low_int(mode, GetCurrentProcess());
             std::wcout << L"Impersonation succeeded.\n";
             WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
         } else {
