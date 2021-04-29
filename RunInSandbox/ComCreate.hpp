@@ -95,7 +95,9 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             impersonate.reset(new ImpersonateThread(proc));
         }
     } else {
-        if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
+        if (mode == IntegrityLevel::Default) {
+            // no impersonation
+        } else if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
             // escape elevation & impersonate integrity
             impersonate.reset(new ImpersonateThread(mode, ImpersonateThread::GetShellProc()));
         } else {
