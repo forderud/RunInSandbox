@@ -36,3 +36,18 @@ UAC related:
 * [How User Account Control works](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)
 * [Runas](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc771525(v=ws.11))
 * [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker)
+
+
+## How to configure COM servers to always run as admin without UAC
+
+`Component Services` (dcomcnfg.exe) can be used to explicitly set the user account used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without requiring any UAC prompt.
+
+**WARNING**: This will introduce a privilege escalation vulnerability if not used carefully.
+
+Instructions:
+* Explicitly call `CoInitializeSecurity` in the COM server to enable low privilege clients to connect (see disabled `ALLOW_ANY_CLIENT_TO_CONNECT` section in TestControl)
+* From dcomcnfg.exe configure the COM server to always run through an administrative account.
+
+![DCOM_RunAs](DCOM_RunAs.png)  
+
+CoCreateInstance calls from non-admin accounts will now start the COM server using an admin account.
