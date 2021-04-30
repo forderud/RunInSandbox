@@ -107,8 +107,12 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     }
 
     // create COM object in a separate process
+    DWORD cls_ctx = CLSCTX_LOCAL_SERVER; // out-of-process
+    if (mode != IntegrityLevel::Default)
+        cls_ctx |= CLSCTX_ENABLE_CLOAKING; // propagate impersonation
+
     CComPtr<IUnknown> obj;
-    HRESULT hr = obj.CoCreateInstance(clsid, nullptr, CLSCTX_LOCAL_SERVER | CLSCTX_ENABLE_CLOAKING);
+    HRESULT hr = obj.CoCreateInstance(clsid, nullptr, cls_ctx);
     if ((mode == IntegrityLevel::AppContainer) && (hr == E_ACCESSDENIED)) {
         std::wcerr << L"ERROR: CoCreateInstance access denied when trying to create a new COM server instance. Have you remember to grant AppContainer permissions?" << std::endl;
         exit(-3);
