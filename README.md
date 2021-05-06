@@ -47,6 +47,7 @@ UAC related:
 Instructions:
 * Explicitly call `CoInitializeSecurity` in the COM server to enable low privilege clients to connect (enable `ALLOW_ANY_CLIENT_TO_CONNECT` section in TestControl)
 * From dcomcnfg.exe configure the COM server to always run through an administrative account.
+* Verify that the account have sufficient filesystem permissions to run the COM server.
 * To test, run `RunInSandbox.exe TestControl.TestControl` from a limited account. This will trigger creation of a TestControl.exe under an admin account with a COM communication channel between the processes.
 
 ![DCOM_RunAs](DCOM_RunAs.png)  
