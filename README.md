@@ -39,6 +39,8 @@ Instructions:
 * Build solution from Visual Studio started with admin privileges.
 * To test, run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started.
 
+![UAC_prompt](UAC_prompt.png)  
+
 ## How to configure COM servers to always run as admin _without_ UAC
 
 `Component Services` (dcomcnfg.exe) can be used to explicitly set the user account used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without requiring any UAC prompt.
