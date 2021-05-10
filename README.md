@@ -35,6 +35,9 @@ C#/.Net sample code for launching an executable or COM class in an "elevated" pr
 
 Read [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker) for instructions for how to use User Account Control (UAC) prompts to request admin privileges for a COM server. UAC is general is documented in [How User Account Control works](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works).
 
+Instructions:
+* Build solution from Visual Studio started with admin privileges.
+* To test, run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started.
 
 ## How to configure COM servers to always run as admin _without_ UAC
 
