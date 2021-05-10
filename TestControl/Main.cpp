@@ -97,18 +97,16 @@ int wmain(int /*argc*/, wchar_t * /*argv*/[]) {
 }
 // EXE Entry Point (windows subsystem)
 int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd/*=SW_SHOWDEFAULT*/) {
-#ifdef ALLOW_ANY_CLIENT_TO_CONNECT
     CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-    // Disable COM security to allow any client to connect. Only relevant if server is configured with explicit RunAs DCOM configuration.
-    // WARNING: Can be used to enable non-admin clients to connect to a server running with admin privileges.
+    // Disable COM security to allow any client to connect.
+    // WARNING: Enables non-admin clients to connect to a server running with admin privileges.
     HRESULT hr = CoInitializeSecurity(nullptr, -1/*auto*/, nullptr, NULL/*reserved*/,
         RPC_C_AUTHN_LEVEL_DEFAULT, ///< 
         RPC_C_IMP_LEVEL_IDENTIFY,  ///< allow server to identify but not impersonate client
         nullptr, EOAC_NONE/*capabilities*/, NULL/*reserved*/);
     if (FAILED(hr))
         abort();
-#endif
 
     return _AtlModule.WinMain(nShowCmd);
 }
