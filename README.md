@@ -39,8 +39,7 @@ Instructions:
 * Build solution from Visual Studio started with admin privileges.
 * To test, run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started. The UAC prompt will require a password _if_ the current user is not an admin.
 
-![UAC_prompt](UAC_prompt.png)
-![UAC_prompt_pw](UAC_prompt_pw.png)  
+![UAC_prompt](UAC_prompt.png) ![UAC_prompt_pw](UAC_prompt_pw.png)  
 
 ## How to configure COM servers to always run as admin _without_ UAC
 
