@@ -92,6 +92,12 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
             std::wcout << L"[success]\n";
         }
 
+        if (mode >= IntegrityLevel::High) {
+            std::wcout << L"Verifying that admin task succeeds...\n";
+            CHECK(test->PerformAdminTask());
+            std::wcout << L"[success]\n";
+        }
+
         if (mode >= IntegrityLevel::Medium) {
             // fails in medium integrity if host is elevated
             std::wcout << L"Moving mouse cursor to top-left corner...\n";

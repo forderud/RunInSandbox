@@ -14,6 +14,17 @@ HRESULT STDMETHODCALLTYPE TestControl::Add(int a, int b, int * sum) {
     return S_OK;
 }
 
+
+HRESULT STDMETHODCALLTYPE TestControl::PerformAdminTask() {
+    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
+    if (proc_integrity < IntegrityLevel::High)
+        return E_ACCESSDENIED;
+
+    // TODO: Perform some task requiring admin privileves
+    return S_OK;
+}
+
+
 HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
 
