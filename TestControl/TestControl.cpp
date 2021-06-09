@@ -143,6 +143,7 @@ HRESULT STDMETHODCALLTYPE TestControl::MoveMouseCursor(int x_pos, int y_pos) {
 #endif
 
     // will fail without WINSTA_WRITEATTRIBUTES access
+    // will fail if the foreground window is running at higher IL than this process (UIPI limitation)
     BOOL ok = SetCursorPos(x_pos, y_pos);
     if (!ok) {
         DWORD err = GetLastError();
