@@ -69,6 +69,9 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         obj = CoCreateAsUser_impersonate(clsid, mode, grant_appcontainer_permissions);
     }
 
+    // allow COM server to set foreground window (needed to escape UIPI limitations)
+    CHECK(CoAllowSetForegroundWindow(obj, NULL));
+
     // try to add two numbers
     CComPtr<ITestInterface> test;
     obj.QueryInterface(&test);

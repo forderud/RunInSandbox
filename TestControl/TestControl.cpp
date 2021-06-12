@@ -1,6 +1,7 @@
 #include "TestControl.hpp"
 #include "../RunInSandbox/ComCreate.hpp"
 #include "Socket.hpp"
+#include <atlwin.h>
 
 
 TestControl::TestControl(){
@@ -82,7 +83,17 @@ HRESULT STDMETHODCALLTYPE TestControl::TestCallback(IUnknown * obj) {
 
 
 HRESULT STDMETHODCALLTYPE TestControl::MoveMouseCursor(int x_pos, int y_pos) {
-    // will fail without WINSTA_WRITEATTRIBUTES access
+    CWindow wnd;
+    {
+        // create window to receive cursor events
+        RECT rect = { 0, 0, 200, 200 };
+        wnd.Create(L"Button", /*parent*/NULL, rect, L"window", WS_OVERLAPPEDWINDOW);
+        wnd.ShowWindow(SW_SHOW);
+        // move window to foreground, so that it starts receiving events
+        BOOL ok = SetForegroundWindow(wnd); // assume host have called CoAllowSetForegroundWindow first
+        assert(ok);
+    }
+
     // will fail if the foreground window is running at higher IL than this process (UIPI limitation)
     BOOL ok = SetCursorPos(x_pos, y_pos);
     if (!ok) {
@@ -90,5 +101,6 @@ HRESULT STDMETHODCALLTYPE TestControl::MoveMouseCursor(int x_pos, int y_pos) {
         // TODO: Figure out why err==0 here
         return E_ACCESSDENIED;
     }
+
     return S_OK;
 }
