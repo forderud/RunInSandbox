@@ -21,7 +21,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 
 ### Outstanding challenges
 * How to apply `removableStorage` capability to enable USB stick access for the AppContainer.
-* Why is `SetCursorPos` failing at medium IL _if_ the host is elevated (high IL). Impersonating the shell process (explorer.exe) to escape elevation doesn't seem to help. However, building the COM server against the `console` subsystem seem to fix the problem, which is kind of strange.
+* Why is `SetCursorPos` failing at medium IL _if_ the host is elevated (high IL). Impersonating the shell process (explorer.exe) to escape elevation doesn't seem to help. The problem appear to be caused by UIPI limitations tied to the foreground window.
 
 
 ## GrantAccess
