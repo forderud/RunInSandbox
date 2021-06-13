@@ -10,13 +10,13 @@ TestControl::TestControl(){
 TestControl::~TestControl() {
 }
 
-HRESULT STDMETHODCALLTYPE TestControl::Add(int a, int b, int * sum) {
+HRESULT TestControl::Add(int a, int b, int * sum) {
     *sum = a + b;
     return S_OK;
 }
 
 
-HRESULT STDMETHODCALLTYPE TestControl::PerformAdminTask() {
+HRESULT TestControl::PerformAdminTask() {
     IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
     if (proc_integrity < IntegrityLevel::High)
         return E_ACCESSDENIED;
@@ -26,7 +26,7 @@ HRESULT STDMETHODCALLTYPE TestControl::PerformAdminTask() {
 }
 
 
-HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) {
+HRESULT TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
 
     IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
@@ -36,7 +36,7 @@ HRESULT STDMETHODCALLTYPE TestControl::IsElevated (/*out*/BOOL * is_elevated, /*
 }
 
 
-HRESULT STDMETHODCALLTYPE TestControl::TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/BOOL * can_access) {
+HRESULT TestControl::TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/BOOL * can_access) {
     *can_access = false; // assume no connectivity by default
 
     try {
@@ -50,7 +50,7 @@ HRESULT STDMETHODCALLTYPE TestControl::TestNetworkConnection (/*in*/BSTR host, U
 }
 
 
-HRESULT STDMETHODCALLTYPE TestControl::CreateInstance (BOOL elevated, /*in*/CLSID clsid, /*out*/IUnknown ** obj) {
+HRESULT TestControl::CreateInstance (BOOL elevated, /*in*/CLSID clsid, /*out*/IUnknown ** obj) {
     if (!obj)
         return E_INVALIDARG;
 
@@ -67,7 +67,7 @@ HRESULT STDMETHODCALLTYPE TestControl::CreateInstance (BOOL elevated, /*in*/CLSI
     }
 }
 
-HRESULT STDMETHODCALLTYPE TestControl::TestCallback(IUnknown * obj) {
+HRESULT TestControl::TestCallback(IUnknown * obj) {
     if (!obj)
         return E_INVALIDARG;
 
@@ -82,7 +82,7 @@ HRESULT STDMETHODCALLTYPE TestControl::TestCallback(IUnknown * obj) {
 }
 
 
-HRESULT STDMETHODCALLTYPE TestControl::MoveMouseCursor(int x_pos, int y_pos) {
+HRESULT TestControl::MoveMouseCursor(int x_pos, int y_pos) {
     CWindow wnd;
     {
         // create window to receive cursor events
