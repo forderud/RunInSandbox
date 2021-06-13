@@ -87,7 +87,7 @@ HRESULT TestControl::MoveMouseCursor(int x_pos, int y_pos) {
     {
         // create window to receive cursor events
         RECT rect = { 0, 0, 200, 200 };
-        wnd.Create(L"Button", /*parent*/NULL, rect, L"window", WS_OVERLAPPEDWINDOW);
+        wnd.Create(L"Button", /*parent*/NULL, rect, L"MoveMouseCursor", WS_OVERLAPPEDWINDOW);
         wnd.ShowWindow(SW_SHOW);
         // move window to foreground, so that it starts receiving events
         BOOL ok = SetForegroundWindow(wnd); // assume host have called CoAllowSetForegroundWindow first
