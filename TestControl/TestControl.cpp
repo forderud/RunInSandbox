@@ -83,9 +83,9 @@ HRESULT TestControl::TestCallback(IUnknown * obj) {
 
 
 HRESULT TestControl::MoveMouseCursor(int x_pos, int y_pos) {
+    // create independent window to receive cursor events
     CWindow wnd;
     {
-        // create window to receive cursor events
         RECT rect = { 0, 0, 200, 200 };
         wnd.Create(L"Button", /*parent*/NULL, rect, L"MoveMouseCursor", WS_OVERLAPPEDWINDOW);
         wnd.ShowWindow(SW_SHOW);
