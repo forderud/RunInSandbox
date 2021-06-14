@@ -97,7 +97,8 @@ int wmain(int /*argc*/, wchar_t * /*argv*/[]) {
 }
 // EXE Entry Point (windows subsystem)
 int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd/*=SW_SHOWDEFAULT*/) {
-    CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    // initialize COM early for programmatic COM security
+    _AtlModule.InitializeCom();
 
     // Disable COM security to allow any client to connect.
     // WARNING: Enables non-admin clients to connect to a server running with admin privileges.
