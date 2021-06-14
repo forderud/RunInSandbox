@@ -13,6 +13,7 @@ interface ICallbackTest : IUnknown {
 
 [object,
  oleautomation, // use "automation" marshaler (oleaut32.dll)
+ local,         // disallow remote calls over network
  uuid(570FBF3C-D853-435E-B761-6A264393B9DA)]
 interface ITestInterface : IUnknown {
     [helpstring("Add two numbers")]
