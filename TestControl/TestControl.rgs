@@ -17,9 +17,6 @@ HKCR
 			VersionIndependentProgID = s 'TestControl.TestControl'
 			val AppID = s '%APPID%'
 			LocalServer32 = s '%MODULE%'
-			{
-				val ThreadingModel = s 'Both'
-			}
 			TypeLib = s '{1FC81ABC-F123-4DEE-9380-4B40032E0ACD}'
 			Version = s '1.0'
 			val LocalizedString = s '@%MODULE%,-102'
