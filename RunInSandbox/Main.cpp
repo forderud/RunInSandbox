@@ -211,12 +211,12 @@ int wmain (int argc, wchar_t *argv[]) {
         // pump messages until receiving WM_QUIT
         MSG msg = {};
         BOOL ret = false;
-        while((ret = GetMessage( &msg, NULL, 0, 0 )) != 0) { 
+        while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
             if (ret == -1) {
                 break; // break on error
             } else {
-                TranslateMessage(&msg); 
-                DispatchMessage(&msg); 
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
             }
         }
 
