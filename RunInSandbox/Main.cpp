@@ -195,33 +195,8 @@ int wmain (int argc, wchar_t *argv[]) {
         }
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
-
-#if 1
         // perform COM calls from main thread (STA)
         ComTests(clsid, mode, grant_appcontainer_permissions, wnd);
-#else
-        // perform COM calls from separate thread (MTA)
-        std::thread t([&](){
-            SetThreadDescription(GetCurrentThread(), L"COM thread (MTA)");
-            CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
-            ComTests(clsid, mode, grant_appcontainer_permissions, wnd);
-        });
-
-        // pump messages until receiving WM_QUIT
-        MSG msg = {};
-        BOOL ret = false;
-        while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
-            if (ret == -1) {
-                break; // break on error
-            } else {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-        }
-
-        t.join();
-#endif
     } else if (url_provided) {
         std::wcout << L"Opening URL " << progid << " in default browser\n";
         if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
