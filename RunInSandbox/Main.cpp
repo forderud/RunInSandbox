@@ -4,6 +4,7 @@
 #include <Shlobj.h>
 #include <atlbase.h>
 #include <atlcom.h>
+#include <atlwin.h>
 #include <wincred.h>
 #pragma comment(lib, "Credui.lib")
 #include "ComCreate.hpp"
@@ -102,7 +103,23 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         }
 
         if (mode >= IntegrityLevel::Medium) {
-            // fails in medium integrity if host is elevated
+            bool reproduce_uipi_child_wnd_issue = true;
+            if (reproduce_uipi_child_wnd_issue) {
+                // Request child window from sandboxed COM/OLE process
+                CComPtr<IOleWindow> win_test;
+                test.QueryInterface(&win_test);
+                HWND child_wnd = {};
+                CHECK(win_test->GetWindow(&child_wnd));
+
+                // Attach child to (invisible) parent window to simulate OLE embedding. This triggers UIPI SetForegroundWindow blocking that also affect unrelated windows.
+                auto winStyle = GetWindowLongPtrW(child_wnd, GWL_STYLE);
+                winStyle &= ~WS_CAPTION; // Remove title bar
+                winStyle |= WS_CHILD;    // Convert to child window. Trigger UIPI blocking when used together with SetParent.
+                SetWindowLongPtrW(child_wnd, GWL_STYLE, winStyle);
+                SetParent(child_wnd, wnd); // Trigger UIPI blocking when used together with WS_CHILD
+            }
+
+            // Fails in medium IL if host is elevated despite the window being in foreground.
             std::wcout << L"Moving mouse cursor to top-left corner...\n";
             HRESULT hr = test->MoveMouseCursor(0, 0);
             if (FAILED(hr)) {

@@ -113,3 +113,17 @@ HRESULT TestControl::MoveMouseCursor(int x_pos, int y_pos) {
 
     return S_OK;
 }
+
+
+HRESULT TestControl::GetWindow(/*out*/HWND* result) {
+    // create dummy window that will be used for establishing a parent-child UI relationship with the parent process
+    CWindow wnd;
+    {
+        RECT rect = { 200, 0, 400, 200 };
+        wnd.Create(L"Button", /*parent*/NULL, rect, L"Child window", WS_OVERLAPPEDWINDOW);
+        wnd.ShowWindow(SW_SHOW);
+    }
+
+    *result = wnd;
+    return S_OK;
+}
