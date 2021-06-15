@@ -121,7 +121,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
 
             // Fails in medium IL if host is elevated despite the window being in foreground.
             std::wcout << L"Moving mouse cursor to top-left corner...\n";
-            HRESULT hr = test->MoveMouseCursor(0, 0);
+            HRESULT hr = test->MoveMouseCursor(false, 0, 0);
             if (FAILED(hr)) {
                 _com_error err(hr);
                 std::wcout << L"[FAILED] " << err.ErrorMessage() << std::endl;

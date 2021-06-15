@@ -35,7 +35,7 @@ interface ITestInterface : IUnknown {
     HRESULT TestCallback([in] IUnknown * obj);
 
     [helpstring("Move the mouse cursor")]
-    HRESULT MoveMouseCursor([in] int x_pos, [in] int y_pos);
+    HRESULT MoveMouseCursor([in] BOOL threaded, [in] int x_pos, [in] int y_pos);
 };
 
 

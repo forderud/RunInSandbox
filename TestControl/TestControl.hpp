@@ -30,7 +30,7 @@ public:
 
     HRESULT STDMETHODCALLTYPE TestCallback(IUnknown * obj) override;
 
-    HRESULT STDMETHODCALLTYPE MoveMouseCursor(int x_pos, int y_pos) override;
+    HRESULT STDMETHODCALLTYPE MoveMouseCursor(BOOL threaded, int x_pos, int y_pos) override;
 
     // IOleWindow
     HRESULT STDMETHODCALLTYPE GetWindow(/*out*/HWND* wnd) override;

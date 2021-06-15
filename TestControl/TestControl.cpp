@@ -2,6 +2,7 @@
 #include "../RunInSandbox/ComCreate.hpp"
 #include "Socket.hpp"
 #include <atlwin.h>
+#include <future>
 
 
 TestControl::TestControl(){
@@ -82,43 +83,50 @@ HRESULT TestControl::TestCallback(IUnknown * obj) {
 }
 
 
-HRESULT TestControl::MoveMouseCursor(int x_pos, int y_pos) {
-    // create independent window to receive cursor events
-    CWindow wnd;
-    {
-        RECT rect = { 0, 0, 200, 200 };
-        wnd.Create(L"Button", /*parent*/NULL, rect, L"MoveMouseCursor", WS_OVERLAPPEDWINDOW);
-        wnd.ShowWindow(SW_SHOW);
-    }
+HRESULT TestControl::MoveMouseCursor(BOOL threaded, int x_pos, int y_pos) {
+    auto create_window_and_move_cursor = [x_pos, y_pos]() -> HRESULT {
+        // create independent window to receive cursor events
+        CWindow wnd;
+        {
+            RECT rect = { 0, 0, 200, 200 };
+            wnd.Create(L"Button", /*parent*/NULL, rect, L"MoveMouseCursor", WS_OVERLAPPEDWINDOW);
+            wnd.ShowWindow(SW_SHOW);
+        }
 
-    // move window to foreground, so that it starts receiving events
-    {
-        // bring window to the front & activate it
-        BOOL ok = BringWindowToTop(wnd);
-        assert(ok);
-        // verify that window is activated
-        HWND active_wnd = GetActiveWindow();
-        assert(wnd == active_wnd);
+        // move window to foreground, so that it starts receiving events
+        {
+            // bring window to the front & activate it
+            BOOL ok = BringWindowToTop(wnd);
+            assert(ok);
+            // verify that window is activated
+            HWND active_wnd = GetActiveWindow();
+            assert(wnd == active_wnd);
 
-        ok = SetForegroundWindow(wnd); // assume host have called CoAllowSetForegroundWindow first
-        assert(ok);
+            ok = SetForegroundWindow(wnd); // assume host have called CoAllowSetForegroundWindow first
+            assert(ok);
 
-        HWND foreground_wnd = GetForegroundWindow();
-        if (foreground_wnd != wnd) {
-            // SetForegroundWindow failed silently due to UIPI limitation
+            HWND foreground_wnd = GetForegroundWindow();
+            if (foreground_wnd != wnd) {
+                // SetForegroundWindow failed silently due to UIPI limitation
+                DWORD err = GetLastError(); // TODO: Figure out why err==0 here
+                return E_ACCESSDENIED;
+            }
+        }
+
+        // will fail if the foreground window is running at higher IL than this process (UIPI limitation)
+        BOOL ok = SetCursorPos(x_pos, y_pos);
+        if (!ok) {
             DWORD err = GetLastError(); // TODO: Figure out why err==0 here
             return E_ACCESSDENIED;
         }
-    }
 
-    // will fail if the foreground window is running at higher IL than this process (UIPI limitation)
-    BOOL ok = SetCursorPos(x_pos, y_pos);
-    if (!ok) {
-        DWORD err = GetLastError(); // TODO: Figure out why err==0 here
-        return E_ACCESSDENIED;
-    }
+        return S_OK;
+    };
 
-    return S_OK;
+    if (threaded)
+        return std::async(create_window_and_move_cursor).get(); // run in separate thread
+    else
+        return create_window_and_move_cursor(); // run in current thread
 }
 
 
