@@ -93,6 +93,12 @@ HRESULT TestControl::MoveMouseCursor(int x_pos, int y_pos) {
 
     // move window to foreground, so that it starts receiving events
     {
+        // set window as "active" (succeeds but don't seem to make any difference)
+        HWND prv_wnd = SetActiveWindow(wnd);
+        assert(prv_wnd);
+        HWND active_wnd = GetActiveWindow();
+        assert(wnd == active_wnd);
+
         BOOL ok = SetForegroundWindow(wnd); // assume host have called CoAllowSetForegroundWindow first
         assert(ok);
 
