@@ -91,11 +91,7 @@ STDAPI DllInstall(BOOL bInstall, _In_opt_  LPCWSTR pszCmdLine) {
 
 #else
 
-// EXE Entry Point (console subsystem)
-int wmain(int /*argc*/, wchar_t * /*argv*/[]) {
-    return _AtlModule.WinMain(SW_SHOWDEFAULT);
-}
-// EXE Entry Point (windows subsystem)
+// EXE Entry Point
 int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nShowCmd/*=SW_SHOWDEFAULT*/) {
     // initialize COM early for programmatic COM security
     _AtlModule.InitializeCom();
