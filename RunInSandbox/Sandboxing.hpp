@@ -367,7 +367,7 @@ public:
     };
 
     /** Tag a folder path as writable by low integrity level (IL) processes.
-        By default, only %USER PROFILE%\AppData\LocalLow is writable.
+        By default, only %USERPROFILE%\AppData\LocalLow is writable.
         Based on "Designing Applications to Run at a Low Integrity Level" https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10)
         Equivalent to "icacls.exe  <path> /setintegritylevel Low"
 
