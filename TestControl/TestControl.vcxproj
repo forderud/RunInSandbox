@@ -21,9 +21,6 @@
     <ClInclude Include="TestControl.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestControl.rgs" />
-  </ItemGroup>
-  <ItemGroup>
     <Midl Include="TestControl.idl" />
   </ItemGroup>
   <ItemGroup>
@@ -83,14 +80,6 @@
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
-    <PostBuildEvent>
-      <Command>echo Registering EXE...
-"$(TargetPath)" /regserver
-</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Post-build registration</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -111,14 +100,6 @@
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
-    <PostBuildEvent>
-      <Command>echo Registering EXE...
-"$(TargetPath)" /regserver
-</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Post-build registration</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

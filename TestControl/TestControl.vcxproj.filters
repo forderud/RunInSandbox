@@ -11,9 +11,6 @@
     <ClInclude Include="Socket.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestControl.rgs" />
-  </ItemGroup>
-  <ItemGroup>
     <Midl Include="TestControl.idl" />
   </ItemGroup>
   <ItemGroup>

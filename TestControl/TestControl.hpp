@@ -36,7 +36,7 @@ public:
         return E_NOTIMPL;
     }
 
-    DECLARE_REGISTRY_RESOURCEID(IDR_TestControl)
+    DECLARE_NO_REGISTRY()
 
     BEGIN_COM_MAP(TestControl)
         COM_INTERFACE_ENTRY(ITestInterface)

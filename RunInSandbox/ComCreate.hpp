@@ -5,12 +5,25 @@
 #include "../TestControl/ComSupport.hpp"
 
 
+inline std::wstring GetFullExePath() {
+    HMODULE module = nullptr;
+    // Get handle to exe/dll that this static lib is linked against
+    LPCTSTR module_ptr = (LPCTSTR)GetFullExePath; // pointer to current function
+    GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, module_ptr, &module);
+
+    // retrieve full exe/dll path (incl. filename)
+    WCHAR file_path[256] = {};
+    GetModuleFileNameW(module, file_path, _countof(file_path));
+
+    return std::wstring(file_path);
+}
+
 /** Attempt to create a COM server that runds through a specific user account.
     AppContainer problem:
       Process is created but CoGetClassObject activation gives E_ACCESSDENIED (The machine-default permission settings do not grant Local Activation permission for the COM Server) */
 CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions) {
     std::unique_ptr<ImpersonateThread> impersonate;
-    bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
+    bool explicit_process_create = true;
     if (explicit_process_create) {
         // launch COM server process manually
         wchar_t clsid_str[39] = {};
@@ -18,7 +31,12 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         if (!ok)
             abort(); // should never happen
 
-        std::wstring exe_path = RegQuery::GetExePath(clsid_str);
+        // assume we're creating TestControl.exe in same folder as this exe
+        std::wstring this_exe_path = GetFullExePath();
+        size_t idx = this_exe_path.find_last_of(L'\\');
+        this_exe_path = this_exe_path.substr(0, idx+1);
+
+        std::wstring exe_path = this_exe_path + L"TestControl.exe";
         if (exe_path.empty())
             exe_path = RegQuery::GetExePath(clsid_str, KEY_WOW64_32KEY); // fallback to 32bit part of registry
         if (exe_path.empty()) {

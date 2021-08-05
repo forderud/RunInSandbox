@@ -3,6 +3,7 @@
 #include "TestControl_i.c"
 #include "ComSupport.hpp"
 #include <psapi.h>
+#include <Shlobj.h>
 
 
 class TestControlModule : public ATL::CAtlExeModuleT<TestControlModule> {
@@ -28,6 +29,15 @@ int wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, wchar_t* /*lp
         RPC_C_AUTHN_LEVEL_DEFAULT, ///< 
         RPC_C_IMP_LEVEL_IDENTIFY,  ///< allow server to identify but not impersonate client
         nullptr, EOAC_NONE/*capabilities*/, NULL/*reserved*/);
+    if (FAILED(hr))
+        abort();
+
+    // prevent type lib registration from failing when not running as admin
+    if(!IsUserAnAdmin())
+        AtlSetPerUserRegistration(true);
+
+    // register type libraries (needed for interface mashalling)
+    hr = _AtlModule.RegisterServer(true);
     if (FAILED(hr))
         abort();
 
