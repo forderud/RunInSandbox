@@ -11,9 +11,7 @@
     <ClInclude Include="Socket.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AppID.rgs" />
     <None Include="TestControl.rgs" />
-    <None Include="Module.def" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="TestControl.idl" />
