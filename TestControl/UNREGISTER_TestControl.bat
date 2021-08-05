@@ -6,6 +6,10 @@ echo NOTICE: Script MUST be run as Administrator.
 setlocal enableextensions
 cd /d "%~dp0"
 
+:: ICallbackTest interface
+reg delete "HKCR\Interface\{D3C91F02-27DB-483C-BE4E-3883E1B51B33}" /f 2> NUL
+:: ITestInterface interface
+reg delete "HKCR\Interface\{570FBF3C-D853-435E-B761-6A264393B9DA}" /f 2> NUL
 
 :: Remove all traces of TestControl from registry (except progid)
 for %%R in (HKEY_LOCAL_MACHINE HKEY_CURRENT_USER) do (
