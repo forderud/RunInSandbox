@@ -20,7 +20,6 @@ for %%R in (HKEY_LOCAL_MACHINE HKEY_CURRENT_USER) do (
   for %%P in (32 64) do (
     :: TestControl class
     reg delete "%%R\SOFTWARE\Classes\CLSID\{F0DFBE77-1697-428E-A895-EFEE202B9333}"     /f /reg:%%P 2> NUL
-    reg delete "%%R\SOFTWARE\Classes\Interface\{570FBF3C-D853-435E-B761-6A264393B9DA}" /f /reg:%%P 2> NUL
   )
 )
 
