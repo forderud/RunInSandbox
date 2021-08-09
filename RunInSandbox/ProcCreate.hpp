@@ -111,14 +111,14 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
         info.nShow = SW_NORMAL;
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
-        return {};
+        return HandleWrap();
     } else {
         HandleWrap parent_proc; // lifetime tied to "si"
         if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
             // REF: https://devblogs.microsoft.com/oldnewthing/20190425-00/?p=102443
             parent_proc = ImpersonateThread::GetShellProc();
-            si.SetParent(&parent_proc);
+            si.SetParent(parent_proc.GetAddressOf());
             std::wcout << L"Using explorer as parent process to escape elevation.\n";
         }
 
@@ -126,7 +126,7 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
             // impersonate desired integrity level
             ImpersonateThread low_int(mode, GetCurrentProcess());
             std::wcout << L"Impersonation succeeded.\n";
-            WIN32_CHECK(CreateProcessAsUser(low_int.m_token, exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+            WIN32_CHECK(CreateProcessAsUser(low_int.m_token.Get(), exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
         } else {
             // use STARTUPINFO to determine integrity level
             WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
@@ -139,7 +139,7 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
 
     // return process handle
     HandleWrap proc;
-    std::swap(*&proc, pi->hProcess);
+    std::swap(*proc.GetAddressOf(), pi->hProcess);
     return proc;
 }
 
@@ -160,6 +160,6 @@ static HandleWrap CreateAndKillAppContainerProcess (AppContainerWrap & ac, const
 
     // return process handle
     HandleWrap proc;
-    std::swap(*&proc, pi->hProcess);
+    std::swap(*proc.GetAddressOf(), pi->hProcess);
     return proc;
 }

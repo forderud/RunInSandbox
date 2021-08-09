@@ -14,6 +14,7 @@
 #pragma comment(lib, "authz.lib")
 #include <Winternl.h>
 #pragma comment(lib, "onecoreuap.lib") // for DeriveCapabilitySidsFromName
+#include <wrl/wrappers/corewrappers.h>
 
 
 static void WIN32_CHECK(BOOL res) {
@@ -28,48 +29,8 @@ static void WIN32_CHECK(BOOL res) {
 }
 
 
-/** RAII wrapper of Win32 "handle" objects. */
-class HandleWrap {
-public:
-    HandleWrap() {
-    }
-
-    HandleWrap(HandleWrap && other) {
-        std::swap(handle, other.handle);
-    }
-
-    ~HandleWrap() {
-        if (handle) {
-            CloseHandle(handle);
-            handle = nullptr;
-        }
-    }
-
-    HandleWrap& operator = (HandleWrap && other) {
-        this->~HandleWrap();
-        new(this) HandleWrap(std::move(other));
-        return *this;
-    }
-    HandleWrap& operator = (HANDLE other) {
-        this->~HandleWrap();
-        new(this) HandleWrap();
-        handle = other;
-        return *this;
-    }
-
-    operator HANDLE () {
-        return handle;
-    }
-    HANDLE* operator & () {
-        return &handle;
-    }
-
-private:
-    HandleWrap(const HandleWrap &) = delete;
-
-    HANDLE handle = nullptr;
-};
-static_assert(sizeof(HandleWrap) == sizeof(HANDLE), "HandleWrap size mismatch");
+// RAII wrapper of Win32 HANDLE objects
+using HandleWrap = Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>;
 
 
 /** RAII wrapper of Win32 API objects allocated with LocalAlloc. */
@@ -500,22 +461,22 @@ struct ImpersonateThread {
         {
             // current user
             HandleWrap cur_token;
-            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
-            WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &m_token));
+            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, cur_token.GetAddressOf()));
+            WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenPrimary, m_token.GetAddressOf()));
         }
 
         if (integrity != IntegrityLevel::Default)
             ApplyIntegrity(integrity);
 
-        WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
+        WIN32_CHECK(ImpersonateLoggedOnUser(m_token.Get())); // change current thread integrity
     }
 
     ImpersonateThread(HandleWrap & handle) {
         HandleWrap cur_token;
-        WIN32_CHECK(OpenProcessToken(handle, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, &cur_token));
-        WIN32_CHECK(DuplicateTokenEx(cur_token, 0, NULL, SecurityImpersonation, TokenPrimary, &m_token));
+        WIN32_CHECK(OpenProcessToken(handle.Get(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, cur_token.GetAddressOf()));
+        WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenPrimary, m_token.GetAddressOf()));
 
-        WIN32_CHECK(ImpersonateLoggedOnUser(m_token)); // change current thread integrity
+        WIN32_CHECK(ImpersonateLoggedOnUser(m_token.Get())); // change current thread integrity
     }
 
     ~ImpersonateThread() {
@@ -534,7 +495,7 @@ struct ImpersonateThread {
         TOKEN_MANDATORY_LABEL TIL = {};
         TIL.Label.Attributes = SE_GROUP_INTEGRITY;
         TIL.Label.Sid = impersonation_sid;
-        WIN32_CHECK(SetTokenInformation(m_token, TokenIntegrityLevel, &TIL, sizeof(TIL) + GetLengthSid(impersonation_sid)));
+        WIN32_CHECK(SetTokenInformation(m_token.Get(), TokenIntegrityLevel, &TIL, sizeof(TIL) + GetLengthSid(impersonation_sid)));
     }
 
     static HandleWrap GetShellProc() {
@@ -544,8 +505,8 @@ struct ImpersonateThread {
         WIN32_CHECK(GetWindowThreadProcessId(GetShellWindow(), &pid));
 
         HandleWrap shell_proc;
-        shell_proc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_CREATE_PROCESS, FALSE, pid); // QUERY_INFORMATION needed for impersonation & CREATE_PROCESS for parent-process setting
-        assert(shell_proc);
+        shell_proc.Attach(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_CREATE_PROCESS, FALSE, pid)); // QUERY_INFORMATION needed for impersonation & CREATE_PROCESS for parent-process setting
+        assert(shell_proc.IsValid());
         return shell_proc;
     }
 
@@ -577,18 +538,18 @@ struct ImpersonateThread {
         Please note that elevated processes might still run under medium or low integrity, so this is _not_ a reliable way of checking for administrative privileges. */
     static bool IsProcessElevated (HANDLE process = GetCurrentProcess()) {
         HandleWrap token;
-        if (!OpenProcessToken(process, TOKEN_QUERY, &token))
+        if (!OpenProcessToken(process, TOKEN_QUERY, token.GetAddressOf()))
             abort(); // should never happen
 
         TOKEN_ELEVATION elevation = {};
         DWORD ret_len = 0;
-        if (!GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &ret_len))
+        if (!GetTokenInformation(token.Get(), TokenElevation, &elevation, sizeof(elevation), &ret_len))
             abort(); // should never happen
 
         if (elevation.TokenIsElevated) {
             TOKEN_ELEVATION_TYPE elevation_type = {};
             ret_len = 0;
-            if (!GetTokenInformation(token, TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
+            if (!GetTokenInformation(token.Get(), TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
                 abort(); // should never happen
 
             // elevation_type is usually TokenElevationTypeFull, or

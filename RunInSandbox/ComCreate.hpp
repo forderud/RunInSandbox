@@ -99,7 +99,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             // no impersonation
         } else if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
             // escape elevation & impersonate integrity
-            impersonate.reset(new ImpersonateThread(mode, ImpersonateThread::GetShellProc()));
+            impersonate.reset(new ImpersonateThread(mode, ImpersonateThread::GetShellProc().Get()));
         } else {
             // impersonate desired integrity
             impersonate.reset(new ImpersonateThread(mode, GetCurrentProcess()));
