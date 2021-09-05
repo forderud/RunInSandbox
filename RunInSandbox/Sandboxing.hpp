@@ -188,8 +188,8 @@ public:
         cap_group_sid = nullptr;
     }
 
-    std::wstring Namespace() const {
-        return L"AppContainerNamedObjects\\" + m_sid.ToString() + L"\\";
+    std::wstring SidString() const {
+        return m_sid.ToString();
     }
 
 private:
