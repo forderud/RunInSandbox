@@ -72,7 +72,7 @@ public:
 
     void Clear() {
         if (sid) {
-            FreeSid(sid);
+            LocalFree(sid);
             sid = nullptr;
         }
     }
