@@ -86,6 +86,14 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         if (mode == IntegrityLevel::AppContainer) {
             AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer", true/*network*/);
             HandleWrap proc = CreateAndKillAppContainerProcess(ac, exe_path.c_str());
+
+            std::wstring obj_name = L"MyObject";
+            HANDLE evt = CreateEventExW(NULL/*security*/, obj_name.c_str(), 0/*flags*/, SYNCHRONIZE);
+            assert(evt);
+
+            // grant AppContainer permission to the event object
+            DWORD ret = Permissions::MakePathAppContainer(ac.SidString().c_str(), obj_name.c_str(), SE_KERNEL_OBJECT, EVENT_MODIFY_STATE);
+
             // impersonate the process handle
             impersonate.reset(new ImpersonateThread(proc));
         } else {

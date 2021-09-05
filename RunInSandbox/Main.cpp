@@ -130,7 +130,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
             }
         }
 
-#if 0
+#if 1
         BOOL has_network = false;
         CComBSTR host = L"1.1.1.1"; // cloudflare
         test->TestNetworkConnection(host, 80, &has_network);
