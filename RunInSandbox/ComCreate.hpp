@@ -84,7 +84,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
         }
 
         if (mode == IntegrityLevel::AppContainer) {
-            AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer");
+            AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer", true/*network*/);
             HandleWrap proc = CreateAndKillAppContainerProcess(ac, exe_path.c_str());
             // impersonate the process handle
             impersonate.reset(new ImpersonateThread(proc));

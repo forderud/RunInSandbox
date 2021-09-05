@@ -236,7 +236,7 @@ int wmain (int argc, wchar_t *argv[]) {
         SECURITY_CAPABILITIES sec_cap = {}; // need to outlive CreateProcess
         if (mode == IntegrityLevel::AppContainer) {
             // create new AppContainer process, based on STARTUPINFO
-            ac.reset(new AppContainerWrap(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer"));
+            ac.reset(new AppContainerWrap(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer", true/*network*/));
 
             sec_cap = ac->SecCap(); // need to outlive CreateProcess
             si.SetSecurity(&sec_cap);
