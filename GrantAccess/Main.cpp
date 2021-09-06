@@ -50,7 +50,7 @@ int wmain(int argc, wchar_t *argv[]) {
             return 0;
         }
 
-        DWORD err = Permissions::MakePathAppContainer(ac_str_sid.c_str(), path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+        DWORD err = Permissions::MakePathAppContainer(ac_str_sid.c_str(), path.c_str(), SE_FILE_OBJECT, GENERIC_READ | GENERIC_EXECUTE);
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
