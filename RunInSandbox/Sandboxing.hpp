@@ -379,8 +379,6 @@ public:
             access.grfAccessPermissions = accessMask;
             access.grfAccessMode = GRANT_ACCESS;
             access.grfInheritance = OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE;
-            access.Trustee.pMultipleTrustee = nullptr;
-            access.Trustee.MultipleTrusteeOperation = NO_MULTIPLE_TRUSTEE;
             access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
             access.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
             access.Trustee.ptstrName = (wchar_t*)*&ac_sid;
