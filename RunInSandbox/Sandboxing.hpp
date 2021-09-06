@@ -364,15 +364,13 @@ public:
 
     /** Make file/folder accessible from a given AppContainer.
         Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-    static DWORD MakePathAppContainer(const wchar_t * ac_str_sid, const wchar_t * path, ACCESS_MASK accessMask) {
-        if (!ac_str_sid || (wcslen(ac_str_sid) == 0))
-            return ERROR_BAD_ARGUMENTS;
-        if (!path || (wcslen(path) == 0))
+    static DWORD MakePathAppContainer(const std::wstring & ac_str_sid, const std::wstring & path, ACCESS_MASK accessMask) {
+        if (ac_str_sid.empty() || path.empty())
             return ERROR_BAD_ARGUMENTS;
 
         // convert string SID to binary
         SidWrap ac_sid;
-        WIN32_CHECK(ConvertStringSidToSid(ac_str_sid, &ac_sid));
+        WIN32_CHECK(ConvertStringSidToSid(ac_str_sid.c_str(), &ac_sid));
 
         EXPLICIT_ACCESSW access = {};
         {
@@ -385,7 +383,7 @@ public:
         }
 
         ACL * prevAcl = nullptr; // weak ptr.
-        DWORD status = GetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
+        DWORD status = GetNamedSecurityInfoW(const_cast<wchar_t*>(path.c_str()), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
         if (status != ERROR_SUCCESS)
             return status;
 
@@ -394,7 +392,7 @@ public:
         if (status != ERROR_SUCCESS)
             return status;
 
-        status = SetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
+        status = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.c_str()), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
         return status; // ERROR_SUCCESS on success
     }
 

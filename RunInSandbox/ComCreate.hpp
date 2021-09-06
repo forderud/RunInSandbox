@@ -35,7 +35,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             if (Permissions::Check::HasReadAccess(existing_access)) {
                 std::wcout << "AppContainer already have EXE access.\n";
             } else {
-                DWORD err = Permissions::MakePathAppContainer(ac_str_sid, exe_path.c_str(), GENERIC_READ | GENERIC_EXECUTE);
+                DWORD err = Permissions::MakePathAppContainer(ac_str_sid, exe_path, GENERIC_READ | GENERIC_EXECUTE);
                 if (err != ERROR_SUCCESS) {
                     _com_error error(err);
                     std::wcerr << L"ERROR: Failed to grant AppContainer permissions to the EXE, MSG=\"" << error.ErrorMessage() << L"\" (" << err << L")" << std::endl;
