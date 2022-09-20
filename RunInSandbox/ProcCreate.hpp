@@ -75,6 +75,10 @@ private:
     PROCESS_INFORMATION pi = {};
 };
 
+struct ProcessHandles {
+    HandleWrap proc; // process handle
+    HandleWrap thrd; // main thread handle
+};
 
 static bool IsCMD (std::wstring path) {
     for (size_t i = 0; i < path.size(); ++i)
@@ -143,23 +147,22 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
     return proc;
 }
 
-
-/** Create and kill an AppContainer process, just to get a process handle that can later be impersonated. */
-static HandleWrap CreateAndKillAppContainerProcess (AppContainerWrap & ac, const wchar_t * exe_path) {
+/** Create an AppContainer process and return the process handle. */
+static ProcessHandles CreateSuspendedAppContainerProcess(AppContainerWrap& ac, const wchar_t* exe_path) {
     StartupInfoWrap si;
     SECURITY_CAPABILITIES sec_cap = ac.SecCap(); // need to outlive CreateProcess
     si.SetSecurity(&sec_cap);
 
-    // create new AppContainer process in suspended state
+    DWORD flags = EXTENDED_STARTUPINFO_PRESENT
+                | CREATE_SUSPENDED; // suspended state without any running threads
+
+    // create new AppContainer process
     ProcessInfoWrap pi;
-    WIN32_CHECK(CreateProcess(exe_path, nullptr, /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, EXTENDED_STARTUPINFO_PRESENT | CREATE_SUSPENDED, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+    WIN32_CHECK(CreateProcess(exe_path, nullptr, /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
 
-    // Kill process since we're only interested in the handle for now.
-    // The COM runtime will later recreate the process when calling CoCreateInstance.
-    WIN32_CHECK(TerminateProcess(pi->hProcess, 0));
-
-    // return process handle
-    HandleWrap proc;
-    std::swap(*proc.GetAddressOf(), pi->hProcess);
+    // return process & thread handle
+    ProcessHandles proc;
+    std::swap(*proc.proc.GetAddressOf(), pi->hProcess);
+    std::swap(*proc.thrd.GetAddressOf(), pi->hThread);
     return proc;
 }

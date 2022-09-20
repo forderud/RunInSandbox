@@ -85,9 +85,14 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
 
         if (mode == IntegrityLevel::AppContainer) {
             AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer", true/*network*/);
-            HandleWrap proc = CreateAndKillAppContainerProcess(ac, exe_path.c_str());
+            ProcessHandles proc = CreateSuspendedAppContainerProcess(ac, exe_path.c_str());
+
+            // Kill process since we're only interested in the handle for now.
+            // The COM runtime will later recreate the process when calling CoCreateInstance.
+            WIN32_CHECK(TerminateProcess(proc.proc.Get(), 0));
+
             // impersonate the process handle
-            impersonate.reset(new ImpersonateThread(proc));
+            impersonate.reset(new ImpersonateThread(proc.proc));
         } else {
             StartupInfoWrap si;
             HandleWrap proc = ProcCreate(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
