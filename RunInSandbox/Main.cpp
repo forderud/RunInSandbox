@@ -244,7 +244,11 @@ int wmain (int argc, wchar_t *argv[]) {
             mode = IntegrityLevel::Default; // avoid double-impersonation
         }
 
-        ProcCreate(si, progid.c_str(), mode, args);
+        ProcessHandles proc = CreateSuspendedProcess(si, progid.c_str(), mode, args);
+
+        // awake process
+        DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
+        assert(prev_sleep_cnt == 1);
     }
 
     std::wcout << L"[done]" << std::endl;

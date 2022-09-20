@@ -95,7 +95,16 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             impersonate.reset(new ImpersonateThread(proc.proc));
         } else {
             StartupInfoWrap si;
-            ProcessHandles proc = ProcCreate(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
+            ProcessHandles proc = CreateSuspendedProcess(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
+
+            // awake process
+            DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
+            assert(prev_sleep_cnt == 1);
+
+            // wait for process to initialize
+            // ignore failure if process is not a GUI app
+            WaitForInputIdle(proc.proc.Get(), INFINITE);
+
             // impersonate the process handle
             impersonate.reset(new ImpersonateThread(proc.proc));
         }

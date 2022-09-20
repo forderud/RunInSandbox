@@ -88,8 +88,8 @@ static bool IsCMD (std::wstring path) {
 }
 
 
-/** Launch a new process within an AppContainer. */
-static ProcessHandles ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
+/** Launch a new suspended process. */
+static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     // append arguments
     for (const auto & arg : arguments) {
@@ -99,7 +99,8 @@ static ProcessHandles ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path,
     ProcessInfoWrap pi;
 
     constexpr BOOL INHERIT_HANDLES = FALSE;
-    DWORD creation_flags = EXTENDED_STARTUPINFO_PRESENT;
+    DWORD creation_flags = EXTENDED_STARTUPINFO_PRESENT
+                         | CREATE_SUSPENDED; // suspended state without any running threads
     if (IsCMD(exe_path))
         creation_flags |= CREATE_NEW_CONSOLE; // required for starting cmd.exe
 
@@ -137,10 +138,6 @@ static ProcessHandles ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path,
         }
     }
 
-    // wait for process to initialize
-    // ignore failure if process is not a GUI app
-    WaitForInputIdle(pi->hProcess, INFINITE);
-
     // return process & thread handle
     ProcessHandles proc;
     std::swap(*proc.proc.GetAddressOf(), pi->hProcess);
@@ -148,7 +145,7 @@ static ProcessHandles ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path,
     return proc;
 }
 
-/** Create an AppContainer process and return the process handle. */
+/** Create an suspended AppContainer process and return the process handle. */
 static ProcessHandles CreateSuspendedAppContainerProcess(AppContainerWrap& ac, const wchar_t* exe_path) {
     StartupInfoWrap si;
     SECURITY_CAPABILITIES sec_cap = ac.SecCap(); // need to outlive CreateProcess
