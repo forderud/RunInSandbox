@@ -89,7 +89,7 @@ static bool IsCMD (std::wstring path) {
 
 
 /** Launch a new process within an AppContainer. */
-static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
+static ProcessHandles ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     // append arguments
     for (const auto & arg : arguments) {
@@ -115,7 +115,7 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
         info.nShow = SW_NORMAL;
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
-        return HandleWrap();
+        return ProcessHandles();
     } else {
         HandleWrap parent_proc; // lifetime tied to "si"
         if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
@@ -141,9 +141,10 @@ static HandleWrap ProcCreate(StartupInfoWrap & si, const wchar_t * exe_path, Int
     // ignore failure if process is not a GUI app
     WaitForInputIdle(pi->hProcess, INFINITE);
 
-    // return process handle
-    HandleWrap proc;
-    std::swap(*proc.GetAddressOf(), pi->hProcess);
+    // return process & thread handle
+    ProcessHandles proc;
+    std::swap(*proc.proc.GetAddressOf(), pi->hProcess);
+    std::swap(*proc.thrd.GetAddressOf(), pi->hThread);
     return proc;
 }
 

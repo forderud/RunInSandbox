@@ -95,9 +95,9 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             impersonate.reset(new ImpersonateThread(proc.proc));
         } else {
             StartupInfoWrap si;
-            HandleWrap proc = ProcCreate(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
+            ProcessHandles proc = ProcCreate(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
             // impersonate the process handle
-            impersonate.reset(new ImpersonateThread(proc));
+            impersonate.reset(new ImpersonateThread(proc.proc));
         }
     } else {
         if (mode == IntegrityLevel::Default) {
