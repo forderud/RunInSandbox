@@ -59,7 +59,7 @@ class RunInSandboxModule: public ATL::CAtlExeModuleT<RunInSandboxModule> {
 RunInSandboxModule _AtlModule;
 
 
-static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions, HWND wnd) {
+static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, bool grant_appcontainer_permissions, HWND wnd) {
     CComPtr<IUnknown> obj;
     if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // launch "COM Elevation Moniker"-compatible COM class in elevated process
@@ -67,7 +67,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_
         CHECK(CoCreateInstanceElevated<IUnknown>(0, clsid, &obj));
         std::wcout << L"COM server sucessfully created in elevated process.\n";
     } else {
-        obj = CoCreateAsUser_impersonate(clsid, mode, grant_appcontainer_permissions);
+        obj = CoCreateAsUser_impersonate(clsid, mode, break_at_startup, grant_appcontainer_permissions);
     }
 
     // allow COM server to set foreground window (needed to escape UIPI limitations)
@@ -183,10 +183,13 @@ int wmain (int argc, wchar_t *argv[]) {
     bool url_provided = std::wstring(argv[arg_idx]).substr(0, 4) == L"http";
     arg_idx++;
 
+    bool break_at_startup = false;
     bool grant_appcontainer_permissions = false;
     while (arg_idx < argc) {
         if (std::wstring(argv[arg_idx]) == L"-g") {
             grant_appcontainer_permissions = true;
+        } else if (std::wstring(argv[arg_idx]) == L"-b") {
+            break_at_startup = true;
         }
         arg_idx++;
     }
@@ -213,7 +216,7 @@ int wmain (int argc, wchar_t *argv[]) {
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
         // perform COM calls from main thread (STA)
-        ComTests(clsid, mode, grant_appcontainer_permissions, wnd);
+        ComTests(clsid, mode, break_at_startup, grant_appcontainer_permissions, wnd);
     } else if (url_provided) {
         std::wcout << L"Opening URL " << progid << " in default browser\n";
         if (ImpersonateThread::GetProcessLevel() == IntegrityLevel::Low)
@@ -245,6 +248,11 @@ int wmain (int argc, wchar_t *argv[]) {
         }
 
         ProcessHandles proc = CreateSuspendedProcess(si, progid.c_str(), mode, args);
+
+        if (break_at_startup) {
+            std::wcout << L"Process created in suspended mode. You can now attach a debugger for investigation of startup problems.\nPress any key to continue." << std::endl;
+            std::wcin.get();
+        }
 
         // awake process
         DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());

@@ -8,10 +8,10 @@
 /** Attempt to create a COM server that runds through a specific user account.
     AppContainer problem:
       Process is created but CoGetClassObject activation gives E_ACCESSDENIED (The machine-default permission settings do not grant Local Activation permission for the COM Server) */
-CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, bool grant_appcontainer_permissions) {
+CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, bool break_at_startup, bool grant_appcontainer_permissions) {
     std::unique_ptr<ImpersonateThread> impersonate;
     bool explicit_process_create = (mode == IntegrityLevel::AppContainer);
-    if (explicit_process_create) {
+    if (explicit_process_create || break_at_startup) {
         // launch COM server process manually
         wchar_t clsid_str[39] = {};
         int ok = StringFromGUID2(clsid, const_cast<wchar_t*>(clsid_str), static_cast<int>(std::size(clsid_str)));
@@ -87,15 +87,33 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer", true/*network*/);
             ProcessHandles proc = CreateSuspendedAppContainerProcess(ac, exe_path.c_str());
 
-            // Kill process since we're only interested in the handle for now.
-            // The COM runtime will later recreate the process when calling CoCreateInstance.
-            WIN32_CHECK(TerminateProcess(proc.proc.Get(), 0));
+            if (break_at_startup) {
+                std::wcout << L"Process created in suspended mode. You can now attach a debugger for investigation of startup problems.\nPress any key to continue." << std::endl;
+                std::wcin.get();
+
+                // awake process
+                DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
+                assert(prev_sleep_cnt == 1);
+
+                // wait for process to initialize
+                // ignore failure if process is not a GUI app
+                WaitForInputIdle(proc.proc.Get(), INFINITE);
+            } else {
+                // Kill process since we're only interested in the handle for now.
+                // The COM runtime will later recreate the process when calling CoCreateInstance.
+                WIN32_CHECK(TerminateProcess(proc.proc.Get(), 0));
+            }
 
             // impersonate the process handle
             impersonate.reset(new ImpersonateThread(proc.proc));
         } else {
             StartupInfoWrap si;
             ProcessHandles proc = CreateSuspendedProcess(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
+
+            if (break_at_startup) {
+                std::wcout << L"Process created in suspended mode. You can now attach a debugger for investigation of startup problems.\nPress any key to continue." << std::endl;
+                std::wcin.get();
+            }
 
             // awake process
             DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
