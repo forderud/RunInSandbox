@@ -178,13 +178,8 @@ public:
         assert(!fail);
         cap_sids = nullptr;
 
-        // clean up cap_group_sid entries & array
-        for (size_t i = 0; i < cap_group_sids_len; ++i) {
-            fail = LocalFree(cap_group_sids[i]);
-            assert(!fail);
-        }
-        fail = LocalFree(cap_group_sids);
-        assert(!fail);
+        // clean up cap_group_sids entries & array
+        FreeSidArray(cap_group_sids, cap_group_sids_len);
         cap_group_sids = nullptr;
     }
 
@@ -193,6 +188,16 @@ public:
     }
 
 private:
+    static void FreeSidArray(__inout_ecount(cSIDs) PSID* sids, ULONG count) {
+        for (ULONG i = 0; i < count; i++) {
+            LocalFree(sids[i]);
+            sids[i] = nullptr;
+        }
+
+        LocalFree(sids);
+        sids = nullptr;
+    }
+
     SidWrap                         m_sid;
     std::vector<SID_AND_ATTRIBUTES> m_capabilities;
 };
