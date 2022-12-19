@@ -163,11 +163,11 @@ public:
     }
 
     void AddCapability(const wchar_t * cap_name) {
-        PSID * cap_group_sid = nullptr;
-        DWORD cap_group_sid_len = 0;
+        PSID * cap_group_sids = nullptr;
+        DWORD cap_group_sids_len = 0;
         PSID * cap_sids = nullptr;
         DWORD cap_sids_len = 0;
-        WIN32_CHECK(DeriveCapabilitySidsFromName(cap_name, &cap_group_sid, &cap_group_sid_len, &cap_sids, &cap_sids_len));
+        WIN32_CHECK(DeriveCapabilitySidsFromName(cap_name, &cap_group_sids, &cap_group_sids_len, &cap_sids, &cap_sids_len));
 
         // forward all capability SIDs (only one in practice)
         for (size_t i = 0; i < cap_sids_len; ++i)
@@ -179,13 +179,13 @@ public:
         cap_sids = nullptr;
 
         // clean up cap_group_sid entries & array
-        for (size_t i = 0; i < cap_group_sid_len; ++i) {
-            fail = LocalFree(cap_group_sid[i]);
+        for (size_t i = 0; i < cap_group_sids_len; ++i) {
+            fail = LocalFree(cap_group_sids[i]);
             assert(!fail);
         }
-        fail = LocalFree(cap_group_sid);
+        fail = LocalFree(cap_group_sids);
         assert(!fail);
-        cap_group_sid = nullptr;
+        cap_group_sids = nullptr;
     }
 
     std::wstring SidString() const {
