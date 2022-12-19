@@ -126,8 +126,7 @@ public:
     ~AppContainerWrap() {
         for (auto &c : m_capabilities) {
             if (c.Sid) {
-                HLOCAL fail = LocalFree(c.Sid);
-                assert(!fail); fail;
+                LocalFree(c.Sid);
                 c.Sid = nullptr;
             }
         }
@@ -174,8 +173,7 @@ public:
             m_capabilities.push_back({cap_sids[i], SE_GROUP_ENABLED});
 
         // clean up cap_sids array (entries will be cleaned up in the destuctor)
-        HLOCAL fail = LocalFree(cap_sids);
-        assert(!fail);
+        LocalFree(cap_sids);
         cap_sids = nullptr;
 
         // clean up cap_group_sids entries & array
