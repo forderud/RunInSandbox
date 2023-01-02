@@ -343,7 +343,7 @@ public:
     Limitations when running under medium IL (e.g. from a non-admin command prompt):
     * Will fail if only the "Administrators" group have full access to the path, even if the current user is a member of that group.
     * Requires either the current user or the "Users" group to be granted full access to the path. */
-    static DWORD MakePathLowIntegrity(const wchar_t * path) {
+    static DWORD MakePathLowIntegrity(wchar_t * path) {
         if (!path || (wcslen(path) == 0))
             return ERROR_BAD_ARGUMENTS;
 
@@ -360,14 +360,14 @@ public:
         }
 
         // apply "low IL" SACL
-        DWORD ret = SetNamedSecurityInfoW(const_cast<wchar_t*>(path), SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
+        DWORD ret = SetNamedSecurityInfoW(path, SE_FILE_OBJECT, LABEL_SECURITY_INFORMATION, /*owner*/NULL, /*group*/NULL, /*Dacl*/NULL, sacl);
         return ret; // ERROR_SUCCESS on success
     }
 
 
     /** Make file/folder accessible from a given AppContainer.
         Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-    static DWORD MakePathAppContainer(const std::wstring & ac_str_sid, const std::wstring & path, SE_OBJECT_TYPE type, ACCESS_MASK accessMask) {
+    static DWORD MakePathAppContainer(const std::wstring & ac_str_sid, std::wstring & path, SE_OBJECT_TYPE type, ACCESS_MASK accessMask) {
         if (ac_str_sid.empty() || path.empty())
             return ERROR_BAD_ARGUMENTS;
 
@@ -386,7 +386,7 @@ public:
         }
 
         ACL * prevAcl = nullptr; // weak ptr.
-        DWORD status = GetNamedSecurityInfoW(const_cast<wchar_t*>(path.c_str()), type, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
+        DWORD status = GetNamedSecurityInfoW(path.data(), type, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/&prevAcl, nullptr, nullptr);
         if (status != ERROR_SUCCESS)
             return status;
 
@@ -395,7 +395,7 @@ public:
         if (status != ERROR_SUCCESS)
             return status;
 
-        status = SetNamedSecurityInfoW(const_cast<wchar_t*>(path.c_str()), type, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
+        status = SetNamedSecurityInfoW(path.data(), type, DACL_SECURITY_INFORMATION, nullptr, nullptr, /*DACL*/newAcl, nullptr);
         return status; // ERROR_SUCCESS on success
     }
 
