@@ -445,7 +445,7 @@ public:
         std::wstring domain(128, L'\0');
         auto domain_len = (DWORD)name.size();
         SID_NAME_USE snu = {};
-        BOOL ok = LookupAccountSidW(NULL, sid, const_cast<wchar_t*>(name.data()), &name_len, const_cast<wchar_t*>(domain.data()), &domain_len, &snu);
+        BOOL ok = LookupAccountSidW(NULL, sid, name.data(), &name_len, domain.data(), &domain_len, &snu);
         if (!ok) {
             DWORD err = GetLastError();
             HRESULT hr = HRESULT_FROM_WIN32(err); hr;
@@ -583,7 +583,7 @@ public:
             return L""; // unknown key
 
         std::wstring exe_path(exe_path_len, L'\0');
-        if (cls_reg.QueryStringValue(nullptr, const_cast<wchar_t*>(exe_path.data()), &exe_path_len) != ERROR_SUCCESS)
+        if (cls_reg.QueryStringValue(nullptr, exe_path.data(), &exe_path_len) != ERROR_SUCCESS)
             abort(); // should never happen
         exe_path.resize(exe_path_len - 1); // remove extra zero-termination
 
@@ -625,7 +625,7 @@ public:
             return L""; // AppID missing
 
         std::wstring app_id(app_id_len, L'\0');
-        if (cls_reg.QueryStringValue(L"AppID", const_cast<wchar_t*>(app_id.data()), &app_id_len) != ERROR_SUCCESS)
+        if (cls_reg.QueryStringValue(L"AppID", app_id.data(), &app_id_len) != ERROR_SUCCESS)
             abort(); // should never happen
         app_id.resize(app_id_len - 1); // remove extra zero-termination
         return app_id;
