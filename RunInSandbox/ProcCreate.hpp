@@ -92,9 +92,8 @@ static bool IsCMD (std::wstring path) {
 static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
     // append arguments
-    for (const auto & arg : arguments) {
+    for (const auto & arg : arguments)
         cmdline += L" " + arg;
-    }
 
     ProcessInfoWrap pi;
 
@@ -146,7 +145,12 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
 }
 
 /** Create an suspended AppContainer process and return the process handle. */
-static ProcessHandles CreateSuspendedAppContainerProcess(AppContainerWrap& ac, const wchar_t* exe_path) {
+static ProcessHandles CreateSuspendedAppContainerProcess(AppContainerWrap& ac, const wchar_t* exe_path, const std::vector<std::wstring>& arguments) {
+    std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
+    // append arguments
+    for (const auto& arg : arguments)
+        cmdline += L" " + arg;
+
     StartupInfoWrap si;
     SECURITY_CAPABILITIES sec_cap = ac.SecCap(); // need to outlive CreateProcess
     si.SetSecurity(&sec_cap);
@@ -156,7 +160,7 @@ static ProcessHandles CreateSuspendedAppContainerProcess(AppContainerWrap& ac, c
 
     // create new AppContainer process
     ProcessInfoWrap pi;
-    WIN32_CHECK(CreateProcess(exe_path, nullptr, /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+    WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
 
     // return process & thread handle
     ProcessHandles proc;

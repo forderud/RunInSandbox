@@ -85,7 +85,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
 
         if (mode == IntegrityLevel::AppContainer) {
             AppContainerWrap ac(L"RunInSandbox.AppContainer", L"RunInSandbox.AppContainer", true/*network*/);
-            ProcessHandles proc = CreateSuspendedAppContainerProcess(ac, exe_path.c_str());
+            ProcessHandles proc = CreateSuspendedAppContainerProcess(ac, exe_path.c_str(), {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
 
             if (break_at_startup) {
                 std::wcout << L"Process created in suspended mode. You can now attach a debugger for investigation of startup problems.\nPress any key to continue." << std::endl;
