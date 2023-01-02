@@ -130,10 +130,10 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
             // impersonate desired integrity level
             ImpersonateThread low_int(mode, GetCurrentProcess());
             std::wcout << L"Impersonation succeeded.\n";
-            WIN32_CHECK(CreateProcessAsUser(low_int.m_token.Get(), exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+            WIN32_CHECK(CreateProcessAsUserW(low_int.m_token.Get(), exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
         } else {
             // use STARTUPINFO to determine integrity level
-            WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+            WIN32_CHECK(CreateProcessW(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
         }
     }
 
@@ -160,7 +160,7 @@ static ProcessHandles CreateSuspendedAppContainerProcess(AppContainerWrap& ac, c
 
     // create new AppContainer process
     ProcessInfoWrap pi;
-    WIN32_CHECK(CreateProcess(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+    WIN32_CHECK(CreateProcessW(exe_path, const_cast<wchar_t*>(cmdline.data()), /*proc.attr*/nullptr, /*thread attr*/nullptr, /*INHERIT_HANDLES*/FALSE, flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
 
     // return process & thread handle
     ProcessHandles proc;
