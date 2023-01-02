@@ -14,7 +14,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
     if (explicit_process_create || break_at_startup) {
         // launch COM server process manually
         wchar_t clsid_str[39] = {};
-        int ok = StringFromGUID2(clsid, const_cast<wchar_t*>(clsid_str), static_cast<int>(std::size(clsid_str)));
+        int ok = StringFromGUID2(clsid, clsid_str, static_cast<int>(std::size(clsid_str)));
         if (!ok)
             abort(); // should never happen
 
@@ -166,7 +166,7 @@ static HRESULT CoCreateInstanceElevated (HWND window, const GUID clsid, T ** res
         return E_INVALIDARG;
 
     wchar_t clsid_str[39] = {};
-    int ok = StringFromGUID2(clsid, const_cast<wchar_t*>(clsid_str), static_cast<int>(std::size(clsid_str)));
+    int ok = StringFromGUID2(clsid, clsid_str, static_cast<int>(std::size(clsid_str)));
     if (!ok)
         abort(); // should never happen
 
