@@ -1,6 +1,8 @@
 # Run in Sandbox
 Sample C++ project for launching executables and out-of-process COM servers in a sandboxed [low integrity level (IL)](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10)) or [AppContainer](https://docs.microsoft.com/en-us/windows/desktop/secauthz/appcontainer-for-legacy-applications-) process on the *same machine*. There's no need to create any additional user accounts.
 
+Related project: Microsoft [SandboxSecurityTools](https://github.com/microsoft/SandboxSecurityTools) for testing of AppContainer Sandboxing.
+
 ## Executable sandboxing
 Run `RunInSandbox.exe [ac|li|mi|hi] ExePath [-b]` to launch the `ExePath` application in an AppContainer, low IL, medium IL or high IL process. This works for `STARTUPINFOEX`-based process creation. The `-b` option is used to break execution immediately after process creation to enable debugging of startup problems.
 
