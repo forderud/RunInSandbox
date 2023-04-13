@@ -337,7 +337,7 @@ public:
 
     /** Tag a folder path as writable by low integrity level (IL) processes.
         By default, only %USERPROFILE%\AppData\LocalLow is writable.
-        Based on "Designing Applications to Run at a Low Integrity Level" https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10)
+        Based on "Designing Applications to Run at a Low Integrity Level" https://learn.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v=msdn.10)
         Equivalent to "icacls.exe  <path> /setintegritylevel Low"
 
     Limitations when running under medium IL (e.g. from a non-admin command prompt):
@@ -488,7 +488,7 @@ struct ImpersonateThread {
     }
 
     /** Adjust integrity level for the impersonation token.
-        Based on "Designing Applications to Run at a Low Integrity Level" https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v%3dmsdn.10) */
+        Based on "Designing Applications to Run at a Low Integrity Level" https://learn.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v=msdn.10) */
     void ApplyIntegrity(IntegrityLevel integrity) {
         assert(integrity != IntegrityLevel::AppContainer);
 
