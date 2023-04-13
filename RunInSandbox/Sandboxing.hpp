@@ -126,7 +126,8 @@ public:
     ~AppContainerWrap() {
         for (auto &c : m_capabilities) {
             if (c.Sid) {
-                LocalFree(c.Sid);
+                HLOCAL fail = LocalFree(c.Sid);
+                assert(!fail); fail;
                 c.Sid = nullptr;
             }
         }
