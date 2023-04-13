@@ -186,7 +186,7 @@ public:
     }
 
 private:
-    static void FreeSidArray(__inout_ecount(cSIDs) PSID* sids, ULONG count) {
+    static void FreeSidArray(PSID* sids, ULONG count) {
         for (ULONG i = 0; i < count; i++) {
             LocalFree(sids[i]);
             sids[i] = nullptr;
@@ -367,7 +367,7 @@ public:
 
     /** Make file/folder accessible from a given AppContainer.
         Based on https://github.com/zodiacon/RunAppContainer/blob/master/RunAppContainer/RunAppContainerDlg.cpp */
-    static DWORD MakePathAppContainer(const std::wstring & ac_str_sid, std::wstring & path, SE_OBJECT_TYPE type, ACCESS_MASK accessMask) {
+    static DWORD MakePathAppContainer(const std::wstring& ac_str_sid, std::wstring path, SE_OBJECT_TYPE type, ACCESS_MASK accessMask) {
         if (ac_str_sid.empty() || path.empty())
             return ERROR_BAD_ARGUMENTS;
 
