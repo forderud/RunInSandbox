@@ -12,6 +12,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestControl", "TestControl\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E4F9DC73-D4E0-4110-B69A-BEC030DD1798}"
 	ProjectSection(SolutionItems) = preProject
+		ComElevation.md = ComElevation.md
 		README.md = README.md
 	EndProjectSection
 EndProject
