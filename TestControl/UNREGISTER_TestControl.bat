@@ -15,7 +15,6 @@ reg delete "HKCR\Interface\{570FBF3C-D853-435E-B761-6A264393B9DA}" /f 2> NUL
 
 :: ProgID
 reg delete "HKCR\TestControl.TestControl"   /f 2> NUL
-reg delete "HKCR\TestControl.TestControl.1" /f 2> NUL
 
 for %%R in (HKEY_LOCAL_MACHINE HKEY_CURRENT_USER) do (
   :: TypeLib & AppID
