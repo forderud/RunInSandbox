@@ -5,7 +5,7 @@ HKCR
 		CLSID = s '{F0DFBE77-1697-428E-A895-EFEE202B9333}'
 	}
 	TestControl.TestControl = s 'TestControl Object'
-	{		
+	{
 		CLSID = s '{F0DFBE77-1697-428E-A895-EFEE202B9333}'
 		CurVer = s 'TestControl.TestControl.1'
 	}
