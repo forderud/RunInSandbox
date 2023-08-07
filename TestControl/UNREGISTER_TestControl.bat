@@ -11,7 +11,12 @@ reg delete "HKCR\Interface\{D3C91F02-27DB-483C-BE4E-3883E1B51B33}" /f 2> NUL
 :: ITestInterface interface
 reg delete "HKCR\Interface\{570FBF3C-D853-435E-B761-6A264393B9DA}" /f 2> NUL
 
-:: Remove all traces of TestControl from registry (except progid)
+:: Remove all traces of TestControl from registry
+
+:: ProgID
+reg delete "HKCR\TestControl.TestControl"   /f 2> NUL
+reg delete "HKCR\TestControl.TestControl.1" /f 2> NUL
+
 for %%R in (HKEY_LOCAL_MACHINE HKEY_CURRENT_USER) do (
   :: TypeLib & AppID
   reg delete "%%R\SOFTWARE\Classes\TypeLib\{1FC81ABC-F123-4DEE-9380-4B40032E0ACD}" /f 2> NUL
