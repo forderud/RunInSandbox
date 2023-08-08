@@ -9,9 +9,9 @@ HKCR
 		ForceRemove {F0DFBE77-1697-428E-A895-EFEE202B9333} = s 'TestControl Object'
 		{
 			ProgID = s 'TestControl.TestControl'
-			val AppID = s '%APPID%'
 			LocalServer32 = s '%MODULE%'
 			TypeLib = s '{1FC81ABC-F123-4DEE-9380-4B40032E0ACD}'
+			val AppID = s '%APPID%'
 			val LocalizedString = s '@%MODULE%,-102'
 			Elevation = s ''
 			{
