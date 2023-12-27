@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30711.63
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RunInSandbox", "RunInSandbox\RunInSandbox.vcxproj", "{67D22CEF-2225-45ED-A1B5-239D1D7502F8}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -16,11 +16,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunElevatedNet", "RunElevatedNet\RunElevatedNet.csproj", "{3D481B63-2EA5-49C4-B351-AD292BEA65AF}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TryToAccess", "TryToAccess\TryToAccess.vcxproj", "{30B5888C-49F6-4E13-8E0A-2C2240B87553}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GrantAccess", "GrantAccess\GrantAccess.vcxproj", "{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RunElevatedNet", "RunElevatedNet\RunElevatedNet.csproj", "{9E3FE3EA-EB11-4703-9CDD-7F15E08AF0E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,10 +36,6 @@ Global
 		{D519401F-4A16-41A6-80AF-E3CAE2D9AE04}.Debug|x64.Build.0 = Debug|x64
 		{D519401F-4A16-41A6-80AF-E3CAE2D9AE04}.Release|x64.ActiveCfg = Release|x64
 		{D519401F-4A16-41A6-80AF-E3CAE2D9AE04}.Release|x64.Build.0 = Release|x64
-		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Debug|x64.ActiveCfg = Debug|x64
-		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Debug|x64.Build.0 = Debug|x64
-		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Release|x64.ActiveCfg = Release|x64
-		{3D481B63-2EA5-49C4-B351-AD292BEA65AF}.Release|x64.Build.0 = Release|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Debug|x64.ActiveCfg = Debug|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Debug|x64.Build.0 = Debug|x64
 		{30B5888C-49F6-4E13-8E0A-2C2240B87553}.Release|x64.ActiveCfg = Release|x64
@@ -48,6 +44,10 @@ Global
 		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Debug|x64.Build.0 = Debug|x64
 		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Release|x64.ActiveCfg = Release|x64
 		{18BE57E3-8256-4C8F-8F28-6BA57704ADE8}.Release|x64.Build.0 = Release|x64
+		{9E3FE3EA-EB11-4703-9CDD-7F15E08AF0E9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9E3FE3EA-EB11-4703-9CDD-7F15E08AF0E9}.Debug|x64.Build.0 = Debug|Any CPU
+		{9E3FE3EA-EB11-4703-9CDD-7F15E08AF0E9}.Release|x64.ActiveCfg = Release|Any CPU
+		{9E3FE3EA-EB11-4703-9CDD-7F15E08AF0E9}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
