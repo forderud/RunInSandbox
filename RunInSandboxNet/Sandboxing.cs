@@ -30,7 +30,7 @@ class Sandboxing
         IntPtr tokenMandatoryLabelPtr = Marshal.AllocHGlobal(tokenMandatoryLabelSize);
         Marshal.StructureToPtr(tokenMandatoryLabel, tokenMandatoryLabelPtr, true);
 
-        var handle = new SafeProcessHandle(token.Token, true);
+        using var handle = new SafeProcessHandle(token.Token, false);
         if (!SetTokenInformation(handle, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabelPtr, tokenMandatoryLabelSize))
             throw new Win32Exception("SetTokenInformationStruct failed");
 
