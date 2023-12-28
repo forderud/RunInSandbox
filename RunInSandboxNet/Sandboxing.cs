@@ -18,7 +18,7 @@ class Sandboxing
         using WindowsIdentity token = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.AdjustDefault | TokenAccessLevels.Query | TokenAccessLevels.AssignPrimary);
 
         IntPtr sidPtr = IntPtr.Zero;
-        if (!ConvertStringSidToSid(level, out sidPtr))
+        if (!ConvertStringSidToSidW(level, out sidPtr))
             throw new Win32Exception("ConvertStringSidToSid failed");
 
         // reduce process integrity level
@@ -40,7 +40,7 @@ class Sandboxing
         });
     }
 
-    [DllImport("Advapi32.dll", EntryPoint = "SetTokenInformation", SetLastError = true)]
+    [DllImport("Advapi32.dll", SetLastError = true)]
     private static extern bool SetTokenInformation(
                                 SafeProcessHandle TokenHandle,
                                 TokenInformationClass TokenInformationClass,
@@ -94,8 +94,8 @@ class Sandboxing
         public uint Attributes;
     }
 
-    [DllImport("Advapi32.dll", EntryPoint = "ConvertStringSidToSidW", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-    private static extern bool ConvertStringSidToSid(string sid, out IntPtr psid);
+    [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+    private static extern bool ConvertStringSidToSidW(string sid, out IntPtr psid);
 
     [DllImport("Advapi32.dll", CallingConvention = CallingConvention.Winapi)]
     private static extern int GetLengthSid(IntPtr pSid);
