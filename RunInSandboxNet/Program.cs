@@ -4,9 +4,10 @@
     {
         var obj = Sandboxing.CoCreate(level, progId);
 
+        // Exercise TestControl API
+        var tc = (TestControl.ITestInterface)obj;
+        if (tc != null)
         {
-            // Exercise TestControl API
-            var tc = (TestControl.ITestInterface)obj;
             bool isElevated, isHighIL;
             tc.IsElevated(out isElevated, out isHighIL);
             Console.WriteLine("High IL: " + isHighIL);
