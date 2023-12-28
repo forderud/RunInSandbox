@@ -4,7 +4,7 @@ if (args.Length > 0)
 else
     progId = "TestControl.TestControl"; // default COM server
 
-var obj = Sandboxing.CreateLowIL(progId);
+var obj = Sandboxing.CoCreate(Sandboxing.SDDL_ML_LOW, progId);
 obj = null;
 
 GC.Collect();

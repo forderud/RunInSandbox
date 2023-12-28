@@ -7,13 +7,17 @@ using System.Security.Principal;
 
 class Sandboxing 
 {
-    public static object CreateLowIL(string progId)
+    // DOC: https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
+    public static readonly string SDDL_ML_LOW = "LW"; // Low mandatory level
+
+    /** Create COM server in a sandboxed process. */
+    public static object CoCreate(string level, string progId)
     {
         // matches OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY)
         WindowsIdentity token = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.AdjustDefault | TokenAccessLevels.Query | TokenAccessLevels.AssignPrimary);
 
         IntPtr sidPtr = IntPtr.Zero;
-        if (!ConvertStringSidToSid("LW", out sidPtr)) // SDDL_ML_LOW - Low mandatory level
+        if (!ConvertStringSidToSid(level, out sidPtr))
             throw new Win32Exception("ConvertStringSidToSid failed");
 
         // reduce process integrity level
