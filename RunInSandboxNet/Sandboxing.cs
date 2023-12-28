@@ -9,6 +9,7 @@ class Sandboxing
 {
     // DOC: https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
     public static readonly string SDDL_ML_LOW = "LW"; // Low mandatory level
+    public static readonly string SDDL_ML_MEDIUM = "ME"; // Medium integrity level
 
     /** Create COM server in a sandboxed process. */
     public static object CoCreate(string level, string progId)
