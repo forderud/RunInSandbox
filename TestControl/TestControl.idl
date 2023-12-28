@@ -23,19 +23,19 @@ interface ITestInterface : IUnknown {
     HRESULT PerformAdminTask();
 
     [helpstring("Check if object is running in an elevated process")]
-    HRESULT IsElevated ([out] BOOL * is_elevated, [out] BOOL * is_high_il);
+    HRESULT IsElevated ([out] VARIANT_BOOL * is_elevated, [out] VARIANT_BOOL * is_high_il);
 
     [helpstring("Check if object has network access")]
-    HRESULT TestNetworkConnection([in] BSTR host, [in] USHORT port, [out,retval] BOOL * can_access);
+    HRESULT TestNetworkConnection([in] BSTR host, [in] USHORT port, [out,retval] VARIANT_BOOL * can_access);
 
     [helpstring("For testing of nested COM object creation")]
-    HRESULT CreateInstance ([in] BOOL elevated, [in] CLSID clsid, [out,retval] IUnknown ** obj);
+    HRESULT CreateInstance ([in] VARIANT_BOOL elevated, [in] CLSID clsid, [out,retval] IUnknown ** obj);
 
     [helpstring("For testing of COM callbacks")]
     HRESULT TestCallback([in] IUnknown * obj);
 
     [helpstring("Move the mouse cursor")]
-    HRESULT MoveMouseCursor([in] BOOL threaded, [in] int x_pos, [in] int y_pos);
+    HRESULT MoveMouseCursor([in] VARIANT_BOOL threaded, [in] int x_pos, [in] int y_pos);
 };
 
 

@@ -19,15 +19,15 @@ public:
 
     HRESULT STDMETHODCALLTYPE PerformAdminTask() override;
 
-    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) override;
+    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
 
-    HRESULT STDMETHODCALLTYPE TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/BOOL * can_access) override;
+    HRESULT STDMETHODCALLTYPE TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/VARIANT_BOOL * can_access) override;
 
-    HRESULT STDMETHODCALLTYPE CreateInstance (BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
+    HRESULT STDMETHODCALLTYPE CreateInstance (VARIANT_BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
 
     HRESULT STDMETHODCALLTYPE TestCallback(IUnknown * obj) override;
 
-    HRESULT STDMETHODCALLTYPE MoveMouseCursor(BOOL threaded, int x_pos, int y_pos) override;
+    HRESULT STDMETHODCALLTYPE MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos) override;
 
     // IOleWindow
     HRESULT STDMETHODCALLTYPE GetWindow(/*out*/HWND* wnd) override;

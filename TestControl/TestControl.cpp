@@ -27,7 +27,7 @@ HRESULT TestControl::PerformAdminTask() {
 }
 
 
-HRESULT TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_high_il) {
+HRESULT TestControl::IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
 
     IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
@@ -37,7 +37,7 @@ HRESULT TestControl::IsElevated (/*out*/BOOL * is_elevated, /*out*/BOOL * is_hig
 }
 
 
-HRESULT TestControl::TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/BOOL * can_access) {
+HRESULT TestControl::TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/VARIANT_BOOL * can_access) {
     *can_access = false; // assume no connectivity by default
 
     try {
@@ -51,7 +51,7 @@ HRESULT TestControl::TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*
 }
 
 
-HRESULT TestControl::CreateInstance (BOOL elevated, /*in*/CLSID clsid, /*out*/IUnknown ** obj) {
+HRESULT TestControl::CreateInstance (VARIANT_BOOL elevated, /*in*/CLSID clsid, /*out*/IUnknown ** obj) {
     if (!obj)
         return E_INVALIDARG;
 
@@ -83,7 +83,7 @@ HRESULT TestControl::TestCallback(IUnknown * obj) {
 }
 
 
-HRESULT TestControl::MoveMouseCursor(BOOL threaded, int x_pos, int y_pos) {
+HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos) {
     auto create_window_and_move_cursor = [x_pos, y_pos]() -> HRESULT {
         // create independent window to receive cursor events
         CWindow wnd;

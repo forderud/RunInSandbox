@@ -83,7 +83,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         std::wcout << L"Add(2, 3) returned " << sum << L".\n";
         assert(sum == 2 + 3);
 
-        BOOL is_elevated = false, is_high_il = false;
+        VARIANT_BOOL is_elevated = false, is_high_il = false;
         CHECK(test->IsElevated(&is_elevated, &is_high_il));
         std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"IsHighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
