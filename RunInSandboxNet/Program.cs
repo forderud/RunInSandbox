@@ -25,7 +25,8 @@
 
         TestCreate(Sandboxing.SDDL_ML_LOW, progId);
 
+        // Run GC to ensure everything's cleaned up
         GC.Collect();
-        //GC.WaitForPendingFinalizers();
+        GC.WaitForPendingFinalizers();
     }
 }
