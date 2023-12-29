@@ -1,8 +1,8 @@
 ﻿class RunInSandbox
 {
-    static void TestCreate(string level, string progId)
+    static void TestCreate(string level, Type clsid)
     {
-        var obj = Sandboxing.CoCreate(level, progId);
+        var obj = Sandboxing.CoCreate(level, clsid);
 
         // Exercise TestControl API
         var tc = (TestControl.ITestInterface)obj;
@@ -23,7 +23,7 @@
             progId = "TestControl.TestControl"; // default COM server
 
 
-        TestCreate(Sandboxing.SDDL_ML_LOW, progId);
+        TestCreate(Sandboxing.SDDL_ML_LOW, Type.GetTypeFromProgID(progId));
 
         // Run GC to ensure everything's cleaned up
         GC.Collect();

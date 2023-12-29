@@ -12,7 +12,7 @@ class Sandboxing
     public static readonly string SDDL_ML_MEDIUM = "ME"; // Medium integrity level
 
     /** Create COM server in a sandboxed process. */
-    public static object CoCreate(string level, string progId)
+    public static object CoCreate(string level, Type clsid)
     {
         // matches OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY)
         using WindowsIdentity token = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.AdjustDefault | TokenAccessLevels.Query | TokenAccessLevels.AssignPrimary);
@@ -36,7 +36,7 @@ class Sandboxing
 
         return WindowsIdentity.RunImpersonated(token.AccessToken, () =>
         {
-            return Activator.CreateInstance(Type.GetTypeFromProgID(progId));
+            return Activator.CreateInstance(clsid);
         });
     }
 
