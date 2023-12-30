@@ -32,8 +32,7 @@ class Sandboxing
         IntPtr tokenMandatoryLabelPtr = Marshal.AllocHGlobal(tokenMandatoryLabelSize);
         Marshal.StructureToPtr(tokenMandatoryLabel, tokenMandatoryLabelPtr, true);
 
-        using var handle = new SafeProcessHandle(token.Token, false);
-        if (!SetTokenInformation(handle, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabelPtr, tokenMandatoryLabelSize))
+        if (!SetTokenInformation(token.AccessToken, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabelPtr, tokenMandatoryLabelSize))
             throw new Win32Exception("SetTokenInformationStruct failed");
 
         return WindowsIdentity.RunImpersonated(token.AccessToken, () =>
@@ -44,7 +43,7 @@ class Sandboxing
 
     [DllImport("Advapi32.dll", SetLastError = true)]
     private static extern bool SetTokenInformation(
-                                SafeProcessHandle TokenHandle,
+                                SafeAccessTokenHandle TokenHandle,
                                 TokenInformationClass TokenInformationClass,
                                 IntPtr TokenInformation,
                                 int TokenInformationLength);
