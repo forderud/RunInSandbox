@@ -11,7 +11,8 @@ class Sandboxing
     public static readonly string SDDL_ML_LOW = "LW"; // Low mandatory level
     public static readonly string SDDL_ML_MEDIUM = "ME"; // Medium integrity level
 
-    /** Create COM server in a sandboxed process. */
+    /** Create COM server in a sandboxed process.
+     *  WARNING: Buggy code that fail when called multiple times. */
     public static object CoCreate(string level, Type clsid)
     {
         // matches OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY)
