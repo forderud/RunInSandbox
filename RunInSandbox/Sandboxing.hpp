@@ -466,8 +466,8 @@ struct ImpersonateThread {
         {
             // current user
             HandleWrap cur_token;
-            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, cur_token.GetAddressOf()));
-            WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenPrimary, m_token.GetAddressOf()));
+            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_IMPERSONATE, cur_token.GetAddressOf()));
+            WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenImpersonation, m_token.GetAddressOf()));
         }
 
         if (integrity != IntegrityLevel::Default)
@@ -478,8 +478,8 @@ struct ImpersonateThread {
 
     ImpersonateThread(HandleWrap & handle) {
         HandleWrap cur_token;
-        WIN32_CHECK(OpenProcessToken(handle.Get(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY, cur_token.GetAddressOf()));
-        WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenPrimary, m_token.GetAddressOf()));
+        WIN32_CHECK(OpenProcessToken(handle.Get(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_IMPERSONATE, cur_token.GetAddressOf()));
+        WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenImpersonation, m_token.GetAddressOf()));
 
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token.Get())); // change current thread integrity
     }

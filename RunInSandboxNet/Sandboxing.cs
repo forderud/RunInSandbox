@@ -15,8 +15,8 @@ class Sandboxing
      *  WARNING: Buggy code that fail when called multiple times. */
     public static object CoCreate(string level, Type clsid)
     {
-        // matches OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_ASSIGN_PRIMARY)
-        using WindowsIdentity curToken = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.AdjustDefault | TokenAccessLevels.Query | TokenAccessLevels.AssignPrimary);
+        // matches OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_IMPERSONATE)
+        using WindowsIdentity curToken = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.AdjustDefault | TokenAccessLevels.Query | TokenAccessLevels.Impersonate);
         using var token = (WindowsIdentity)curToken.Clone();
 
         IntPtr sidPtr = IntPtr.Zero;
