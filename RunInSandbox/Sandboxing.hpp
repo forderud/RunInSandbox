@@ -466,7 +466,7 @@ struct ImpersonateThread {
         {
             // current user
             HandleWrap cur_token;
-            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_IMPERSONATE, cur_token.GetAddressOf()));
+            WIN32_CHECK(OpenProcessToken(proc, TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT, cur_token.GetAddressOf()));
             WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenImpersonation, m_token.GetAddressOf()));
         }
 
@@ -478,7 +478,7 @@ struct ImpersonateThread {
 
     ImpersonateThread(HandleWrap & handle) {
         HandleWrap cur_token;
-        WIN32_CHECK(OpenProcessToken(handle.Get(), TOKEN_DUPLICATE | TOKEN_ADJUST_DEFAULT | TOKEN_QUERY | TOKEN_IMPERSONATE, cur_token.GetAddressOf()));
+        WIN32_CHECK(OpenProcessToken(handle.Get(), TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT, cur_token.GetAddressOf()));
         WIN32_CHECK(DuplicateTokenEx(cur_token.Get(), 0, NULL, SecurityImpersonation, TokenImpersonation, m_token.GetAddressOf()));
 
         WIN32_CHECK(ImpersonateLoggedOnUser(m_token.Get())); // change current thread integrity
