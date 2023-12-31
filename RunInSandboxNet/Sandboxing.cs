@@ -38,7 +38,7 @@ class Sandboxing
         return WindowsIdentity.RunImpersonated(token.AccessToken, () =>
         {
             return Activator.CreateInstance(clsid);
-        });
+        })!;
     }
 
     [DllImport("Advapi32.dll", SetLastError = true)]

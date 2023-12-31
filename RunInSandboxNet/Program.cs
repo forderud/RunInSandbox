@@ -23,8 +23,8 @@
             progId = "TestControl.TestControl"; // default COM server
 
 
-        //TestCreate(Sandboxing.SDDL_ML_MEDIUM, Type.GetTypeFromProgID(progId));
-        TestCreate(Sandboxing.SDDL_ML_LOW, Type.GetTypeFromProgID(progId));
+        //TestCreate(Sandboxing.SDDL_ML_MEDIUM, Type.GetTypeFromProgID(progId)!);
+        TestCreate(Sandboxing.SDDL_ML_LOW, Type.GetTypeFromProgID(progId)!);
 
         // Run GC to ensure everything's cleaned up
         GC.Collect();
