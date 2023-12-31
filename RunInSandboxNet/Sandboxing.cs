@@ -16,8 +16,9 @@ class Sandboxing
     public static object CoCreate(string level, Type clsid)
     {
         // matches OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT)
-        using WindowsIdentity curToken = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.Impersonate | TokenAccessLevels.Query | TokenAccessLevels.AdjustDefault);
-        using var token = (WindowsIdentity)curToken.Clone();
+        using WindowsIdentity curId = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.Impersonate | TokenAccessLevels.Query | TokenAccessLevels.AdjustDefault);
+        using var id = (WindowsIdentity)curId.Clone();
+        using SafeAccessTokenHandle token = id.AccessToken;
 
         IntPtr sidPtr = IntPtr.Zero;
         if (!ConvertStringSidToSidW(level, out sidPtr))
@@ -32,10 +33,10 @@ class Sandboxing
         IntPtr tokenMandatoryLabelPtr = Marshal.AllocHGlobal(tokenMandatoryLabelSize);
         Marshal.StructureToPtr(tokenMandatoryLabel, tokenMandatoryLabelPtr, true);
 
-        if (!SetTokenInformation(token.AccessToken, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabelPtr, tokenMandatoryLabelSize))
+        if (!SetTokenInformation(token, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabelPtr, tokenMandatoryLabelSize))
             throw new Win32Exception("SetTokenInformationStruct failed");
 
-        return WindowsIdentity.RunImpersonated(token.AccessToken, () =>
+        return WindowsIdentity.RunImpersonated(token, () =>
         {
             return Activator.CreateInstance(clsid);
         })!;
