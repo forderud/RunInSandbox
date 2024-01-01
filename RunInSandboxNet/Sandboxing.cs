@@ -37,14 +37,6 @@ class Sandboxing
         })!;
     }
 
-    [DllImport("Advapi32.dll", SetLastError = true)]
-    private static extern bool SetTokenInformation(
-                                SafeAccessTokenHandle TokenHandle,
-                                TokenInformationClass TokenInformationClass,
-                                TOKEN_MANDATORY_LABEL TokenInformation,
-                                int TokenInformationLength);
-
-
     private enum TokenInformationClass
     {
         TokenUser = 1,
@@ -91,12 +83,6 @@ class Sandboxing
         public uint Attributes;
     }
 
-    [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-    private static extern bool ConvertStringSidToSidW(string sid, out IntPtr psid);
-
-    [DllImport("Advapi32.dll", CallingConvention = CallingConvention.Winapi)]
-    private static extern int GetLengthSid(IntPtr pSid);
-
     [StructLayout(LayoutKind.Sequential)]
     private class TOKEN_MANDATORY_LABEL
     {
@@ -106,4 +92,18 @@ class Sandboxing
         }
         public SID_AND_ATTRIBUTES Label;
     }
+
+    [DllImport("Advapi32.dll", SetLastError = true)]
+    private static extern bool SetTokenInformation(
+                            SafeAccessTokenHandle TokenHandle,
+                            TokenInformationClass TokenInformationClass,
+                            TOKEN_MANDATORY_LABEL TokenInformation,
+                            int TokenInformationLength);
+
+    [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+    private static extern bool ConvertStringSidToSidW(string sid, out IntPtr psid);
+
+    [DllImport("Advapi32.dll", CallingConvention = CallingConvention.Winapi)]
+    private static extern int GetLengthSid(IntPtr pSid);
+
 }
