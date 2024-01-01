@@ -16,14 +16,9 @@ class Sandboxing
     public static object CoCreate(string level, Type clsid)
     {
         // mimic OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT)
-        SafeAccessTokenHandle curToken;
-#if false
         using WindowsIdentity id = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.Impersonate | TokenAccessLevels.Query | TokenAccessLevels.AdjustDefault);
-        curToken = id.AccessToken;
-#else
-        if (!OpenProcessToken(GetCurrentProcess(), TokenAccessLevels.Duplicate | TokenAccessLevels.Impersonate | TokenAccessLevels.Query | TokenAccessLevels.AdjustDefault, out curToken))
-            throw new Win32Exception("OpenProcessToken failed");
-#endif
+        using SafeAccessTokenHandle curToken = id.AccessToken;
+
         // mimic DuplicateTokenEx(curToken, 0, NULL, SecurityImpersonation, TokenImpersonation, &token)
         var token = new SafeAccessTokenHandle();
         if (!DuplicateTokenEx(curToken, 0, IntPtr.Zero, SECURITY_IMPERSONATION_LEVEL.SecurityImpersonation, TokenType.TokenImpersonation, ref token))
@@ -120,11 +115,4 @@ class Sandboxing
                                   SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
                                   TokenType TokenType,
                                   ref SafeAccessTokenHandle phNewToken);
-
-    [DllImport("advapi32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool OpenProcessToken(IntPtr ProcessHandle, TokenAccessLevels DesiredAccess, out SafeAccessTokenHandle TokenHandle);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    internal static extern IntPtr GetCurrentProcess();
 }
