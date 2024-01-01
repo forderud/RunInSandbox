@@ -28,9 +28,7 @@ class Sandboxing
         var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL();
         tokenMandatoryLabel.Label.Attributes = 0x00000020; // SE_GROUP_INTEGRITY
         tokenMandatoryLabel.Label.Sid = sidPtr;
-        int tokenMandatoryLabelSize = Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr);
-
-        if (!SetTokenInformation(token, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabel, tokenMandatoryLabelSize))
+        if (!SetTokenInformation(token, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
             throw new Win32Exception("SetTokenInformationStruct failed");
 
         return WindowsIdentity.RunImpersonated(token, () =>
