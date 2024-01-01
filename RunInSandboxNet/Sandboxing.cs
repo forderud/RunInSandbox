@@ -74,23 +74,14 @@ class Sandboxing
     [StructLayout(LayoutKind.Sequential)]
     private class SID_AND_ATTRIBUTES
     {
-        public SID_AND_ATTRIBUTES()
-        {
-            this.Sid = IntPtr.Zero;
-        }
-
-        public IntPtr Sid;
-        public uint Attributes;
+        public IntPtr Sid = IntPtr.Zero;
+        public uint Attributes = 0;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private class TOKEN_MANDATORY_LABEL
     {
-        public TOKEN_MANDATORY_LABEL()
-        {
-            this.Label = new SID_AND_ATTRIBUTES();
-        }
-        public SID_AND_ATTRIBUTES Label;
+        public SID_AND_ATTRIBUTES Label = new SID_AND_ATTRIBUTES();
     }
 
     [DllImport("Advapi32.dll", SetLastError = true)]
