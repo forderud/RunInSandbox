@@ -38,16 +38,9 @@ class Sandboxing
             Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
         }
 
-        SafeAccessTokenHandle token2;
-#if false
-        using var id = new WindowsIdentity(token.DangerousGetHandle());
-        token2 = id.AccessToken;
-#else
-        token2 = token;
-#endif
         // RunImpersonated isn't actually needed here, since Process.Start & Activator.CreateInstance
         // are using the current process token, and _not_ the impersonation token.
-        object obj = WindowsIdentity.RunImpersonated(token2, () =>
+        object obj = WindowsIdentity.RunImpersonated(token, () =>
         {
             // process start
             Process.Start("notepad.exe");
