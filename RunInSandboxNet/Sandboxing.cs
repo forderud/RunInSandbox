@@ -25,9 +25,7 @@ class Sandboxing
             throw new Win32Exception("ConvertStringSidToSid failed");
 
         // reduce process integrity level
-        var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL();
-        tokenMandatoryLabel.Label.Attributes = 0x00000020; // SE_GROUP_INTEGRITY
-        tokenMandatoryLabel.Label.Sid = sidPtr;
+        var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
         if (!SetTokenInformation(token, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
             throw new Win32Exception("SetTokenInformationStruct failed");
 
@@ -75,12 +73,16 @@ class Sandboxing
     private class SID_AND_ATTRIBUTES
     {
         public IntPtr Sid = IntPtr.Zero;
-        public uint Attributes = 0;
+        public uint Attributes = 0x00000020; // SE_GROUP_INTEGRITY
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private class TOKEN_MANDATORY_LABEL
     {
+        public TOKEN_MANDATORY_LABEL(IntPtr sidPtr)
+        {
+            Label.Sid = sidPtr;
+        }
         public SID_AND_ATTRIBUTES Label = new SID_AND_ATTRIBUTES();
     }
 
