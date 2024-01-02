@@ -37,7 +37,7 @@ class Sandboxing
         })!;
     }
 
-    // Copied from https://github.com/dotnet/wpf-test/blob/main/src/Test/Common/Code/Microsoft/Test/Diagnostics/ProcessHelper.cs
+    // based on https://github.com/dotnet/wpf-test/blob/main/src/Test/Common/Code/Microsoft/Test/Diagnostics/ProcessHelper.cs
     [StructLayout(LayoutKind.Sequential)]
     private class SID_AND_ATTRIBUTES
     {
