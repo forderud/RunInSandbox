@@ -25,7 +25,7 @@ class Sandboxing
         if (!ConvertStringSidToSidW(level, out sidPtr))
             throw new Win32Exception("ConvertStringSidToSid failed");
 
-        // reduce process integrity level
+        // reduce integrity level
         var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
         if (!SetTokenInformation(token, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
             throw new Win32Exception("SetTokenInformationStruct failed");
