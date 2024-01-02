@@ -1,5 +1,3 @@
-/* This file is intended to match the C++ Sandboxing.hpp */
-
 using Microsoft.Win32.SafeHandles;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,14 +6,15 @@ using System.Security.Principal;
 
 class Sandboxing
 {
-    // DOC: https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
-    public static readonly string SDDL_ML_LOW = "LW"; // Low mandatory level
-    public static readonly string SDDL_ML_MEDIUM = "ME"; // Medium integrity level
+    static void Main(string[] args)
+    {
+        Create("notepad.exe"); // will succeed
+        Create("notepad.exe"); // will fail
+    }
 
-    /** Create COM server in a sandboxed process.
-     *  WARNING: WindowsIdentity.GetCurrent throws "Access is denied" exception if called multiple times.
-     *  Associated bug report: https://github.com/dotnet/runtime/issues/96397 */
-    public static object CoCreate(string level, Type clsid)
+    /** Start application in a sandboxed integrity level (low IL) process.
+     *  WARNING: WindowsIdentity.GetCurrent throws "Access is denied" exception if called multiple times. */
+    public static void Create(string appName)
     {
         // mimic OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT)
         using WindowsIdentity curId = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.Impersonate | TokenAccessLevels.Query | TokenAccessLevels.AdjustDefault);
@@ -23,28 +22,22 @@ class Sandboxing
         using var id = (WindowsIdentity)curId.Clone();
         using SafeAccessTokenHandle token = id.AccessToken; // copy of process token
 
+        // get low integrity level (low IL) SID (https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings)
+        IntPtr sidPtr = IntPtr.Zero;
+        if (!ConvertStringSidToSidW("LW", out sidPtr))
+            throw new Win32Exception("ConvertStringSidToSid failed");
+
+        // reduce integrity level
+        var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
+        int TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
+        if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
+            throw new Win32Exception("SetTokenInformationStruct failed");
+
+        WindowsIdentity.RunImpersonated(token, () =>
         {
-            IntPtr sidPtr = IntPtr.Zero;
-            if (!ConvertStringSidToSidW(level, out sidPtr))
-                throw new Win32Exception("ConvertStringSidToSid failed");
-
-            // reduce integrity level
-            var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
-            int TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
-            if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
-                throw new Win32Exception("SetTokenInformationStruct failed");
-
-            Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
-        }
-
-        return WindowsIdentity.RunImpersonated(token, () =>
-        {
-            // process start
-            Process.Start("notepad.exe");
-
-            // COM server creation
-            return Activator.CreateInstance(clsid);
-        })!;
+            // start in sandboxed process
+            Process.Start(appName);
+        });
     }
 
     // based on https://github.com/dotnet/wpf-test/blob/main/src/Test/Common/Code/Microsoft/Test/Diagnostics/ProcessHelper.cs
