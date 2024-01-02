@@ -67,5 +67,4 @@ class Sandboxing
 
     [DllImport("Advapi32.dll")]
     private static extern int GetLengthSid(IntPtr pSid);
-
 }
