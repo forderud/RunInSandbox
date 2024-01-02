@@ -28,7 +28,7 @@ class Sandboxing
 
             // reduce integrity level
             var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
-            int TokenIntegrityLevel = TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
+            int TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
             if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
                 throw new Win32Exception("SetTokenInformationStruct failed");
 
