@@ -94,10 +94,10 @@ class Sandboxing
                             TOKEN_MANDATORY_LABEL TokenInformation,
                             int TokenInformationLength);
 
-    [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+    [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
     private static extern bool ConvertStringSidToSidW(string sid, out IntPtr psid);
 
-    [DllImport("Advapi32.dll", CallingConvention = CallingConvention.Winapi)]
+    [DllImport("Advapi32.dll")]
     private static extern int GetLengthSid(IntPtr pSid);
 
 }
