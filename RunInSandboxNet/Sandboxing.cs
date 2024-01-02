@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-class Sandboxing 
+class Sandboxing
 {
     // DOC: https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings
     public static readonly string SDDL_ML_LOW = "LW"; // Low mandatory level
