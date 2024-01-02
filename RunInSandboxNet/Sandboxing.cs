@@ -21,15 +21,19 @@ class Sandboxing
         using var id = (WindowsIdentity)curId.Clone();
         using SafeAccessTokenHandle token = id.AccessToken;
 
-        IntPtr sidPtr = IntPtr.Zero;
-        if (!ConvertStringSidToSidW(level, out sidPtr))
-            throw new Win32Exception("ConvertStringSidToSid failed");
+        {
+            IntPtr sidPtr = IntPtr.Zero;
+            if (!ConvertStringSidToSidW(level, out sidPtr))
+                throw new Win32Exception("ConvertStringSidToSid failed");
 
-        // reduce integrity level
-        var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
-        int TokenIntegrityLevel = TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
-        if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
-            throw new Win32Exception("SetTokenInformationStruct failed");
+            // reduce integrity level
+            var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
+            int TokenIntegrityLevel = TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
+            if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
+                throw new Win32Exception("SetTokenInformationStruct failed");
+
+            Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
+        }
 
         return WindowsIdentity.RunImpersonated(token, () =>
         {
