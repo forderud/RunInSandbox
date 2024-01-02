@@ -27,46 +27,14 @@ class Sandboxing
 
         // reduce integrity level
         var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
-        if (!SetTokenInformation(token, TokenInformationClass.TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
+        int TokenIntegrityLevel = TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
+        if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
             throw new Win32Exception("SetTokenInformationStruct failed");
 
         return WindowsIdentity.RunImpersonated(token, () =>
         {
             return Activator.CreateInstance(clsid);
         })!;
-    }
-
-    private enum TokenInformationClass
-    {
-        TokenUser = 1,
-        TokenGroups,
-        TokenPrivileges,
-        TokenOwner,
-        TokenPrimaryGroup,
-        TokenDefaultDacl,
-        TokenSource,
-        TokenType,
-        TokenImpersonationLevel,
-        TokenStatistics,
-        TokenRestrictedSids,
-        TokenSessionId,
-        TokenGroupsAndPrivileges,
-        TokenSessionReference,
-        TokenSandBoxInert,
-        TokenAuditPolicy,
-        TokenOrigin,
-        TokenElevationType,
-        TokenLinkedToken,
-        TokenElevation,
-        TokenHasRestrictions,
-        TokenAccessInformation,
-        TokenVirtualizationAllowed,
-        TokenVirtualizationEnabled,
-        TokenIntegrityLevel,
-        TokenUIAccess,
-        TokenMandatoryPolicy,
-        TokenLogonSid,
-        MaxTokenInfoClass  // MaxTokenInfoClass should always be the last enum
     }
 
     // Copied from https://github.com/dotnet/wpf-test/blob/main/src/Test/Common/Code/Microsoft/Test/Diagnostics/ProcessHelper.cs
@@ -90,7 +58,7 @@ class Sandboxing
     [DllImport("Advapi32.dll", SetLastError = true)]
     private static extern bool SetTokenInformation(
                             SafeAccessTokenHandle TokenHandle,
-                            TokenInformationClass TokenInformationClass,
+                            int TokenInformationClass, // TOKEN_INFORMATION_CLASS enum
                             TOKEN_MANDATORY_LABEL TokenInformation,
                             int TokenInformationLength);
 
