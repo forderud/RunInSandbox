@@ -2,6 +2,7 @@
 
 using Microsoft.Win32.SafeHandles;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
@@ -37,6 +38,10 @@ class Sandboxing
 
         return WindowsIdentity.RunImpersonated(token, () =>
         {
+            // process start
+            Process.Start("notepad.exe");
+
+            // COM server creation
             return Activator.CreateInstance(clsid);
         })!;
     }
