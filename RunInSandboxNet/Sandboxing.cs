@@ -20,7 +20,7 @@ class Sandboxing
         using WindowsIdentity curId = WindowsIdentity.GetCurrent(TokenAccessLevels.Duplicate | TokenAccessLevels.Impersonate | TokenAccessLevels.Query | TokenAccessLevels.AdjustDefault);
         // mimic DuplicateTokenEx(curToken, 0, NULL, SecurityImpersonation, TokenImpersonation, &token)
         using var id = (WindowsIdentity)curId.Clone();
-        using SafeAccessTokenHandle token = id.AccessToken;
+        using SafeAccessTokenHandle token = id.AccessToken; // copy of process token
 
         {
             IntPtr sidPtr = IntPtr.Zero;
