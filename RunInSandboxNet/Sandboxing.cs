@@ -13,7 +13,8 @@ class Sandboxing
     public static readonly string SDDL_ML_MEDIUM = "ME"; // Medium integrity level
 
     /** Create COM server in a sandboxed process.
-     *  WARNING: WindowsIdentity.GetCurrent throws "Access is denied" exception if called multiple times. */
+     *  WARNING: WindowsIdentity.GetCurrent throws "Access is denied" exception if called multiple times.
+     *  Associated bug report: https://github.com/dotnet/runtime/issues/96397 */
     public static object CoCreate(string level, Type clsid)
     {
         // mimic OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_ADJUST_DEFAULT)
