@@ -38,6 +38,9 @@ class Sandboxing
             Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
         }
 
+        ExecutionContext? currentContext = ExecutionContext.Capture();
+
+        ExecutionContext.Run(currentContext, _ =>
         {
             ImpersonateLoggedOnUser(token);
             
@@ -50,8 +53,10 @@ class Sandboxing
             RevertToSelf();
             token.Dispose();
 
-            return obj;
-        }
+            //return obj;
+        }, null);
+
+        return null;
     }
 
     // based on https://github.com/dotnet/wpf-test/blob/main/src/Test/Common/Code/Microsoft/Test/Diagnostics/ProcessHelper.cs
