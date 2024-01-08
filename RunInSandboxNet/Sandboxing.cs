@@ -37,6 +37,8 @@ class Sandboxing
             Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
         }
 
+        // RunImpersonated isn't actually needed here, since Process.Start & Activator.CreateInstance
+        // are using the current process token, and _not_ the impersonation token.
         return WindowsIdentity.RunImpersonated(token, () =>
         {
             // process start
