@@ -38,20 +38,20 @@ class Sandboxing
             Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
         }
 
-        // RunImpersonated isn't actually needed here, since Process.Start & Activator.CreateInstance
-        // are using the current process token, and _not_ the impersonation token.
-        object obj = WindowsIdentity.RunImpersonated(token, () =>
         {
+            ImpersonateLoggedOnUser(token);
+            
             // process start
             Process.Start("notepad.exe");
 
             // COM server creation
-            return Activator.CreateInstance(clsid);
-        })!;
+            object obj =  Activator.CreateInstance(clsid);
 
-        token.Dispose();
+            RevertToSelf();
+            token.Dispose();
 
-        return obj;
+            return obj;
+        }
     }
 
     // based on https://github.com/dotnet/wpf-test/blob/main/src/Test/Common/Code/Microsoft/Test/Diagnostics/ProcessHelper.cs
@@ -108,4 +108,12 @@ class Sandboxing
                                   SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
                                   TokenType TokenType,
                                   ref SafeAccessTokenHandle phNewToken);
+
+    [DllImport("Advapi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ImpersonateLoggedOnUser(SafeAccessTokenHandle userToken);
+
+    [DllImport("Advapi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool RevertToSelf();
 }
