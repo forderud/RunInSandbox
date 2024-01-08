@@ -38,9 +38,7 @@ class Sandboxing
             Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
         }
 
-        ExecutionContext? currentContext = ExecutionContext.Capture();
-
-        ExecutionContext.Run(currentContext, _ =>
+        var t = new Thread(() =>
         {
             ImpersonateLoggedOnUser(token);
             
@@ -54,7 +52,10 @@ class Sandboxing
             token.Dispose();
 
             //return obj;
-        }, null);
+        });
+        t.Start();
+        t.Join();
+
 
         return null;
     }
