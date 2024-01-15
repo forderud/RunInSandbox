@@ -130,7 +130,12 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
             // impersonate desired integrity level
             ImpersonateThread low_int(mode, GetCurrentProcess());
             std::wcout << L"Impersonation succeeded.\n";
-            WIN32_CHECK(CreateProcessAsUserW(low_int.m_token.Get(), exe_path, cmdline.data(), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
+
+            // convert to primary token as needed by CreateProcessAsUserW
+            HandleWrap prim_token;
+            WIN32_CHECK(DuplicateTokenEx(low_int.m_token.Get(), 0, NULL, SecurityImpersonation, TokenPrimary, prim_token.GetAddressOf()));
+
+            WIN32_CHECK(CreateProcessAsUserW(prim_token.Get(), exe_path, cmdline.data(), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
         } else {
             // use STARTUPINFO to determine integrity level
             WIN32_CHECK(CreateProcessW(exe_path, cmdline.data(), /*proc.attr*/nullptr, /*thread attr*/nullptr, INHERIT_HANDLES, creation_flags, /*env*/nullptr, /*cur-dir*/nullptr, (STARTUPINFO*)&si, &pi));
