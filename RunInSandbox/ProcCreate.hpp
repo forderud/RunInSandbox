@@ -132,6 +132,7 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
             std::wcout << L"Impersonation succeeded.\n";
 
             // convert to primary token as needed by CreateProcessAsUserW
+            // can also use OpenThreadToken here
             HandleWrap prim_token;
             WIN32_CHECK(DuplicateTokenEx(low_int.m_token.Get(), 0, NULL, SecurityImpersonation, TokenPrimary, prim_token.GetAddressOf()));
 
