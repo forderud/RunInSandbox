@@ -19,4 +19,8 @@
     </COMReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TestControl\TestControl.vcxproj" />
+  </ItemGroup>
+
 </Project>
