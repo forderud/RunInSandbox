@@ -14,11 +14,12 @@ Instructions:
 
 **WARNING**: This will introduce a privilege escalation vulnerability if not used carefully.
 
-`Component Services` (dcomcnfg.exe) can be used to explicitly set the user account used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without requiring any UAC prompt. Also need to explicitly call `CoInitializeSecurity` in the COM server to enable low privilege clients to connect.
+The [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en-us/windows/win32/com/runas) registry value can be used to configure which user account is used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without any UAC prompt.
 
+This registry value can either be edited manually or using `Component Services`:  
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
-This will modify the [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en-us/windows/win32/com/runas) registry value for the COM server. 
+In order to be compatible with RunAs, elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect.
 
 
 ### Instructions to test
