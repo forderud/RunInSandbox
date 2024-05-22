@@ -11,16 +11,16 @@ Instructions:
 
 ## How to configure COM servers to always run as admin _without_ UAC
 
-`Component Services` (dcomcnfg.exe) can be used to explicitly set the user account used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without requiring any UAC prompt. Also need to explicitly call `CoInitializeSecurity` in the COM server to enable low privilege clients to connect.
-
-
 **WARNING**: This will introduce a privilege escalation vulnerability if not used carefully.
 
-Instructions:
-* From dcomcnfg.exe configure the COM server to always run through an administrative account.
-* Verify that the account have sufficient filesystem permissions to run the COM server.
-* To test, run `RunInSandbox.exe TestControl.TestControl` from a limited account. This will trigger creation of a TestControl.exe under an admin account with a COM communication channel between the processes.
+`Component Services` (dcomcnfg.exe) can be used to explicitly set the user account used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without requiring any UAC prompt. Also need to explicitly call `CoInitializeSecurity` in the COM server to enable low privilege clients to connect.
 
 ![DCOM_RunAs](DCOM_RunAs.png)  
+
+
+### Instructions to test
+* From `dcomcnfg.exe` configure the COM server to always run through an administrative account.
+* Verify that the account have sufficient filesystem permissions to run the COM server.
+* To test, run `RunInSandbox.exe TestControl.TestControl` from a limited account. This will trigger creation of a TestControl.exe under an admin account with a COM communication channel between the processes.
 
 CoCreateInstance calls from non-admin accounts will now start the COM server using an admin account.
