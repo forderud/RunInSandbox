@@ -16,14 +16,14 @@ interface ICallbackTest : IUnknown {
  local,         // disallow remote calls over network
  uuid(570FBF3C-D853-435E-B761-6A264393B9DA)]
 interface ITestInterface : IUnknown {
+    [helpstring("Check if object is running in an elevated process")]
+    HRESULT IsElevated([out] VARIANT_BOOL* is_elevated, [out] VARIANT_BOOL* is_high_il);
+
     [helpstring("Add two numbers")]
     HRESULT Add ([in] int a, [in] int b, [out,retval] int * sum);
     
     [helpstring("Perform task requiring admin privileges.")]
     HRESULT PerformAdminTask();
-
-    [helpstring("Check if object is running in an elevated process")]
-    HRESULT IsElevated ([out] VARIANT_BOOL * is_elevated, [out] VARIANT_BOOL * is_high_il);
 
     [helpstring("Check if object has network access")]
     HRESULT TestNetworkConnection([in] BSTR host, [in] USHORT port, [out,retval] VARIANT_BOOL * can_access);

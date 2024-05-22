@@ -15,11 +15,11 @@ public:
 
     /*NOT virtual*/ ~TestControl();
 
+    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
+
     HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override;
 
     HRESULT STDMETHODCALLTYPE PerformAdminTask() override;
-
-    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
 
     HRESULT STDMETHODCALLTYPE TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/VARIANT_BOOL * can_access) override;
 

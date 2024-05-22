@@ -11,6 +11,16 @@ TestControl::TestControl(){
 TestControl::~TestControl() {
 }
 
+HRESULT TestControl::IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) {
+    *is_elevated = ImpersonateThread::IsProcessElevated();
+
+    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
+    *is_high_il = (proc_integrity >= IntegrityLevel::High);
+
+    return S_OK;
+}
+
+
 HRESULT TestControl::Add(int a, int b, int * sum) {
     *sum = a + b;
     return S_OK;
@@ -23,16 +33,6 @@ HRESULT TestControl::PerformAdminTask() {
         return E_ACCESSDENIED;
 
     // TODO: Perform some task requiring admin privileves
-    return S_OK;
-}
-
-
-HRESULT TestControl::IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) {
-    *is_elevated = ImpersonateThread::IsProcessElevated();
-
-    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
-    *is_high_il = (proc_integrity >= IntegrityLevel::High);
-
     return S_OK;
 }
 
