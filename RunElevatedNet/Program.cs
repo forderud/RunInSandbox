@@ -29,7 +29,7 @@ namespace RunElevatedNet
             }
 
             // check if argument is a COM class
-            Type comCls = Type.GetTypeFromProgID(arg); // e.g. HNetCfg.FwPolicy2
+            Type? comCls = Type.GetTypeFromProgID(arg); // e.g. HNetCfg.FwPolicy2
 
             if (comCls == null) {
                 // argument is _not_ a COM CLSID, so assume that it's a EXE instead
@@ -43,7 +43,7 @@ namespace RunElevatedNet
 
             // argument _is_ a COM CLSID, so launch COM class
             bool launch_elevated = true;
-            object obj = null;
+            object? obj = null;
             if (launch_elevated) {
                 System.Console.WriteLine("Creating an elevated (admin) COM class instance...");
                 obj = CoCreateInstanceElevated((IntPtr)0, comCls); // elevated
