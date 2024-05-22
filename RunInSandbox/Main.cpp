@@ -71,7 +71,9 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
     }
 
     // allow COM server to set foreground window (needed to escape UIPI limitations)
-    CHECK(CoAllowSetForegroundWindow(obj, NULL));
+    HRESULT hr = CoAllowSetForegroundWindow(obj, NULL);
+    if (FAILED(hr))
+        std::wcout << L"WARNING: CoAllowSetForegroundWindow failed. This might occur if the server is running in a background process.\n";
 
     // try to add two numbers
     CComPtr<ITestInterface> test;
@@ -121,7 +123,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
 
             // Fails in medium IL if host is elevated despite the window being in foreground.
             std::wcout << L"Moving mouse cursor to top-left corner...\n";
-            HRESULT hr = test->MoveMouseCursor(false, 0, 0);
+            hr = test->MoveMouseCursor(false, 0, 0);
             if (FAILED(hr)) {
                 _com_error err(hr);
                 std::wcout << L"[FAILED] " << err.ErrorMessage() << std::endl;
