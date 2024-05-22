@@ -57,7 +57,7 @@ namespace RunElevatedNet
 
             // sample code to exercise the Windows firewall API (to give an impression of how to call COM interfaces from .Net)
             try {
-                TestFirewall((INetFwPolicy2)obj);
+                TestFirewall((INetFwPolicy2)obj!);
             } catch (InvalidCastException) {
                 // skip firewall testing
             }
@@ -76,7 +76,7 @@ namespace RunElevatedNet
             // See https://stackoverflow.com/a/6040946/44360 for why this is required
             url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\*)" + "\"", @"$1$1\" + "\"");
             url = System.Text.RegularExpressions.Regex.Replace(url, @"(\\+)$", @"$1$1");
-            Process proc = Process.Start(new ProcessStartInfo($"\"{url}\"") { CreateNoWindow = true });
+            Process proc = Process.Start(new ProcessStartInfo($"\"{url}\"") { CreateNoWindow = true })!;
 #endif
 
             // check if process exits surprisingly fast
@@ -98,8 +98,8 @@ namespace RunElevatedNet
 
             {
                 // create new rule
-                Type ruleClass = Type.GetTypeFromProgID("HNetCfg.FWRule");
-                INetFwRule rule = (INetFwRule)Activator.CreateInstance(ruleClass);
+                Type ruleClass = Type.GetTypeFromProgID("HNetCfg.FWRule")!;
+                INetFwRule rule = (INetFwRule)Activator.CreateInstance(ruleClass)!;
                 rule.Name = "My HTTP server";
                 rule.Protocol = 6; //NET_FW_IP_PROTOCOL_TCP
                 rule.LocalPorts = "8080";
