@@ -9,6 +9,7 @@ Instructions:
 
 ![UAC_prompt](UAC_prompt.png) ![UAC_prompt_pw](UAC_prompt_pw.png)  
 
+
 ## How to configure COM servers to always run as admin _without_ UAC
 
 **WARNING**: This will introduce a privilege escalation vulnerability if not used carefully.
@@ -21,8 +22,8 @@ This will modify the [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en
 
 
 ### Instructions to test
-* From `dcomcnfg.exe` configure the COM server to always run through an administrative account.
+* From the Windows registry, set the `RunAs` registry value to `nt authority\localservice` or some other admin account.
 * Verify that the account have sufficient filesystem permissions to run the COM server.
-* To test, run `RunInSandbox.exe TestControl.TestControl` from a limited account. This will trigger creation of a TestControl.exe under an admin account with a COM communication channel between the processes.
+* To test, run `RunInSandbox.exe TestControl.TestControl` from a limited account. This will trigger creation of a TestControl.exe under the specified account with a COM communication channel between the processes.
 
 CoCreateInstance calls from non-admin accounts will now start the COM server using an admin account.
