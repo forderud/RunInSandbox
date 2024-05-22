@@ -11,6 +11,8 @@
             bool isElevated, isHighIL;
             tc.IsElevated(out isElevated, out isHighIL);
             Console.WriteLine("High IL: " + isHighIL);
+
+            Console.WriteLine("Username: " + tc.GetUsername());
         }
     }
 
