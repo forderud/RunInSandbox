@@ -17,6 +17,8 @@ Instructions:
 
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
+This will modify the [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en-us/windows/win32/com/runas) registry value for the COM server. 
+
 
 ### Instructions to test
 * From `dcomcnfg.exe` configure the COM server to always run through an administrative account.
