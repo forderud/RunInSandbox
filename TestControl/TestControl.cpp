@@ -20,6 +20,16 @@ HRESULT TestControl::IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIA
     return S_OK;
 }
 
+HRESULT TestControl::GetUsername(/*out*/BSTR* username) {
+    WCHAR buffer[128] = {};
+    auto buf_len = (DWORD)std::size(buffer);
+    GetUserNameW(buffer, &buf_len);
+
+    CComBSTR result(buffer);
+    *username = result.Detach();
+    return S_OK;
+}
+
 
 HRESULT TestControl::Add(int a, int b, int * sum) {
     *sum = a + b;

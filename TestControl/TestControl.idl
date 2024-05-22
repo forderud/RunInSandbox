@@ -19,6 +19,9 @@ interface ITestInterface : IUnknown {
     [helpstring("Check if object is running in an elevated process")]
     HRESULT IsElevated([out] VARIANT_BOOL* is_elevated, [out] VARIANT_BOOL* is_high_il);
 
+    [helpstring("Get COM server user account")]
+    HRESULT GetUsername([out, retval] BSTR* username);
+
     [helpstring("Add two numbers")]
     HRESULT Add ([in] int a, [in] int b, [out,retval] int * sum);
     

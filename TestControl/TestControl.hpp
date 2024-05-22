@@ -17,6 +17,8 @@ public:
 
     HRESULT STDMETHODCALLTYPE IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
 
+    HRESULT STDMETHODCALLTYPE GetUsername(/*out*/BSTR* username) override;
+
     HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override;
 
     HRESULT STDMETHODCALLTYPE PerformAdminTask() override;

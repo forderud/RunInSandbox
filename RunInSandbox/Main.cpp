@@ -90,6 +90,10 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"IsHighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
 
+        CComBSTR username;
+        CHECK(test->GetUsername(&username));
+        std::wcout << L"Username: " << username.m_str << L"\n";
+
         {
             // fails for AppContainers if host is elevated
             std::wcout << L"Testing COM callback...\n";
