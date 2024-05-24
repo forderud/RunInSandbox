@@ -5,6 +5,7 @@
 #include <subauth.h>
 #define _NTDEF_
 #include <ntsecapi.h>
+#include <atlbase.h> // CRegKey
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
@@ -20,8 +21,8 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
     WCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
     swprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", tszAppID);
 
-    HKEY  hkeyRegistry = NULL;
-    DWORD dwReturnValue = RegOpenKeyEx(HKEY_CLASSES_ROOT, tszKeyName, 0, KEY_ALL_ACCESS, &hkeyRegistry);
+    CRegKey hkeyRegistry;
+    DWORD dwReturnValue = hkeyRegistry.Open(HKEY_CLASSES_ROOT, tszKeyName, KEY_ALL_ACCESS);
     if (dwReturnValue != ERROR_SUCCESS) {
         wprintf(L"ERROR: Cannot open AppID registry key (%d).", dwReturnValue);
         return dwReturnValue;
@@ -29,7 +30,7 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
 
     if (_wcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
         // default case so delete "RunAs" value 
-        dwReturnValue = RegDeleteValue(hkeyRegistry, L"RunAs");
+        dwReturnValue = hkeyRegistry.DeleteValue(L"RunAs");
 
         if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
             dwReturnValue = ERROR_SUCCESS;
@@ -51,15 +52,12 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
             }
         }
 
-        dwReturnValue = RegSetValueExW(hkeyRegistry, L"RunAs", 0, REG_SZ, (LPBYTE)tszPrincipal, (DWORD)wcslen(tszPrincipal) * sizeof(WCHAR));
+        dwReturnValue = hkeyRegistry.SetStringValue(L"RunAs", tszPrincipal);
         if (dwReturnValue != ERROR_SUCCESS) {
             wprintf(L"ERROR: Cannot set RunAs registry value (%d).", dwReturnValue);
             return dwReturnValue;
         }
     }
-
-    if (hkeyRegistry)
-        RegCloseKey(hkeyRegistry);
 
     return ERROR_SUCCESS;
 }
