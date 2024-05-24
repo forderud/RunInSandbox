@@ -39,9 +39,9 @@ private:
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
 DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password);
-DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[]);
-DWORD GetPrincipalSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid);
-BOOL ConstructWellKnownSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid);
+DWORD SetAccountRights(const std::wstring& username, const WCHAR tszPrivilege[]);
+DWORD GetPrincipalSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
+BOOL ConstructWellKnownSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 
 
 DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, const std::wstring password)
@@ -150,7 +150,7 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Sets the account right for a given user.                     *
 \*---------------------------------------------------------------------------*/
-DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[])
+DWORD SetAccountRights(const std::wstring& username, const WCHAR tszPrivilege[])
 {
     LSA_UNICODE_STRING lsaPrivilegeString = {};
 
@@ -183,7 +183,7 @@ DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[])
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Creates a SID for the supplied principal.                    *
 \*---------------------------------------------------------------------------*/
-DWORD GetPrincipalSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid)
+DWORD GetPrincipalSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid)
 {
     // first check for known in-built SID
     if (ConstructWellKnownSID(username, /*out*/pSid))
@@ -219,7 +219,7 @@ DWORD GetPrincipalSID(const std::wstring username, /*out*/std::vector<BYTE>& pSi
  * DESCRIPTION: This method converts some designated well-known identities   *
  * to a SID.                                                                 *
 \*---------------------------------------------------------------------------*/
-BOOL ConstructWellKnownSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid)
+BOOL ConstructWellKnownSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid)
 {
     // Look for well-known English names
     DWORD dwSubAuthority = 0;
