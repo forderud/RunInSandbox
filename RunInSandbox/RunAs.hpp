@@ -45,7 +45,7 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
             }
         }
 
-        dwReturnValue = RegSetValueEx(hkeyRegistry, L"RunAs", 0, REG_SZ, (LPBYTE)tszPrincipal, (DWORD)_tcslen(tszPrincipal) * sizeof(WCHAR));
+        dwReturnValue = RegSetValueExW(hkeyRegistry, L"RunAs", 0, REG_SZ, (LPBYTE)tszPrincipal, (DWORD)wcslen(tszPrincipal) * sizeof(WCHAR));
         if (dwReturnValue != ERROR_SUCCESS) {
             wprintf(L"ERROR: Cannot set RunAs registry value (%d).", dwReturnValue);
             return dwReturnValue;
