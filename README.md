@@ -25,10 +25,11 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 * How to apply `removableStorage` capability to enable USB stick access for the AppContainer.
 * Why is `SetCursorPos` failing at medium IL _if_ the host is elevated (high IL). Impersonating the shell process (explorer.exe) to escape elevation doesn't seem to help. The problem appear to be caused by UIPI limitations tied to the foreground window.
 
+## ComRunAs
+Command-line tool for configuring COM servers to be started through a specific user account. Requires the COM server to already have an `AppID` registry entry.
 
 ## GrantAccess
 Command-line tool to make a file or path writable by AppContainers and low IL process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
-
 
 ## RunElevatedNet
 C#/.Net sample code for launching an executable or COM class in an "elevated" process with admin privileges. The same functionality is also included in the RunInSandbox project.
