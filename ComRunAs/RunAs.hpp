@@ -204,6 +204,7 @@ CLEANUP:
 \*---------------------------------------------------------------------------*/
 DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid)
 {
+    // first check for known in-built SID
     if (ConstructWellKnownSID(username, /*out*/pSid))
         return ERROR_SUCCESS;
 
