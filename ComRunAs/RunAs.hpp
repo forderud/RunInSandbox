@@ -118,10 +118,8 @@ DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, co
     const size_t GUIDSTR_MAX = 38;
     WCHAR wszKey[4 + GUIDSTR_MAX + 1] = { 0 };
     WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
-    WCHAR wszPassword[256] = { 0 };
 
     StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), AppID.c_str());
-    StringCchCopyW(wszPassword, RTL_NUMBER_OF(wszPassword), password.c_str());
 
     StringCchCopyW(wszKey, RTL_NUMBER_OF(wszKey), L"SCM:");
     StringCchCatW(wszKey, RTL_NUMBER_OF(wszKey), wszAppID);
@@ -132,8 +130,8 @@ DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, co
     lsaKeyString.Buffer = wszKey;
 
     LSA_UNICODE_STRING lsaPasswordString = {};
-    lsaPasswordString.Length = (USHORT)((wcslen(wszPassword) + 1) * sizeof(WCHAR));
-    lsaPasswordString.Buffer = wszPassword;
+    lsaPasswordString.Length = (USHORT)((password.length() + 1) * sizeof(WCHAR));
+    lsaPasswordString.Buffer = (WCHAR*)password.c_str();
     lsaPasswordString.MaximumLength = lsaPasswordString.Length;
 
     // Open the local security policy
