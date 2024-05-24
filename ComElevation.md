@@ -22,7 +22,7 @@ Alternatives for editing the registry value:
 * Edit manually using `Component Services`.  
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
-In order to be compatible with RunAs, elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect.
+In order to be compatible with RunAs, elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect. The assigned user also need to have sufficient filesystem permissions to start the server.
 
 
 ### Instructions to test
