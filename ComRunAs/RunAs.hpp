@@ -226,16 +226,9 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
 \*---------------------------------------------------------------------------*/
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
 {
-    BOOL fRetVal = FALSE;
-    PSID psidTemp = NULL;
-    BOOL fUseWorldAuth = FALSE;
-
-    SID_IDENTIFIER_AUTHORITY SidAuthorityNT = SECURITY_NT_AUTHORITY;
-    SID_IDENTIFIER_AUTHORITY SidAuthorityWorld = SECURITY_WORLD_SID_AUTHORITY;
-
-    DWORD dwSubAuthority;
-
     // Look for well-known English names
+    DWORD dwSubAuthority = 0;
+    BOOL fUseWorldAuth = FALSE;
     if (_wcsicmp(tszPrincipal, L"Administrators") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_ADMINS;
     } else if (_wcsicmp(tszPrincipal, L"Power Users") == 0) {
@@ -255,6 +248,9 @@ BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
         return FALSE;
     }
 
+    PSID psidTemp = NULL;
+    SID_IDENTIFIER_AUTHORITY SidAuthorityNT = SECURITY_NT_AUTHORITY;
+    SID_IDENTIFIER_AUTHORITY SidAuthorityWorld = SECURITY_WORLD_SID_AUTHORITY;
     if (dwSubAuthority == DOMAIN_ALIAS_RID_ADMINS || dwSubAuthority == DOMAIN_ALIAS_RID_POWER_USERS) {
         if (!AllocateAndInitializeSid(
             &SidAuthorityNT,
@@ -275,6 +271,7 @@ BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
 
     }
 
+    BOOL fRetVal = FALSE;
     if (IsValidSid(psidTemp)) {
         DWORD cbSid = GetLengthSid(psidTemp);
         *pSid = (PSID)malloc(cbSid);
