@@ -17,7 +17,7 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
 {
     const size_t SIZE_NAME_BUFFER = 256;
     WCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
-    _stprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", tszAppID);
+    swprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", tszAppID);
 
     HKEY  hkeyRegistry = NULL;
     DWORD dwReturnValue = RegOpenKeyEx(HKEY_CLASSES_ROOT, tszKeyName, 0, KEY_ALL_ACCESS, &hkeyRegistry);
@@ -26,7 +26,7 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
         return dwReturnValue;
     }
 
-    if (_tcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
+    if (_wcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
         dwReturnValue = RegDeleteValue(hkeyRegistry, L"RunAs");
 
         if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
@@ -36,7 +36,7 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
             return dwReturnValue;
         }
     } else {
-        if (_tcsicmp(tszPrincipal, L"INTERACTIVE USER") != 0)
+        if (_wcsicmp(tszPrincipal, L"INTERACTIVE USER") != 0)
         {
             dwReturnValue = SetRunAsPassword(tszAppID, tszPrincipal, tszPassword);
             if (dwReturnValue != ERROR_SUCCESS) {
@@ -87,8 +87,8 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
     WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
     WCHAR wszPassword[256] = { 0 };
 
-    StringCchCopy(wszAppID, RTL_NUMBER_OF(wszAppID), tszAppID);
-    StringCchCopy(wszPassword, RTL_NUMBER_OF(wszPassword), tszPassword);
+    StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), tszAppID);
+    StringCchCopyW(wszPassword, RTL_NUMBER_OF(wszPassword), tszPassword);
 
     StringCchCopyW(wszKey, RTL_NUMBER_OF(wszKey), L"SCM:");
     StringCchCatW(wszKey, RTL_NUMBER_OF(wszKey), wszAppID);
@@ -233,20 +233,20 @@ BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
     DWORD dwSubAuthority;
 
     // Look for well-known English names
-    if (_tcsicmp(tszPrincipal, L"Administrators") == 0) {
+    if (_wcsicmp(tszPrincipal, L"Administrators") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_ADMINS;
-    } else if (_tcsicmp(tszPrincipal, L"Power Users") == 0) {
+    } else if (_wcsicmp(tszPrincipal, L"Power Users") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_POWER_USERS;
-    } else if (_tcsicmp(tszPrincipal, L"Everyone") == 0) {
+    } else if (_wcsicmp(tszPrincipal, L"Everyone") == 0) {
         dwSubAuthority = SECURITY_WORLD_RID;
         fUseWorldAuth = TRUE;
-    } else if (_tcsicmp(tszPrincipal, L"System") == 0) {
+    } else if (_wcsicmp(tszPrincipal, L"System") == 0) {
         dwSubAuthority = SECURITY_LOCAL_SYSTEM_RID;
-    } else if (_tcsicmp(tszPrincipal, L"Self") == 0) {
+    } else if (_wcsicmp(tszPrincipal, L"Self") == 0) {
         dwSubAuthority = SECURITY_PRINCIPAL_SELF_RID;
-    } else if (_tcsicmp(tszPrincipal, L"Anonymous") == 0) {
+    } else if (_wcsicmp(tszPrincipal, L"Anonymous") == 0) {
         dwSubAuthority = SECURITY_ANONYMOUS_LOGON_RID;
-    } else if (_tcsicmp(tszPrincipal, L"Interactive") == 0) {
+    } else if (_wcsicmp(tszPrincipal, L"Interactive") == 0) {
         dwSubAuthority = SECURITY_INTERACTIVE_RID;
     } else {
         return FALSE;
