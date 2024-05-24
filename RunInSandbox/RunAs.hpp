@@ -8,6 +8,7 @@
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
 #define GUIDSTR_MAX 38
+#define SIZE_NAME_BUFFER 256
 
 DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword);
 DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege);
@@ -15,6 +16,50 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid);
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid);
 
 
+DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, const wchar_t* tszPassword)
+{
+    HKEY  hkeyRegistry = NULL;
+    TCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
+
+    _stprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), _T("APPID\\%s"), tszAppID);
+
+    DWORD dwReturnValue = RegOpenKeyEx(HKEY_CLASSES_ROOT, tszKeyName, 0, KEY_ALL_ACCESS, &hkeyRegistry);
+    if (dwReturnValue != ERROR_SUCCESS) {
+        wprintf(L"ERROR: Cannot open AppID registry key (%d).", dwReturnValue);
+        return dwReturnValue;
+    }
+
+    if (_tcsicmp(tszPrincipal, _T("LAUNCHING USER")) == 0) {
+        dwReturnValue = RegDeleteValue(hkeyRegistry, _T("RunAs"));
+
+        if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
+            dwReturnValue = ERROR_SUCCESS;
+        } else if (dwReturnValue != ERROR_SUCCESS) {
+            wprintf(L"ERROR: Cannot remove RunAs registry value (%d).", dwReturnValue);
+            return dwReturnValue;
+        }
+    } else {
+        if (_tcsicmp(tszPrincipal, L"INTERACTIVE USER") != 0)
+        {
+            dwReturnValue = SetRunAsPassword(tszAppID, tszPrincipal, tszPassword);
+            if (dwReturnValue != ERROR_SUCCESS) {
+                wprintf(L"ERROR: Cannot set RunAs password (%d).", dwReturnValue);
+                return dwReturnValue;
+            }
+        }
+
+        dwReturnValue = RegSetValueEx(hkeyRegistry, _T("RunAs"), 0, REG_SZ, (LPBYTE)tszPrincipal, (DWORD)_tcslen(tszPrincipal) * sizeof(TCHAR));
+        if (dwReturnValue != ERROR_SUCCESS) {
+            wprintf(L"ERROR: Cannot set RunAs registry value (%d).", dwReturnValue);
+            return dwReturnValue;
+        }
+    }
+
+    if (hkeyRegistry)
+        RegCloseKey(hkeyRegistry);
+
+    return ERROR_SUCCESS;
+}
 
 /*---------------------------------------------------------------------------*\
  * NAME: SetRunAsPassword                                                    *
