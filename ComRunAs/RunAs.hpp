@@ -38,7 +38,7 @@ private:
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
 DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword);
-DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege);
+DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[]);
 DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 
@@ -152,7 +152,7 @@ DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrinci
         return dwReturnValue;
 
 
-    dwReturnValue = SetAccountRights(tszPrincipal.c_str(), L"SeBatchLogonRight");
+    dwReturnValue = SetAccountRights(tszPrincipal, L"SeBatchLogonRight");
     return dwReturnValue;
 }
 
@@ -162,7 +162,7 @@ DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrinci
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Sets the account right for a given user.                     *
 \*---------------------------------------------------------------------------*/
-DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
+DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[])
 {
     PSID               psidPrincipal = NULL;
     LSA_UNICODE_STRING lsaPrivilegeString = {};
@@ -177,7 +177,7 @@ DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
-    dwReturnValue = GetPrincipalSID(tszUser, &psidPrincipal);
+    dwReturnValue = GetPrincipalSID(tszUser.c_str(), &psidPrincipal);
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
