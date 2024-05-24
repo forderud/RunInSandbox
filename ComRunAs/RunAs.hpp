@@ -185,7 +185,6 @@ CLEANUP:
 \*---------------------------------------------------------------------------*/
 DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
 {
-
     if (ConstructWellKnownSID(tszPrincipal, pSid))
         return ERROR_SUCCESS;
 
@@ -271,20 +270,19 @@ BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
 
     }
 
+    if (!IsValidSid(psidTemp))
+        return FALSE;
+    
     BOOL fRetVal = FALSE;
-    if (IsValidSid(psidTemp)) {
-        DWORD cbSid = GetLengthSid(psidTemp);
-        *pSid = (PSID)malloc(cbSid);
-        if (pSid) {
-            if (!CopySid(cbSid, *pSid, psidTemp)) {
-                free(*pSid);
-                *pSid = NULL;
-            } else {
-                fRetVal = TRUE;
-            }
-        }
-        FreeSid(psidTemp);
+    DWORD cbSid = GetLengthSid(psidTemp);
+    *pSid = (PSID)malloc(cbSid); // assign output buffer
+    if (!CopySid(cbSid, *pSid, psidTemp)) {
+        free(*pSid);
+        *pSid = NULL;
+    } else {
+        fRetVal = TRUE;
     }
+    FreeSid(psidTemp);
 
     return fRetVal;
 }
