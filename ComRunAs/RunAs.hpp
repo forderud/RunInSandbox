@@ -39,7 +39,7 @@ private:
 
 DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, const std::wstring password);
 DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[]);
-DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
+DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
 
 
@@ -202,16 +202,16 @@ CLEANUP:
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Creates a SID for the supplied principal.                    *
 \*---------------------------------------------------------------------------*/
-DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid)
+DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid)
 {
-    if (ConstructWellKnownSID(tszPrincipal, /*out*/pSid))
+    if (ConstructWellKnownSID(username, /*out*/pSid))
         return ERROR_SUCCESS;
 
     TCHAR        tszRefDomain[256] = { 0 };
     DWORD        cbRefDomain = 255;
     SID_NAME_USE snu;
     DWORD cbSid = 0;
-    LookupAccountNameW(NULL, tszPrincipal.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
+    LookupAccountNameW(NULL, username.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
 
     DWORD dwReturnValue = GetLastError();
     if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER)
@@ -227,7 +227,7 @@ DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid)
 
     cbRefDomain = 255;
 
-    if (!LookupAccountNameW(NULL, tszPrincipal.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
+    if (!LookupAccountNameW(NULL, username.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
         dwReturnValue = GetLastError();
         return dwReturnValue;
     }
