@@ -16,7 +16,10 @@ Instructions:
 
 The [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en-us/windows/win32/com/runas) registry value can be used to configure which user account is used for out-of-proc COM servers. This can be used to make a COM server always run with admin privileges without any UAC prompt.
 
-This registry value can either be edited manually or using `Component Services`:  
+Alternatives for editing the registry value:
+* Edit registry with `regedit.exe`. This only works for accounts that doesn't require a password.
+* Use `ComRunAs.exe` tool in this repo to specify username & password.
+* Edit manually using `Component Services`.  
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
 In order to be compatible with RunAs, elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect.
