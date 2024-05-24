@@ -46,12 +46,9 @@ BOOL ConstructWellKnownSID(const std::wstring username, /*out*/std::vector<BYTE>
 
 DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, const std::wstring password)
 {
-    const size_t SIZE_NAME_BUFFER = 256;
-    WCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
-    swprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", AppID.c_str());
-
+    std::wstring tszKeyName = L"APPID\\" + AppID;
     CRegKey hkeyRegistry;
-    DWORD dwReturnValue = hkeyRegistry.Open(HKEY_CLASSES_ROOT, tszKeyName, KEY_ALL_ACCESS);
+    DWORD dwReturnValue = hkeyRegistry.Open(HKEY_CLASSES_ROOT, tszKeyName.c_str(), KEY_ALL_ACCESS);
     if (dwReturnValue != ERROR_SUCCESS) {
         wprintf(L"ERROR: Cannot open AppID registry key (%d).", dwReturnValue);
         return dwReturnValue;
