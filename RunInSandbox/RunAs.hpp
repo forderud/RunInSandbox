@@ -7,9 +7,6 @@
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-#define GUIDSTR_MAX 38
-#define SIZE_NAME_BUFFER 256
-
 DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword);
 DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege);
 DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid);
@@ -18,18 +15,18 @@ BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid);
 
 DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, const wchar_t* tszPassword)
 {
+    const size_t SIZE_NAME_BUFFER = 256;
+    WCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
+    _stprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", tszAppID);
+
     HKEY  hkeyRegistry = NULL;
-    TCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
-
-    _stprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), _T("APPID\\%s"), tszAppID);
-
     DWORD dwReturnValue = RegOpenKeyEx(HKEY_CLASSES_ROOT, tszKeyName, 0, KEY_ALL_ACCESS, &hkeyRegistry);
     if (dwReturnValue != ERROR_SUCCESS) {
         wprintf(L"ERROR: Cannot open AppID registry key (%d).", dwReturnValue);
         return dwReturnValue;
     }
 
-    if (_tcsicmp(tszPrincipal, _T("LAUNCHING USER")) == 0) {
+    if (_tcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
         dwReturnValue = RegDeleteValue(hkeyRegistry, _T("RunAs"));
 
         if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
@@ -48,7 +45,7 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
             }
         }
 
-        dwReturnValue = RegSetValueEx(hkeyRegistry, _T("RunAs"), 0, REG_SZ, (LPBYTE)tszPrincipal, (DWORD)_tcslen(tszPrincipal) * sizeof(TCHAR));
+        dwReturnValue = RegSetValueEx(hkeyRegistry, L"RunAs", 0, REG_SZ, (LPBYTE)tszPrincipal, (DWORD)_tcslen(tszPrincipal) * sizeof(WCHAR));
         if (dwReturnValue != ERROR_SUCCESS) {
             wprintf(L"ERROR: Cannot set RunAs registry value (%d).", dwReturnValue);
             return dwReturnValue;
@@ -83,9 +80,10 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
 \*---------------------------------------------------------------------------*/
 DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
 {
-    WCHAR                 wszKey[4 + GUIDSTR_MAX + 1] = { 0 };
-    WCHAR                 wszAppID[GUIDSTR_MAX + 1] = { 0 };
-    WCHAR                 wszPassword[256] = { 0 };
+    const size_t GUIDSTR_MAX = 38;
+    WCHAR wszKey[4 + GUIDSTR_MAX + 1] = { 0 };
+    WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
+    WCHAR wszPassword[256] = { 0 };
 
     StringCchCopy(wszAppID, RTL_NUMBER_OF(wszAppID), tszAppID);
     StringCchCopy(wszPassword, RTL_NUMBER_OF(wszPassword), tszPassword);
@@ -109,17 +107,13 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
 
     HANDLE hPolicy = NULL;
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_SECRET, &hPolicy);
-
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
     // Store the user's password
     dwReturnValue = LsaStorePrivateData(hPolicy, &lsaKeyString, &lsaPasswordString);
-
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
@@ -153,7 +147,6 @@ DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
     LSA_HANDLE            hPolicy = NULL;
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &hPolicy);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
@@ -166,7 +159,6 @@ DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
     lsaPrivilegeString.Buffer = wszPrivilege;
 
     dwReturnValue = LsaAddAccountRights(hPolicy, psidPrincipal, &lsaPrivilegeString, 1);
-
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
@@ -187,7 +179,6 @@ CLEANUP:
 \*---------------------------------------------------------------------------*/
 DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
 {
-    DWORD cbSid = 0;
 
     if (ConstructWellKnownSID(tszPrincipal, pSid))
         return ERROR_SUCCESS;
@@ -195,10 +186,12 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
     TCHAR        tszRefDomain[256] = { 0 };
     DWORD        cbRefDomain = 255;
     SID_NAME_USE snu;
-    LookupAccountName(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
+    DWORD cbSid = 0;
+    LookupAccountNameW(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
 
     DWORD dwReturnValue = GetLastError();
-    if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER) goto CLEANUP;
+    if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER)
+        goto CLEANUP;
 
     dwReturnValue = ERROR_SUCCESS;
 
@@ -210,7 +203,7 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
 
     cbRefDomain = 255;
 
-    if (!LookupAccountName(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
+    if (!LookupAccountNameW(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
         dwReturnValue = GetLastError();
         goto CLEANUP;
     }
