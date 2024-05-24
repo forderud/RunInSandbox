@@ -7,6 +7,7 @@
 #include <ntsecapi.h>
 #include <atlbase.h> // CRegKey
 #include <string>
+#include <vector>
 
 
 /** LSA_HANDLE RAII wrapper */
@@ -39,8 +40,8 @@ private:
 
 DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, const std::wstring password);
 DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[]);
-DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid);
-BOOL ConstructWellKnownSID(const std::wstring username, /*out*/PSID* pSid);
+DWORD GetPrincipalSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid);
+BOOL ConstructWellKnownSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid);
 
 
 DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, const std::wstring password)
@@ -164,7 +165,6 @@ DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, co
 \*---------------------------------------------------------------------------*/
 DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[])
 {
-    PSID               psidPrincipal = NULL;
     LSA_UNICODE_STRING lsaPrivilegeString = {};
 
     WCHAR wszPrivilege[256] = { 0 };
@@ -175,25 +175,19 @@ DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[])
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &hPolicy);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
-        goto CLEANUP;
+        return dwReturnValue;
 
-    dwReturnValue = GetPrincipalSID(username, &psidPrincipal);
+    std::vector<BYTE> sidPrincipal; // PSID buffer
+    dwReturnValue = GetPrincipalSID(username, sidPrincipal);
     if (dwReturnValue != ERROR_SUCCESS)
-        goto CLEANUP;
+        return dwReturnValue;
 
     lsaPrivilegeString.Length = (USHORT)(wcslen(wszPrivilege) * sizeof(WCHAR));
     lsaPrivilegeString.MaximumLength = (USHORT)(lsaPrivilegeString.Length + sizeof(WCHAR));
     lsaPrivilegeString.Buffer = wszPrivilege;
 
-    dwReturnValue = LsaAddAccountRights(hPolicy, psidPrincipal, &lsaPrivilegeString, 1);
+    dwReturnValue = LsaAddAccountRights(hPolicy, sidPrincipal.data(), &lsaPrivilegeString, 1);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-    if (dwReturnValue != ERROR_SUCCESS)
-        goto CLEANUP;
-
-CLEANUP:
-    if (psidPrincipal)
-        free(psidPrincipal);
-
     return dwReturnValue;
 }
 
@@ -202,7 +196,7 @@ CLEANUP:
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Creates a SID for the supplied principal.                    *
 \*---------------------------------------------------------------------------*/
-DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid)
+DWORD GetPrincipalSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid)
 {
     // first check for known in-built SID
     if (ConstructWellKnownSID(username, /*out*/pSid))
@@ -212,7 +206,7 @@ DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid)
     DWORD        cbRefDomain = 255;
     SID_NAME_USE snu;
     DWORD cbSid = 0;
-    LookupAccountNameW(NULL, username.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
+    LookupAccountNameW(NULL, username.c_str(), (PSID)pSid.data(), &cbSid, tszRefDomain, &cbRefDomain, &snu);
 
     DWORD dwReturnValue = GetLastError();
     if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER)
@@ -220,15 +214,10 @@ DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid)
 
     dwReturnValue = ERROR_SUCCESS;
 
-    *pSid = (PSID)malloc(cbSid);
-    if (!pSid) {
-        dwReturnValue = ERROR_OUTOFMEMORY;
-        return dwReturnValue;
-    }
-
+    pSid.resize(cbSid);
     cbRefDomain = 255;
 
-    if (!LookupAccountNameW(NULL, username.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
+    if (!LookupAccountNameW(NULL, username.c_str(), (PSID)pSid.data(), &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
         dwReturnValue = GetLastError();
         return dwReturnValue;
     }
@@ -243,7 +232,7 @@ DWORD GetPrincipalSID(const std::wstring username, /*out*/PSID* pSid)
  * DESCRIPTION: This method converts some designated well-known identities   *
  * to a SID.                                                                 *
 \*---------------------------------------------------------------------------*/
-BOOL ConstructWellKnownSID(const std::wstring username, /*out*/PSID* pSid)
+BOOL ConstructWellKnownSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid)
 {
     // Look for well-known English names
     DWORD dwSubAuthority = 0;
@@ -295,10 +284,9 @@ BOOL ConstructWellKnownSID(const std::wstring username, /*out*/PSID* pSid)
     
     BOOL fRetVal = FALSE;
     DWORD cbSid = GetLengthSid(psidTemp);
-    *pSid = (PSID)malloc(cbSid); // assign output buffer
-    if (!CopySid(cbSid, *pSid, psidTemp)) {
-        free(*pSid);
-        *pSid = NULL;
+    pSid.resize(cbSid); // assign output buffer
+    if (!CopySid(cbSid, pSid.data(), psidTemp)) {
+        pSid.clear();
     } else {
         fRetVal = TRUE;
     }
