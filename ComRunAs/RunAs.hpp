@@ -37,7 +37,7 @@ private:
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword);
+DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword);
 DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege);
 DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
@@ -73,7 +73,7 @@ DWORD SetRunAsAccount(const std::wstring tszAppID, const std::wstring tszPrincip
             // password not needed
         } else {
             // password needed
-            dwReturnValue = SetRunAsPassword(tszAppID.c_str(), tszPrincipal.c_str(), tszPassword.c_str());
+            dwReturnValue = SetRunAsPassword(tszAppID, tszPrincipal, tszPassword);
             if (dwReturnValue != ERROR_SUCCESS) {
                 wprintf(L"ERROR: Cannot set RunAs password (%d).", dwReturnValue);
                 return dwReturnValue;
@@ -110,7 +110,7 @@ DWORD SetRunAsAccount(const std::wstring tszAppID, const std::wstring tszPrincip
  * --------------------------------------------------------------------------*
  *  RETURNS: WIN32 Error Code                                                *
 \*---------------------------------------------------------------------------*/
-DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
+DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword)
 {
     // TODO: Check if password is valid
 
@@ -119,8 +119,8 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
     WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
     WCHAR wszPassword[256] = { 0 };
 
-    StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), tszAppID);
-    StringCchCopyW(wszPassword, RTL_NUMBER_OF(wszPassword), tszPassword);
+    StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), tszAppID.c_str());
+    StringCchCopyW(wszPassword, RTL_NUMBER_OF(wszPassword), tszPassword.c_str());
 
     StringCchCopyW(wszKey, RTL_NUMBER_OF(wszKey), L"SCM:");
     StringCchCatW(wszKey, RTL_NUMBER_OF(wszKey), wszAppID);
@@ -152,7 +152,7 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
         return dwReturnValue;
 
 
-    dwReturnValue = SetAccountRights(tszPrincipal, L"SeBatchLogonRight");
+    dwReturnValue = SetAccountRights(tszPrincipal.c_str(), L"SeBatchLogonRight");
     return dwReturnValue;
 }
 
