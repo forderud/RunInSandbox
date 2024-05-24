@@ -115,19 +115,11 @@ DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, co
 {
     // TODO: Check if password is valid
 
-    const size_t GUIDSTR_MAX = 38;
-    WCHAR wszKey[4 + GUIDSTR_MAX + 1] = { 0 };
-    WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
-
-    StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), AppID.c_str());
-
-    StringCchCopyW(wszKey, RTL_NUMBER_OF(wszKey), L"SCM:");
-    StringCchCatW(wszKey, RTL_NUMBER_OF(wszKey), wszAppID);
-
-    LSA_UNICODE_STRING  lsaKeyString = {};
-    lsaKeyString.Length = (USHORT)((wcslen(wszKey) + 1) * sizeof(WCHAR));
-    lsaKeyString.MaximumLength = sizeof(wszKey);
-    lsaKeyString.Buffer = wszKey;
+    std::wstring key = L"SCM:" + AppID;
+    LSA_UNICODE_STRING lsaKeyString = {};
+    lsaKeyString.Length = (USHORT)((key.length() + 1) * sizeof(WCHAR));
+    lsaKeyString.MaximumLength = lsaKeyString.Length;
+    lsaKeyString.Buffer = (WCHAR*)key.c_str();
 
     LSA_UNICODE_STRING lsaPasswordString = {};
     lsaPasswordString.Length = (USHORT)((password.length() + 1) * sizeof(WCHAR));
