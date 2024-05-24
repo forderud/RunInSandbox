@@ -39,7 +39,7 @@ private:
 
 DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword);
 DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[]);
-DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
+DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 
 
@@ -177,7 +177,7 @@ DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[])
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
-    dwReturnValue = GetPrincipalSID(tszUser.c_str(), &psidPrincipal);
+    dwReturnValue = GetPrincipalSID(tszUser, &psidPrincipal);
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
@@ -202,16 +202,16 @@ CLEANUP:
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Creates a SID for the supplied principal.                    *
 \*---------------------------------------------------------------------------*/
-DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid)
+DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid)
 {
-    if (ConstructWellKnownSID(tszPrincipal, /*out*/pSid))
+    if (ConstructWellKnownSID(tszPrincipal.c_str(), /*out*/pSid))
         return ERROR_SUCCESS;
 
     TCHAR        tszRefDomain[256] = { 0 };
     DWORD        cbRefDomain = 255;
     SID_NAME_USE snu;
     DWORD cbSid = 0;
-    LookupAccountNameW(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
+    LookupAccountNameW(NULL, tszPrincipal.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
 
     DWORD dwReturnValue = GetLastError();
     if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER)
@@ -227,7 +227,7 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid)
 
     cbRefDomain = 255;
 
-    if (!LookupAccountNameW(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
+    if (!LookupAccountNameW(NULL, tszPrincipal.c_str(), *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
         dwReturnValue = GetLastError();
         return dwReturnValue;
     }
