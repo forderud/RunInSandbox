@@ -6,6 +6,7 @@
 #define _NTDEF_
 #include <ntsecapi.h>
 #include <atlbase.h> // CRegKey
+#include <string>
 
 
 /** LSA_HANDLE RAII wrapper */
@@ -42,11 +43,11 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 
 
-DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
+DWORD SetRunAsAccount(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword)
 {
     const size_t SIZE_NAME_BUFFER = 256;
     WCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
-    swprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", tszAppID);
+    swprintf_s(tszKeyName, RTL_NUMBER_OF(tszKeyName), L"APPID\\%s", tszAppID.c_str());
 
     CRegKey hkeyRegistry;
     DWORD dwReturnValue = hkeyRegistry.Open(HKEY_CLASSES_ROOT, tszKeyName, KEY_ALL_ACCESS);
@@ -55,7 +56,7 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
         return dwReturnValue;
     }
 
-    if (_wcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
+    if (_wcsicmp(tszPrincipal.c_str(), L"LAUNCHING USER") == 0) {
         // default case so delete "RunAs" value 
         dwReturnValue = hkeyRegistry.DeleteValue(L"RunAs");
 
@@ -68,18 +69,18 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
     } else {
         // TODO: Skip password also for "nt authority\localservice" & "nt authority\networkservice"
 
-        if (_wcsicmp(tszPrincipal, L"INTERACTIVE USER") == 0) {
+        if (_wcsicmp(tszPrincipal.c_str(), L"INTERACTIVE USER") == 0) {
             // password not needed
         } else {
             // password needed
-            dwReturnValue = SetRunAsPassword(tszAppID, tszPrincipal, tszPassword);
+            dwReturnValue = SetRunAsPassword(tszAppID.c_str(), tszPrincipal.c_str(), tszPassword.c_str());
             if (dwReturnValue != ERROR_SUCCESS) {
                 wprintf(L"ERROR: Cannot set RunAs password (%d).", dwReturnValue);
                 return dwReturnValue;
             }
         }
 
-        dwReturnValue = hkeyRegistry.SetStringValue(L"RunAs", tszPrincipal);
+        dwReturnValue = hkeyRegistry.SetStringValue(L"RunAs", tszPrincipal.c_str());
         if (dwReturnValue != ERROR_SUCCESS) {
             wprintf(L"ERROR: Cannot set RunAs registry value (%d).", dwReturnValue);
             return dwReturnValue;
