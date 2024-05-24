@@ -38,7 +38,7 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
             return dwReturnValue;
         }
     } else {
-        // TODO: Skip password also for "nt authority\localservice"and "nt authority\networkservice"
+        // TODO: Skip password also for "nt authority\localservice" & "nt authority\networkservice"
 
         if (_wcsicmp(tszPrincipal, L"INTERACTIVE USER") == 0) {
             // password not needed
