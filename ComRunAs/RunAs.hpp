@@ -7,6 +7,33 @@
 #include <ntsecapi.h>
 #include <atlbase.h> // CRegKey
 
+
+/** LSA_HANDLE RAII wrapper */
+class LsaWrap {
+public:
+    LsaWrap() {
+    }
+    ~LsaWrap() {
+        if (obj) {
+            LsaClose(obj);
+            obj = nullptr;
+        }
+    }
+
+    operator LSA_HANDLE () {
+        return obj;
+    }
+    LSA_HANDLE* operator & () {
+        return &obj;
+    }
+
+private:
+    LsaWrap(const LsaWrap&) = delete;
+    LsaWrap& operator = (const LsaWrap&) = delete;
+
+    LSA_HANDLE obj = nullptr;
+};
+
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
 DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword);
@@ -111,7 +138,7 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
     LSA_OBJECT_ATTRIBUTES objectAttributes = { 0 };
     objectAttributes.Length = sizeof(LSA_OBJECT_ATTRIBUTES);
 
-    LSA_HANDLE hPolicy = NULL;
+    LsaWrap hPolicy;
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_SECRET, &hPolicy);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
@@ -129,9 +156,6 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
         goto CLEANUP;
 
 CLEANUP:
-    if (hPolicy)
-        LsaClose(hPolicy);
-
     return dwReturnValue;
 }
 
@@ -150,7 +174,7 @@ DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
     StringCchCopy(wszPrivilege, RTL_NUMBER_OF(wszPrivilege), tszPrivilege);
 
     LSA_OBJECT_ATTRIBUTES objectAttributes = {};
-    LSA_HANDLE            hPolicy = NULL;
+    LsaWrap hPolicy;
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &hPolicy);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
@@ -172,8 +196,6 @@ DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
 CLEANUP:
     if (psidPrincipal)
         free(psidPrincipal);
-    if (hPolicy)
-        LsaClose(hPolicy);
 
     return dwReturnValue;
 }
