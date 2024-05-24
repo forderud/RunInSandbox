@@ -27,7 +27,7 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
     }
 
     if (_tcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
-        dwReturnValue = RegDeleteValue(hkeyRegistry, _T("RunAs"));
+        dwReturnValue = RegDeleteValue(hkeyRegistry, L"RunAs");
 
         if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
             dwReturnValue = ERROR_SUCCESS;
@@ -118,7 +118,7 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
         goto CLEANUP;
 
 
-    dwReturnValue = SetAccountRights(tszPrincipal, _T("SeBatchLogonRight"));
+    dwReturnValue = SetAccountRights(tszPrincipal, L"SeBatchLogonRight");
     if (dwReturnValue != ERROR_SUCCESS)
         goto CLEANUP;
 
@@ -231,20 +231,20 @@ BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
     DWORD dwSubAuthority;
 
     // Look for well-known English names
-    if (_tcsicmp(tszPrincipal, _T("Administrators")) == 0) {
+    if (_tcsicmp(tszPrincipal, L"Administrators") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_ADMINS;
-    } else if (_tcsicmp(tszPrincipal, _T("Power Users")) == 0) {
+    } else if (_tcsicmp(tszPrincipal, L"Power Users") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_POWER_USERS;
-    } else if (_tcsicmp(tszPrincipal, _T("Everyone")) == 0) {
+    } else if (_tcsicmp(tszPrincipal, L"Everyone") == 0) {
         dwSubAuthority = SECURITY_WORLD_RID;
         fUseWorldAuth = TRUE;
-    } else if (_tcsicmp(tszPrincipal, _T("System")) == 0) {
+    } else if (_tcsicmp(tszPrincipal, L"System") == 0) {
         dwSubAuthority = SECURITY_LOCAL_SYSTEM_RID;
-    } else if (_tcsicmp(tszPrincipal, _T("Self")) == 0) {
+    } else if (_tcsicmp(tszPrincipal, L"Self") == 0) {
         dwSubAuthority = SECURITY_PRINCIPAL_SELF_RID;
-    } else if (_tcsicmp(tszPrincipal, _T("Anonymous")) == 0) {
+    } else if (_tcsicmp(tszPrincipal, L"Anonymous") == 0) {
         dwSubAuthority = SECURITY_ANONYMOUS_LOGON_RID;
-    } else if (_tcsicmp(tszPrincipal, _T("Interactive")) == 0) {
+    } else if (_tcsicmp(tszPrincipal, L"Interactive") == 0) {
         dwSubAuthority = SECURITY_INTERACTIVE_RID;
     } else {
         return FALSE;
