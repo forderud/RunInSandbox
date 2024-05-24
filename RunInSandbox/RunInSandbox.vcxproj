@@ -77,7 +77,6 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RunAs.hpp" />
     <ClInclude Include="Sandboxing.hpp" />
     <ClInclude Include="ComCreate.hpp" />
     <ClInclude Include="ProcCreate.hpp" />

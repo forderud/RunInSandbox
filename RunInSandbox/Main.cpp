@@ -9,7 +9,6 @@
 #pragma comment(lib, "Credui.lib")
 #include "ComCreate.hpp"
 #include "ProcCreate.hpp"
-#include "RunAs.hpp"
 #include "../TestControl/TestControl_h.h"
 
 

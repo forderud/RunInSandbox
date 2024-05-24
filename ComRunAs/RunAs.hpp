@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <lsalookup.h>
 #include <strsafe.h>
+#include <subauth.h>
 #define _NTDEF_
 #include <ntsecapi.h>
 
