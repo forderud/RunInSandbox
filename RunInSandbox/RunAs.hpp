@@ -9,9 +9,12 @@
 
 #define GUIDSTR_MAX 38
 
-DWORD SetAccountRights(LPTSTR tszUser, const wchar_t* tszPrivilege);
-DWORD GetPrincipalSID(LPTSTR tszPrincipal, PSID* pSid);
-BOOL ConstructWellKnownSID(LPTSTR tszPrincipal, PSID* pSid);
+DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword);
+DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege);
+DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid);
+BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid);
+
+
 
 /*---------------------------------------------------------------------------*\
  * NAME: SetRunAsPassword                                                    *
@@ -33,7 +36,7 @@ BOOL ConstructWellKnownSID(LPTSTR tszPrincipal, PSID* pSid);
  * --------------------------------------------------------------------------*
  *  RETURNS: WIN32 Error Code                                                *
 \*---------------------------------------------------------------------------*/
-DWORD SetRunAsPassword(LPTSTR tszAppID, LPTSTR tszPrincipal, LPTSTR tszPassword)
+DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
 {
     WCHAR                 wszKey[4 + GUIDSTR_MAX + 1] = { 0 };
     WCHAR                 wszAppID[GUIDSTR_MAX + 1] = { 0 };
@@ -93,7 +96,7 @@ CLEANUP:
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Sets the account right for a given user.                     *
 \*---------------------------------------------------------------------------*/
-DWORD SetAccountRights(LPTSTR tszUser, const wchar_t* tszPrivilege)
+DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege)
 {
     PSID               psidPrincipal = NULL;
     LSA_UNICODE_STRING lsaPrivilegeString = {};
@@ -137,16 +140,15 @@ CLEANUP:
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Creates a SID for the supplied principal.                    *
 \*---------------------------------------------------------------------------*/
-DWORD GetPrincipalSID(LPTSTR tszPrincipal, PSID* pSid)
+DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
 {
     DWORD cbSid = 0;
-    cbRefDomain = 255;
 
     if (ConstructWellKnownSID(tszPrincipal, pSid))
         return ERROR_SUCCESS;
 
     TCHAR        tszRefDomain[256] = { 0 };
-    DWORD        cbRefDomain = 0;
+    DWORD        cbRefDomain = 255;
     SID_NAME_USE snu;
     LookupAccountName(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu);
 
@@ -179,7 +181,7 @@ CLEANUP:
  * DESCRIPTION: This method converts some designated well-known identities   *
  * to a SID.                                                                 *
 \*---------------------------------------------------------------------------*/
-BOOL ConstructWellKnownSID(LPTSTR tszPrincipal, PSID* pSid)
+BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
 {
     BOOL fRetVal = FALSE;
     PSID psidTemp = NULL;
