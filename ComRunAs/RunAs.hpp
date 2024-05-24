@@ -38,8 +38,8 @@ private:
 
 DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword);
 DWORD SetAccountRights(const WCHAR* tszUser, const WCHAR* tszPrivilege);
-DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid);
-BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid);
+DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
+BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
 
 
 DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
@@ -201,9 +201,9 @@ CLEANUP:
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Creates a SID for the supplied principal.                    *
 \*---------------------------------------------------------------------------*/
-DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
+DWORD GetPrincipalSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid)
 {
-    if (ConstructWellKnownSID(tszPrincipal, pSid))
+    if (ConstructWellKnownSID(tszPrincipal, /*out*/pSid))
         return ERROR_SUCCESS;
 
     TCHAR        tszRefDomain[256] = { 0 };
@@ -241,7 +241,7 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
  * DESCRIPTION: This method converts some designated well-known identities   *
  * to a SID.                                                                 *
 \*---------------------------------------------------------------------------*/
-BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid)
+BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid)
 {
     // Look for well-known English names
     DWORD dwSubAuthority = 0;
