@@ -14,7 +14,6 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{30B5888C-49F6-4E13-8E0A-2C2240B87553}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TryToAccess</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
