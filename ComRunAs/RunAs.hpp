@@ -119,11 +119,11 @@ DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, co
     LSA_UNICODE_STRING lsaKeyString = {};
     lsaKeyString.Length = (USHORT)((key.length() + 1) * sizeof(WCHAR));
     lsaKeyString.MaximumLength = lsaKeyString.Length;
-    lsaKeyString.Buffer = (WCHAR*)key.c_str();
+    lsaKeyString.Buffer = key.data();
 
     LSA_UNICODE_STRING lsaPasswordString = {};
     lsaPasswordString.Length = (USHORT)((password.length() + 1) * sizeof(WCHAR));
-    lsaPasswordString.Buffer = (WCHAR*)password.c_str();
+    lsaPasswordString.Buffer = const_cast<WCHAR*>(password.data());
     lsaPasswordString.MaximumLength = lsaPasswordString.Length;
 
     // Open the local security policy
