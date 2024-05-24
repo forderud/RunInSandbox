@@ -114,14 +114,14 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
 
     std::wstring key = L"SCM:" + AppID;
     LSA_UNICODE_STRING lsaKeyString = {};
-    lsaKeyString.Length = (USHORT)((key.length() + 1) * sizeof(WCHAR));
-    lsaKeyString.MaximumLength = lsaKeyString.Length;
+    lsaKeyString.Length = (USHORT)(key.length()*sizeof(WCHAR)); // exclude null-termination
+    lsaKeyString.MaximumLength = lsaKeyString.Length + sizeof(WCHAR); // include null-termination
     lsaKeyString.Buffer = key.data();
 
     LSA_UNICODE_STRING lsaPasswordString = {};
-    lsaPasswordString.Length = (USHORT)((password.length() + 1) * sizeof(WCHAR));
+    lsaPasswordString.Length = (USHORT)(password.length()*sizeof(WCHAR)); // exclude null-termination
+    lsaPasswordString.MaximumLength = lsaPasswordString.Length + sizeof(WCHAR); // include null-termination
     lsaPasswordString.Buffer = const_cast<WCHAR*>(password.data());
-    lsaPasswordString.MaximumLength = lsaPasswordString.Length;
 
     // Open the local security policy
     LSA_OBJECT_ATTRIBUTES objectAttributes = { 0 };
@@ -165,8 +165,8 @@ DWORD SetAccountRights(const std::wstring& username, const WCHAR privilege[])
         return dwReturnValue;
 
     LSA_UNICODE_STRING lsaPrivilegeString = {};
-    lsaPrivilegeString.Length = (USHORT)(wcslen(privilege) * sizeof(WCHAR));
-    lsaPrivilegeString.MaximumLength = (USHORT)(lsaPrivilegeString.Length + sizeof(WCHAR));
+    lsaPrivilegeString.Length = (USHORT)(wcslen(privilege)*sizeof(WCHAR)); // exclude null-termination
+    lsaPrivilegeString.MaximumLength = lsaPrivilegeString.Length + sizeof(WCHAR); // include null-termination
     lsaPrivilegeString.Buffer = const_cast<WCHAR*>(privilege);
 
     dwReturnValue = LsaAddAccountRights(hPolicy, sidPrincipal.data(), &lsaPrivilegeString, 1);
