@@ -40,7 +40,7 @@ private:
 DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword);
 DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[]);
 DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
-BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid);
+BOOL ConstructWellKnownSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
 
 
 DWORD SetRunAsAccount(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword)
@@ -204,7 +204,7 @@ CLEANUP:
 \*---------------------------------------------------------------------------*/
 DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid)
 {
-    if (ConstructWellKnownSID(tszPrincipal.c_str(), /*out*/pSid))
+    if (ConstructWellKnownSID(tszPrincipal, /*out*/pSid))
         return ERROR_SUCCESS;
 
     TCHAR        tszRefDomain[256] = { 0 };
@@ -242,25 +242,25 @@ DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid)
  * DESCRIPTION: This method converts some designated well-known identities   *
  * to a SID.                                                                 *
 \*---------------------------------------------------------------------------*/
-BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, /*out*/PSID* pSid)
+BOOL ConstructWellKnownSID(const std::wstring tszPrincipal, /*out*/PSID* pSid)
 {
     // Look for well-known English names
     DWORD dwSubAuthority = 0;
     BOOL fUseWorldAuth = FALSE;
-    if (_wcsicmp(tszPrincipal, L"Administrators") == 0) {
+    if (_wcsicmp(tszPrincipal.c_str(), L"Administrators") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_ADMINS;
-    } else if (_wcsicmp(tszPrincipal, L"Power Users") == 0) {
+    } else if (_wcsicmp(tszPrincipal.c_str(), L"Power Users") == 0) {
         dwSubAuthority = DOMAIN_ALIAS_RID_POWER_USERS;
-    } else if (_wcsicmp(tszPrincipal, L"Everyone") == 0) {
+    } else if (_wcsicmp(tszPrincipal.c_str(), L"Everyone") == 0) {
         dwSubAuthority = SECURITY_WORLD_RID;
         fUseWorldAuth = TRUE;
-    } else if (_wcsicmp(tszPrincipal, L"System") == 0) {
+    } else if (_wcsicmp(tszPrincipal.c_str(), L"System") == 0) {
         dwSubAuthority = SECURITY_LOCAL_SYSTEM_RID;
-    } else if (_wcsicmp(tszPrincipal, L"Self") == 0) {
+    } else if (_wcsicmp(tszPrincipal.c_str(), L"Self") == 0) {
         dwSubAuthority = SECURITY_PRINCIPAL_SELF_RID;
-    } else if (_wcsicmp(tszPrincipal, L"Anonymous") == 0) {
+    } else if (_wcsicmp(tszPrincipal.c_str(), L"Anonymous") == 0) {
         dwSubAuthority = SECURITY_ANONYMOUS_LOGON_RID;
-    } else if (_wcsicmp(tszPrincipal, L"Interactive") == 0) {
+    } else if (_wcsicmp(tszPrincipal.c_str(), L"Interactive") == 0) {
         dwSubAuthority = SECURITY_INTERACTIVE_RID;
     } else {
         return FALSE;
