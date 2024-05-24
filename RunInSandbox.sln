@@ -22,7 +22,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GrantAccess", "GrantAccess\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RunElevatedNet", "RunElevatedNet\RunElevatedNet.csproj", "{9E3FE3EA-EB11-4703-9CDD-7F15E08AF0E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunInSandboxNet", "RunInSandboxNet\RunInSandboxNet.csproj", "{16DECCC3-CC59-41B3-8EF6-218F71A30678}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RunInSandboxNet", "RunInSandboxNet\RunInSandboxNet.csproj", "{16DECCC3-CC59-41B3-8EF6-218F71A30678}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComRunAs", "ComRunAs\ComRunAs.vcxproj", "{E145C919-E044-4028-99EF-B1A3236F2E26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +56,10 @@ Global
 		{16DECCC3-CC59-41B3-8EF6-218F71A30678}.Debug|x64.Build.0 = Debug|Any CPU
 		{16DECCC3-CC59-41B3-8EF6-218F71A30678}.Release|x64.ActiveCfg = Release|Any CPU
 		{16DECCC3-CC59-41B3-8EF6-218F71A30678}.Release|x64.Build.0 = Release|Any CPU
+		{E145C919-E044-4028-99EF-B1A3236F2E26}.Debug|x64.ActiveCfg = Debug|x64
+		{E145C919-E044-4028-99EF-B1A3236F2E26}.Debug|x64.Build.0 = Debug|x64
+		{E145C919-E044-4028-99EF-B1A3236F2E26}.Release|x64.ActiveCfg = Release|x64
+		{E145C919-E044-4028-99EF-B1A3236F2E26}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
