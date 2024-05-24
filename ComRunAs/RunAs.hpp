@@ -142,20 +142,16 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_SECRET, &hPolicy);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
-        goto CLEANUP;
+        return dwReturnValue;
 
     // Store the user's password
     dwReturnValue = LsaStorePrivateData(hPolicy, &lsaKeyString, &lsaPasswordString);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
-        goto CLEANUP;
+        return dwReturnValue;
 
 
     dwReturnValue = SetAccountRights(tszPrincipal, L"SeBatchLogonRight");
-    if (dwReturnValue != ERROR_SUCCESS)
-        goto CLEANUP;
-
-CLEANUP:
     return dwReturnValue;
 }
 
