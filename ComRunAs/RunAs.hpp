@@ -28,6 +28,7 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
     }
 
     if (_wcsicmp(tszPrincipal, L"LAUNCHING USER") == 0) {
+        // default case so delete "RunAs" value 
         dwReturnValue = RegDeleteValue(hkeyRegistry, L"RunAs");
 
         if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
@@ -37,8 +38,12 @@ DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WC
             return dwReturnValue;
         }
     } else {
-        if (_wcsicmp(tszPrincipal, L"INTERACTIVE USER") != 0)
-        {
+        // TODO: Skip password also for "nt authority\localservice"and "nt authority\networkservice"
+
+        if (_wcsicmp(tszPrincipal, L"INTERACTIVE USER") == 0) {
+            // password not needed
+        } else {
+            // password needed
             dwReturnValue = SetRunAsPassword(tszAppID, tszPrincipal, tszPassword);
             if (dwReturnValue != ERROR_SUCCESS) {
                 wprintf(L"ERROR: Cannot set RunAs password (%d).", dwReturnValue);
