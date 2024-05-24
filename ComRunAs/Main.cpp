@@ -16,5 +16,8 @@ int wmain(int argc, wchar_t* argv[]) {
     wprintf(L"Configuring COM server with AppID %s to run with user %s.\n", appid, username);
 
     auto res = SetRunAsAccount(appid, username, password);
+
+    wprintf(L"INFO: Please ensure that the %s account have filesystem permission to run the COM server.\n", username);
+
     return res;
 }
