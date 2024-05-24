@@ -39,7 +39,7 @@ private:
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
 DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password);
-DWORD SetAccountRights(const std::wstring& username, const WCHAR tszPrivilege[]);
+DWORD SetAccountRights(const std::wstring& username, const WCHAR privilege[]);
 DWORD GetPrincipalSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 BOOL ConstructWellKnownSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 
@@ -150,13 +150,8 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
  * --------------------------------------------------------------------------*
  * DESCRIPTION: Sets the account right for a given user.                     *
 \*---------------------------------------------------------------------------*/
-DWORD SetAccountRights(const std::wstring& username, const WCHAR tszPrivilege[])
+DWORD SetAccountRights(const std::wstring& username, const WCHAR privilege[])
 {
-    LSA_UNICODE_STRING lsaPrivilegeString = {};
-
-    WCHAR wszPrivilege[256] = { 0 };
-    StringCchCopy(wszPrivilege, RTL_NUMBER_OF(wszPrivilege), tszPrivilege);
-
     LSA_OBJECT_ATTRIBUTES objectAttributes = {};
     LsaWrap hPolicy;
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &hPolicy);
@@ -169,9 +164,10 @@ DWORD SetAccountRights(const std::wstring& username, const WCHAR tszPrivilege[])
     if (dwReturnValue != ERROR_SUCCESS)
         return dwReturnValue;
 
-    lsaPrivilegeString.Length = (USHORT)(wcslen(wszPrivilege) * sizeof(WCHAR));
+    LSA_UNICODE_STRING lsaPrivilegeString = {};
+    lsaPrivilegeString.Length = (USHORT)(wcslen(privilege) * sizeof(WCHAR));
     lsaPrivilegeString.MaximumLength = (USHORT)(lsaPrivilegeString.Length + sizeof(WCHAR));
-    lsaPrivilegeString.Buffer = wszPrivilege;
+    lsaPrivilegeString.Buffer = const_cast<WCHAR*>(privilege);
 
     dwReturnValue = LsaAddAccountRights(hPolicy, sidPrincipal.data(), &lsaPrivilegeString, 1);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
