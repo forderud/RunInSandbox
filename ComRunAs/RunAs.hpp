@@ -37,7 +37,7 @@ private:
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring tszPrincipal, const std::wstring password);
+DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, const std::wstring password);
 DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[]);
 DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
@@ -102,7 +102,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
  *  tszAppID - The Application ID you wish to modify                         *
  *  (e.g. "{99999999-9999-9999-9999-00AA00BBF7C7}")                          *
  *                                                                           *
- *  tszPrincipal - Name of the principal you have specified in the RunAs     *
+ *  username - Name of the principal you have specified in the RunAs     *
  *  named value under the AppID registry key                                 *
  *                                                                           *
  *  tszPassword - Password of the user you have specified in the RunAs       *
@@ -110,7 +110,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
  * --------------------------------------------------------------------------*
  *  RETURNS: WIN32 Error Code                                                *
 \*---------------------------------------------------------------------------*/
-DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring tszPrincipal, const std::wstring password)
+DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, const std::wstring password)
 {
     // TODO: Check if password is valid
 
@@ -152,7 +152,7 @@ DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring tszPrincipal
         return dwReturnValue;
 
 
-    dwReturnValue = SetAccountRights(tszPrincipal, L"SeBatchLogonRight");
+    dwReturnValue = SetAccountRights(username, L"SeBatchLogonRight");
     return dwReturnValue;
 }
 
