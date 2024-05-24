@@ -197,24 +197,23 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid)
 
     DWORD dwReturnValue = GetLastError();
     if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER)
-        goto CLEANUP;
+        return dwReturnValue;
 
     dwReturnValue = ERROR_SUCCESS;
 
     *pSid = (PSID)malloc(cbSid);
     if (!pSid) {
         dwReturnValue = ERROR_OUTOFMEMORY;
-        goto CLEANUP;
+        return dwReturnValue;
     }
 
     cbRefDomain = 255;
 
     if (!LookupAccountNameW(NULL, tszPrincipal, *pSid, &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
         dwReturnValue = GetLastError();
-        goto CLEANUP;
+        return dwReturnValue;
     }
 
-CLEANUP:
     return dwReturnValue;
 }
 
