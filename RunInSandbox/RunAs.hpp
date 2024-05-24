@@ -80,6 +80,8 @@ DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, cons
 \*---------------------------------------------------------------------------*/
 DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
 {
+    // TODO: Check if password is valid
+
     const size_t GUIDSTR_MAX = 38;
     WCHAR wszKey[4 + GUIDSTR_MAX + 1] = { 0 };
     WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
