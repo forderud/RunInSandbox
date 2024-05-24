@@ -38,7 +38,7 @@ private:
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, const std::wstring password);
+DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password);
 DWORD SetAccountRights(const std::wstring username, const WCHAR tszPrivilege[]);
 DWORD GetPrincipalSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid);
 BOOL ConstructWellKnownSID(const std::wstring username, /*out*/std::vector<BYTE>& pSid);
@@ -108,7 +108,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
  * --------------------------------------------------------------------------*
  *  RETURNS: WIN32 Error Code                                                *
 \*---------------------------------------------------------------------------*/
-DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring username, const std::wstring password)
+DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password)
 {
     // TODO: Check if password is valid
 
