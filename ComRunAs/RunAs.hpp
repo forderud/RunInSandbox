@@ -14,7 +14,7 @@ DWORD GetPrincipalSID(const WCHAR* tszPrincipal, PSID* pSid);
 BOOL ConstructWellKnownSID(const WCHAR* tszPrincipal, PSID* pSid);
 
 
-DWORD SetRunAsAccount(const wchar_t* tszAppID, const wchar_t* tszPrincipal, const wchar_t* tszPassword)
+DWORD SetRunAsAccount(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const WCHAR* tszPassword)
 {
     const size_t SIZE_NAME_BUFFER = 256;
     WCHAR tszKeyName[SIZE_NAME_BUFFER] = { 0 };
