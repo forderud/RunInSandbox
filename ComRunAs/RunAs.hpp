@@ -37,7 +37,7 @@ private:
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword);
+DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring tszPrincipal, const std::wstring password);
 DWORD SetAccountRights(const std::wstring tszUser, const WCHAR tszPrivilege[]);
 DWORD GetPrincipalSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
 BOOL ConstructWellKnownSID(const std::wstring tszPrincipal, /*out*/PSID* pSid);
@@ -110,7 +110,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
  * --------------------------------------------------------------------------*
  *  RETURNS: WIN32 Error Code                                                *
 \*---------------------------------------------------------------------------*/
-DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrincipal, const std::wstring tszPassword)
+DWORD SetRunAsPassword(const std::wstring AppID, const std::wstring tszPrincipal, const std::wstring password)
 {
     // TODO: Check if password is valid
 
@@ -119,8 +119,8 @@ DWORD SetRunAsPassword(const std::wstring tszAppID, const std::wstring tszPrinci
     WCHAR wszAppID[GUIDSTR_MAX + 1] = { 0 };
     WCHAR wszPassword[256] = { 0 };
 
-    StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), tszAppID.c_str());
-    StringCchCopyW(wszPassword, RTL_NUMBER_OF(wszPassword), tszPassword.c_str());
+    StringCchCopyW(wszAppID, RTL_NUMBER_OF(wszAppID), AppID.c_str());
+    StringCchCopyW(wszPassword, RTL_NUMBER_OF(wszPassword), password.c_str());
 
     StringCchCopyW(wszKey, RTL_NUMBER_OF(wszKey), L"SCM:");
     StringCchCatW(wszKey, RTL_NUMBER_OF(wszKey), wszAppID);
