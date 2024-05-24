@@ -111,7 +111,7 @@ DWORD SetRunAsPassword(const WCHAR* tszAppID, const WCHAR* tszPrincipal, const W
     LSA_OBJECT_ATTRIBUTES objectAttributes = { 0 };
     objectAttributes.Length = sizeof(LSA_OBJECT_ATTRIBUTES);
 
-    HANDLE hPolicy = NULL;
+    LSA_HANDLE hPolicy = NULL;
     DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_SECRET, &hPolicy);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
     if (dwReturnValue != ERROR_SUCCESS)
