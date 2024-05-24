@@ -1,4 +1,3 @@
-# Run in Sandbox
 Sample C++ project for launching executables and out-of-process COM servers in a sandboxed [low integrity level (IL)](https://learn.microsoft.com/en-us/previous-versions/dotnet/articles/bb625960(v=msdn.10)) or [AppContainer](https://docs.microsoft.com/en-us/windows/desktop/secauthz/appcontainer-for-legacy-applications-) process on the *same machine*. There's no need to create any additional user accounts.
 
 Related project: Microsoft [SandboxSecurityTools](https://github.com/microsoft/SandboxSecurityTools) for testing of AppContainer Sandboxing.
@@ -6,7 +5,7 @@ Related project: Microsoft [SandboxSecurityTools](https://github.com/microsoft/S
 ## Executable sandboxing
 Run `RunInSandbox.exe [ac|li|mi|hi] ExePath [-b]` to launch the `ExePath` application in an AppContainer, low IL, medium IL or high IL process. This works for `STARTUPINFOEX`-based process creation. The `-b` option is used to break execution immediately after process creation to enable debugging of startup problems.
 
-## COM sandboxing
+## RunInSandbox - COM sandboxing
 Run `RunInSandbox.exe [ac|li|mi|hi] ProgID [-g][-b]` to launch the `ProgID` COM server in an AppContainer, low IL, medium IL or high IL process. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
 
 Example usage:
@@ -26,7 +25,7 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 * Why is `SetCursorPos` failing at medium IL _if_ the host is elevated (high IL). Impersonating the shell process (explorer.exe) to escape elevation doesn't seem to help. The problem appear to be caused by UIPI limitations tied to the foreground window.
 
 ## ComRunAs
-Command-line tool for configuring COM servers to be started through a specific user account. Requires the COM server to already have an `AppID` registry entry.
+Command-line tool for configuring COM servers to be started through a specific user account. Requires the COM server to already have an [`AppID`](https://learn.microsoft.com/en-us/windows/win32/com/appid-key) registry entry.
 
 ## GrantAccess
 Command-line tool to make a file or path writable by AppContainers and low IL process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
