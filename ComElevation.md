@@ -19,7 +19,7 @@ The [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en-us/windows/win32
 Alternatives for editing the registry value:
 * Edit registry with `regedit.exe`. This only works for accounts that doesn't require a password.
 * Use `ComRunAs.exe` tool in this repo to specify username & password.
-* Edit manually using `Component Services`.  
+* Edit manually using `Component Services` (`dcomcnfg.exe`).
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
 In order to be compatible with RunAs, elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect. The assigned user also need to have sufficient filesystem permissions to start the server.
