@@ -139,7 +139,8 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
     if (dwReturnValue != ERROR_SUCCESS)
         return dwReturnValue;
 
-
+    // Grant user "Log on as a batch job" rights
+    // This is not enabled by default for manually created acounts
     dwReturnValue = SetAccountRights(username, L"SeBatchLogonRight");
     return dwReturnValue;
 }
