@@ -44,6 +44,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
 
             // Grant user "Log on as a batch job" rights
             // This is not enabled by default for manually created acounts
+            // TOOD: Check if user already has this right
             dwReturnValue = SetAccountRights(username, L"SeBatchLogonRight");
             if (dwReturnValue != ERROR_SUCCESS) {
                 wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", dwReturnValue);
