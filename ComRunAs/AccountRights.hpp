@@ -9,11 +9,8 @@
 DWORD GetPrincipalSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 BOOL ConstructWellKnownSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 
-/*---------------------------------------------------------------------------*\
- * NAME: SetAccountRights                                                    *
- * --------------------------------------------------------------------------*
- * DESCRIPTION: Sets the account right for a given user.                     *
-\*---------------------------------------------------------------------------*/
+/** Sets the account right for a given user.
+ * Current values can be inspected opening gpedit.msc and navigating to "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" */
 DWORD SetAccountRights(const std::wstring& username, const WCHAR privilege[])
 {
     LSA_OBJECT_ATTRIBUTES objectAttributes = {};
