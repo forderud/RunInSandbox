@@ -1,38 +1,8 @@
 #pragma once
-#include <Windows.h>
-#include <lsalookup.h>
-#include <subauth.h> // for UNICODE_STRING
-#define _NTDEF_
-#include <ntsecapi.h> // for LSA_HANDLE
+#include "Util.hpp"
 #include <string>
 #include <vector>
 
-
-/** LSA_HANDLE RAII wrapper */
-class LsaWrap {
-public:
-    LsaWrap() {
-    }
-    ~LsaWrap() {
-        if (obj) {
-            LsaClose(obj);
-            obj = nullptr;
-        }
-    }
-
-    operator LSA_HANDLE () {
-        return obj;
-    }
-    LSA_HANDLE* operator & () {
-        return &obj;
-    }
-
-private:
-    LsaWrap(const LsaWrap&) = delete;
-    LsaWrap& operator = (const LsaWrap&) = delete;
-
-    LSA_HANDLE obj = nullptr;
-};
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 

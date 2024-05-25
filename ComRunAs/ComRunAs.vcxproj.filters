@@ -6,5 +6,6 @@
   <ItemGroup>
     <ClInclude Include="RunAs.hpp" />
     <ClInclude Include="AccountRights.hpp" />
+    <ClInclude Include="Util.hpp" />
   </ItemGroup>
 </Project>
