@@ -85,12 +85,12 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
 {
     std::wstring key = L"SCM:" + AppID;
     LSA_UNICODE_STRING lsaKeyString = {};
-    lsaKeyString.Length = (USHORT)(key.length() + 1)*sizeof(WCHAR); // include null-termination (not according to spec)
+    lsaKeyString.Length = (USHORT)(key.length() + 1)*sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
     lsaKeyString.MaximumLength = lsaKeyString.Length;               // include null-termination
     lsaKeyString.Buffer = key.data();
 
     LSA_UNICODE_STRING lsaPasswordString = {};
-    lsaPasswordString.Length = (USHORT)(password.length() + 1)*sizeof(WCHAR); // include null-termination (not according to spec)
+    lsaPasswordString.Length = (USHORT)(password.length() + 1)*sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
     lsaPasswordString.MaximumLength = lsaPasswordString.Length;               // include null-termination
     lsaPasswordString.Buffer = const_cast<WCHAR*>(password.data());
 
