@@ -26,7 +26,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
         if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
             dwReturnValue = ERROR_SUCCESS;
         } else if (dwReturnValue != ERROR_SUCCESS) {
-            wprintf(L"ERROR: Cannot remove RunAs registry value (%d).", dwReturnValue);
+            wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", dwReturnValue);
             return dwReturnValue;
         }
     } else {
@@ -38,14 +38,22 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
             // password needed
             dwReturnValue = SetRunAsPassword(AppID, username, password);
             if (dwReturnValue != ERROR_SUCCESS) {
-                wprintf(L"ERROR: Cannot set RunAs password (%d).", dwReturnValue);
+                wprintf(L"ERROR: Cannot set RunAs password (%d).\n", dwReturnValue);
+                return dwReturnValue;
+            }
+
+            // Grant user "Log on as a batch job" rights
+            // This is not enabled by default for manually created acounts
+            dwReturnValue = SetAccountRights(username, L"SeBatchLogonRight");
+            if (dwReturnValue != ERROR_SUCCESS) {
+                wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", dwReturnValue);
                 return dwReturnValue;
             }
         }
 
         dwReturnValue = hkeyRegistry.SetStringValue(L"RunAs", username.c_str());
         if (dwReturnValue != ERROR_SUCCESS) {
-            wprintf(L"ERROR: Cannot set RunAs registry value (%d).", dwReturnValue);
+            wprintf(L"ERROR: Cannot set RunAs registry value (%d).\n", dwReturnValue);
             return dwReturnValue;
         }
     }
@@ -101,12 +109,5 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
     // Store the user's password
     dwReturnValue = LsaStorePrivateData(hPolicy, &lsaKeyString, &lsaPasswordString);
     dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-    if (dwReturnValue != ERROR_SUCCESS)
-        return dwReturnValue;
-
-    // Grant user "Log on as a batch job" rights
-    // This is not enabled by default for manually created acounts
-    dwReturnValue = SetAccountRights(username, L"SeBatchLogonRight");
     return dwReturnValue;
 }
-
