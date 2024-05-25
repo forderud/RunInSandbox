@@ -83,8 +83,6 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
 \*---------------------------------------------------------------------------*/
 DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password)
 {
-    // TODO: Check if password is valid
-
     std::wstring key = L"SCM:" + AppID;
     LSA_UNICODE_STRING lsaKeyString = {};
     lsaKeyString.Length = (USHORT)(key.length() + 1)*sizeof(WCHAR); // include null-termination (not according to spec)
@@ -97,7 +95,7 @@ DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, 
     lsaPasswordString.Buffer = const_cast<WCHAR*>(password.data());
 
     // Open the local security policy
-    LSA_OBJECT_ATTRIBUTES objectAttributes = { 0 };
+    LSA_OBJECT_ATTRIBUTES objectAttributes = {};
     objectAttributes.Length = sizeof(LSA_OBJECT_ATTRIBUTES);
 
     LsaWrap hPolicy;
