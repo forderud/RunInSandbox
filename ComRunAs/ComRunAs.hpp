@@ -40,7 +40,7 @@ public:
         else {
             // TODO: Skip password also for "nt authority\localservice" & "nt authority\networkservice"
 
-            if (_wcsicmp(username.c_str(), L"INTERACTIVE USER") == 0) {
+            if (_wcsicmp(username.c_str(), L"Interactive User") == 0) {
                 // password not needed
             }
             else {
