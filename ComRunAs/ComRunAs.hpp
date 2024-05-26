@@ -9,11 +9,6 @@
 *   Based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm */
 class ComRunAs {
 public:
-    ComRunAs() {
-    }
-    ~ComRunAs() {
-    }
-
     DWORD Open (const std::wstring AppID) {
         m_appid = AppID;
 

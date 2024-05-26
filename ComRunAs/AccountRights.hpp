@@ -11,11 +11,6 @@
 * Current values can be inspected opening gpedit.msc and navigating to "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" */
 class AccountRights {
 public:
-    AccountRights() {
-    }
-    ~AccountRights() {
-    }
-
     DWORD Open(const std::wstring& username) {
         LSA_OBJECT_ATTRIBUTES objectAttributes = {};
         DWORD res = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &m_policy);
