@@ -18,23 +18,23 @@ public:
         m_appid = AppID;
 
         std::wstring tszKeyName = L"APPID\\" + AppID;
-        DWORD dwReturnValue = m_reg.Open(HKEY_CLASSES_ROOT, tszKeyName.c_str(), KEY_ALL_ACCESS);
-        return dwReturnValue;
+        DWORD res = m_reg.Open(HKEY_CLASSES_ROOT, tszKeyName.c_str(), KEY_ALL_ACCESS);
+        return res;
     }
 
 
     DWORD Assign(const std::wstring username, /*optional*/const WCHAR* password) {
-        DWORD dwReturnValue;
+        DWORD res = ERROR_SUCCESS;
         if (_wcsicmp(username.c_str(), L"Launching User") == 0) { // https://learn.microsoft.com/en-us/windows/win32/com/launching-user
             // default case so delete "RunAs" value 
-            dwReturnValue = m_reg.DeleteValue(L"RunAs");
+            res = m_reg.DeleteValue(L"RunAs");
 
-            if (dwReturnValue == ERROR_FILE_NOT_FOUND) {
-                dwReturnValue = ERROR_SUCCESS;
+            if (res == ERROR_FILE_NOT_FOUND) {
+                res = ERROR_SUCCESS;
             }
-            else if (dwReturnValue != ERROR_SUCCESS) {
-                wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", dwReturnValue);
-                return dwReturnValue;
+            else if (res != ERROR_SUCCESS) {
+                wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", res);
+                return res;
             }
         } else {
             // check if account require password
@@ -52,36 +52,36 @@ public:
                     return ERROR_INVALID_PASSWORD;
                 }
 
-                dwReturnValue = SetRunAsPassword(m_appid, password);
-                if (dwReturnValue != ERROR_SUCCESS) {
-                    wprintf(L"ERROR: Cannot set RunAs password (%d).\n", dwReturnValue);
-                    return dwReturnValue;
+                res = SetRunAsPassword(m_appid, password);
+                if (res != ERROR_SUCCESS) {
+                    wprintf(L"ERROR: Cannot set RunAs password (%d).\n", res);
+                    return res;
                 }
 
                 // Grant user "Log on as a batch job" rights
                 // This is not enabled by default for manually created acounts
                 AccountRights ar;
-                dwReturnValue = ar.Open(username);
-                if (dwReturnValue != ERROR_SUCCESS) {
-                    wprintf(L"ERROR: Unknown user %s (%d).\n", username.c_str(), dwReturnValue);
-                    return dwReturnValue;
+                res = ar.Open(username);
+                if (res != ERROR_SUCCESS) {
+                    wprintf(L"ERROR: Unknown user %s (%d).\n", username.c_str(), res);
+                    return res;
                 }
 
                 if (ar.HasRight(L"SeBatchLogonRight")) {
                     wprintf(L"INFO: User %s already has SeBatchLogonRight.\n", username.c_str());
                 } else {
-                    dwReturnValue = ar.Set(L"SeBatchLogonRight");
-                    if (dwReturnValue != ERROR_SUCCESS) {
-                        wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", dwReturnValue);
-                        return dwReturnValue;
+                    res = ar.Set(L"SeBatchLogonRight");
+                    if (res != ERROR_SUCCESS) {
+                        wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", res);
+                        return res;
                     }
                 }
             }
 
-            dwReturnValue = m_reg.SetStringValue(L"RunAs", username.c_str());
-            if (dwReturnValue != ERROR_SUCCESS) {
-                wprintf(L"ERROR: Cannot set RunAs registry value (%d).\n", dwReturnValue);
-                return dwReturnValue;
+            res = m_reg.SetStringValue(L"RunAs", username.c_str());
+            if (res != ERROR_SUCCESS) {
+                wprintf(L"ERROR: Cannot set RunAs registry value (%d).\n", res);
+                return res;
             }
         }
 
@@ -124,15 +124,15 @@ private:
         objectAttributes.Length = sizeof(LSA_OBJECT_ATTRIBUTES);
 
         LsaWrap hPolicy;
-        DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_SECRET, &hPolicy);
-        dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-        if (dwReturnValue != ERROR_SUCCESS)
-            return dwReturnValue;
+        DWORD res = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_SECRET, &hPolicy);
+        res = LsaNtStatusToWinError(res);
+        if (res != ERROR_SUCCESS)
+            return res;
 
         // Store the user's password
-        dwReturnValue = LsaStorePrivateData(hPolicy, &lsaKeyString, &lsaPasswordString);
-        dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-        return dwReturnValue;
+        res = LsaStorePrivateData(hPolicy, &lsaKeyString, &lsaPasswordString);
+        res = LsaNtStatusToWinError(res);
+        return res;
     }
 
     std::wstring m_appid;
