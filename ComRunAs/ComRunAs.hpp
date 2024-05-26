@@ -67,11 +67,14 @@ public:
                     return dwReturnValue;
                 }
 
-                // TOOD: Check if user already has this right
-                dwReturnValue = ar.Set(L"SeBatchLogonRight");
-                if (dwReturnValue != ERROR_SUCCESS) {
-                    wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", dwReturnValue);
-                    return dwReturnValue;
+                if (ar.HasRight(L"SeBatchLogonRight")) {
+                    wprintf(L"INFO: User %s already has SeBatchLogonRight.\n", username.c_str());
+                } else {
+                    dwReturnValue = ar.Set(L"SeBatchLogonRight");
+                    if (dwReturnValue != ERROR_SUCCESS) {
+                        wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", dwReturnValue);
+                        return dwReturnValue;
+                    }
                 }
             }
 

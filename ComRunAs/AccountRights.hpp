@@ -26,6 +26,25 @@ public:
         return res;
     }
 
+    bool HasRight(const WCHAR privilege[]) {
+        LSA_UNICODE_STRING* rights = nullptr;
+        ULONG count = 0;
+        NTSTATUS res = LsaEnumerateAccountRights(m_policy, m_sidPrincipal.data(), &rights, &count);
+        if (res != STATUS_SUCCESS)
+            return false;
+
+        bool found = false;
+        for (size_t i = 0; i < count; ++i) {
+            if (_wcsicmp(privilege, rights[i].Buffer) == 0) {
+                found = true;
+                break;
+            }
+        }
+
+        LsaFreeMemory(rights);
+        return found;
+    }
+
     DWORD Set(const WCHAR privilege[]) {
         LSA_UNICODE_STRING lsaPrivilegeString = {};
         lsaPrivilegeString.Length = (USHORT)(wcslen(privilege) * sizeof(WCHAR)); // exclude null-termination
