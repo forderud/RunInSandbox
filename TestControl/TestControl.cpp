@@ -110,7 +110,7 @@ HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos
             assert(ok);
             // verify that window is activated
             HWND active_wnd = GetActiveWindow();
-            assert(wnd == active_wnd);
+            assert(wnd == active_wnd); active_wnd;
 
             ok = SetForegroundWindow(wnd); // assume host have called CoAllowSetForegroundWindow first
             assert(ok);

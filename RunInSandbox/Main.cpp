@@ -262,7 +262,7 @@ int wmain (int argc, wchar_t *argv[]) {
 
         // awake process
         DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
-        assert(prev_sleep_cnt == 1);
+        assert(prev_sleep_cnt == 1); prev_sleep_cnt;
     }
 
     std::wcout << L"[done]" << std::endl;
