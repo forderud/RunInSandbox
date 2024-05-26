@@ -1,4 +1,4 @@
-#include "RunAs.hpp"
+#include "ComRunAs.hpp"
 #include <iostream>
 
 int wmain(int argc, wchar_t* argv[]) {
@@ -15,7 +15,18 @@ int wmain(int argc, wchar_t* argv[]) {
 
     wprintf(L"Configuring COM server with AppID %s to run with user %s.\n", appid, username);
 
-    auto res = SetRunAsAccount(appid, username, password);
+    ComRunAs runas;
+    DWORD res = runas.Open(appid);
+    if (res != ERROR_SUCCESS) {
+        wprintf(L"ERROR: Cannot open AppID %s registry key (%d).", appid, res);
+        return res;
+    }
+
+    res = runas.Assign(username, password);
+    if (res != ERROR_SUCCESS) {
+        wprintf(L"ERROR: Unable to assign RunAs account (%d).", res);
+        return res;
+    }
 
     wprintf(L"INFO: Please ensure that the %s account have filesystem permission to run the COM server.\n", username);
 

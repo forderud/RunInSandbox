@@ -4,7 +4,7 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RunAs.hpp" />
+    <ClInclude Include="ComRunAs.hpp" />
     <ClInclude Include="AccountRights.hpp" />
     <ClInclude Include="Util.hpp" />
   </ItemGroup>
