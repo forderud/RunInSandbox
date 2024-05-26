@@ -33,16 +33,16 @@ public:
         if (res != STATUS_SUCCESS)
             return false;
 
-        bool found = false;
+        bool foundMatch = false;
         for (size_t i = 0; i < count; ++i) {
             if (_wcsicmp(privilege, rights[i].Buffer) == 0) {
-                found = true;
+                foundMatch = true;
                 break;
             }
         }
 
         LsaFreeMemory(rights);
-        return found;
+        return foundMatch;
     }
 
     DWORD Set(const WCHAR privilege[]) {
