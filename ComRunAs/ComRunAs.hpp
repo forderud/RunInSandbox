@@ -31,8 +31,7 @@ public:
 
             if (res == ERROR_FILE_NOT_FOUND) {
                 res = ERROR_SUCCESS;
-            }
-            else if (res != ERROR_SUCCESS) {
+            } else if (res != ERROR_SUCCESS) {
                 wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", res);
                 return res;
             }
@@ -81,7 +80,7 @@ public:
 
             res = m_reg.SetStringValue(L"RunAs", username.c_str());
             if (res != ERROR_SUCCESS) {
-                wprintf(L"ERROR: Cannot set RunAs registry value (%d).\n", res);
+                wprintf(L"ERROR: Unable to set RunAs registry value (%d).\n", res);
                 return res;
             }
         }
