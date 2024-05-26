@@ -15,7 +15,7 @@ public:
     }
 
     DWORD Open (const std::wstring AppID) {
-        m_AppID = AppID;
+        m_appid = AppID;
 
         std::wstring tszKeyName = L"APPID\\" + AppID;
         DWORD dwReturnValue = m_reg.Open(HKEY_CLASSES_ROOT, tszKeyName.c_str(), KEY_ALL_ACCESS);
@@ -50,7 +50,7 @@ public:
                     return ERROR_INVALID_PASSWORD;
                 }
 
-                dwReturnValue = SetRunAsPassword(m_AppID, password);
+                dwReturnValue = SetRunAsPassword(m_appid, password);
                 if (dwReturnValue != ERROR_SUCCESS) {
                     wprintf(L"ERROR: Cannot set RunAs password (%d).\n", dwReturnValue);
                     return dwReturnValue;
@@ -123,6 +123,6 @@ private:
         return dwReturnValue;
     }
 
-    std::wstring m_AppID;
+    std::wstring m_appid;
     CRegKey      m_reg;
 };
