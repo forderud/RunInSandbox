@@ -25,7 +25,7 @@ public:
 
     DWORD Assign(const std::wstring username, /*optional*/const WCHAR* password) {
         DWORD dwReturnValue;
-        if (_wcsicmp(username.c_str(), L"LAUNCHING USER") == 0) {
+        if (_wcsicmp(username.c_str(), L"Launching User") == 0) { // https://learn.microsoft.com/en-us/windows/win32/com/launching-user
             // default case so delete "RunAs" value 
             dwReturnValue = m_reg.DeleteValue(L"RunAs");
 
@@ -129,9 +129,9 @@ private:
     CRegKey      m_reg;
 
     static inline const WCHAR* s_PasswordlessAccounts[] = {
-        L"Interactive User",
-        L"nt authority\\localservice",
-        L"nt authority\\networkservice",
-        L"nt authority\\system",
+        L"Interactive User",             ///< https://learn.microsoft.com/en-us/windows/win32/com/interactive-user
+        L"nt authority\\localservice",   ///< https://learn.microsoft.com/en-us/windows/win32/services/localservice-account
+        L"nt authority\\networkservice", ///< https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account
+        L"nt authority\\system",         ///< https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account
     };
 };
