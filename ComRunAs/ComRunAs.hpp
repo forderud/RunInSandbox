@@ -70,6 +70,7 @@ public:
                 if (ar.HasRight(L"SeBatchLogonRight")) {
                     wprintf(L"INFO: User %s already has SeBatchLogonRight.\n", username.c_str());
                 } else {
+                    wprintf(L"INFO: Setting SeBatchLogonRight for user %s.\n", username.c_str());
                     res = ar.Set(L"SeBatchLogonRight");
                     if (res != ERROR_SUCCESS) {
                         wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", res);
