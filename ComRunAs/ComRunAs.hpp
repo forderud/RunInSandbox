@@ -5,8 +5,7 @@
 
 
 /** Utility class for configuring which user account to run COM servers through.
-*   Will modify the AppID\RunAs registry key as documented on https://learn.microsoft.com/en-us/windows/win32/com/runas
-*   Based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm */
+*   Will modify the AppID\RunAs registry key as documented on https://learn.microsoft.com/en-us/windows/win32/com/runas */
 class ComRunAs {
 public:
     DWORD Open (const std::wstring AppID) {
@@ -83,23 +82,11 @@ public:
     }
 
 private:
-    /*---------------------------------------------------------------------------*\
-     * NAME: SetRunAsPassword                                                    *
-     * --------------------------------------------------------------------------*
-     * DESCRIPTION: Sets the RunAs password for an AppID. Note that if you       *
-     * have specified the RunAs named value to "Interactive User" you do not     *
-     * need to set the RunAs password.                                           *
-     * --------------------------------------------------------------------------*
-     *  ARGUMENTS:                                                               *
-     *                                                                           *
-     *  AppID - The Application ID you wish to modify                            *
-     *  (e.g. "{99999999-9999-9999-9999-00AA00BBF7C7}")                          *
-     *                                                                           *
-     *  password - Password of the user you have specified in the RunAs          *
-     *  named value under the AppID registry key.                                *
-     * --------------------------------------------------------------------------*
-     *  RETURNS: WIN32 Error Code                                                *
-    \*---------------------------------------------------------------------------*/
+     /* Sets the RunAs password for an AppID.
+       Based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm 
+       Arguments:    
+       * AppID - The Application ID you wish to modify (e.g. "{99999999-9999-9999-9999-00AA00BBF7C7}")
+       * password - Password of the user you have specified in the RunAs named value under the AppID registry key. */
     static DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& password) {
         std::wstring key = L"SCM:" + AppID;
         LSA_UNICODE_STRING KeyString = {};
