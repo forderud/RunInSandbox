@@ -1,6 +1,7 @@
 #pragma once
 #include "Util.hpp"
 #include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -22,7 +23,14 @@ public:
         if (res != ERROR_SUCCESS)
             return res;
 
-        res = GetPrincipalSID(username, m_sidPrincipal);
+
+        // first check for known in-built SID
+        std::tie(res, m_sidPrincipal) = ConstructWellKnownSID(username);
+        if (res)
+            return ERROR_SUCCESS;
+
+        // fallback to check regular accounts
+        std::tie(res, m_sidPrincipal) = GetPrincipalSID(username);
         return res;
     }
 
@@ -62,33 +70,30 @@ private:
      * --------------------------------------------------------------------------*
      * DESCRIPTION: Creates a SID for the supplied principal.                    *
     \*---------------------------------------------------------------------------*/
-    static DWORD GetPrincipalSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid)
+    static std::tuple<DWORD, std::vector<BYTE>> GetPrincipalSID(const std::wstring& username)
     {
-        // first check for known in-built SID
-        if (ConstructWellKnownSID(username, /*out*/pSid))
-            return ERROR_SUCCESS;
-
         TCHAR tszRefDomain[256] = { 0 };
         DWORD cbRefDomain = 255;
         SID_NAME_USE snu;
         DWORD cbSid = 0;
-        LookupAccountNameW(NULL, username.c_str(), (PSID)pSid.data(), &cbSid, tszRefDomain, &cbRefDomain, &snu);
+        LookupAccountNameW(NULL, username.c_str(), nullptr, &cbSid, tszRefDomain, &cbRefDomain, &snu);
 
-        DWORD dwReturnValue = GetLastError();
-        if (dwReturnValue != ERROR_INSUFFICIENT_BUFFER)
-            return dwReturnValue;
+        DWORD res = GetLastError();
+        if (res != ERROR_INSUFFICIENT_BUFFER)
+            return {res, {}};
 
-        dwReturnValue = ERROR_SUCCESS;
+        res = ERROR_SUCCESS;
 
-        pSid.resize(cbSid);
+        std::vector<BYTE> sid;
+        sid.resize(cbSid);
         cbRefDomain = 255;
 
-        if (!LookupAccountNameW(NULL, username.c_str(), (PSID)pSid.data(), &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
-            dwReturnValue = GetLastError();
-            return dwReturnValue;
+        if (!LookupAccountNameW(NULL, username.c_str(), (PSID)sid.data(), &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
+            res = GetLastError();
+            return {res, {}};
         }
 
-        return dwReturnValue;
+        return {res, sid};
     }
 
 
@@ -98,7 +103,7 @@ private:
      * DESCRIPTION: This method converts some designated well-known identities   *
      * to a SID.                                                                 *
     \*---------------------------------------------------------------------------*/
-    static BOOL ConstructWellKnownSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid)
+    static std::tuple<BOOL, std::vector<BYTE>> ConstructWellKnownSID(const std::wstring& username)
     {
         // Look for well-known English names
         DWORD dwSubAuthority = 0;
@@ -126,7 +131,7 @@ private:
             dwSubAuthority = SECURITY_INTERACTIVE_RID;
         }
         else {
-            return FALSE;
+            return {FALSE, {}};
         }
 
         PSID psidTemp = NULL;
@@ -140,7 +145,7 @@ private:
                 dwSubAuthority,
                 0, 0, 0, 0, 0, 0,
                 &psidTemp
-            )) return FALSE;
+            )) return {FALSE, {}};
         }
         else {
             if (!AllocateAndInitializeSid(
@@ -149,25 +154,26 @@ private:
                 dwSubAuthority,
                 0, 0, 0, 0, 0, 0, 0,
                 &psidTemp
-            )) return FALSE;
+            )) return {FALSE, {}};
 
         }
 
         if (!IsValidSid(psidTemp))
-            return FALSE;
+            return {FALSE, {}};
 
         BOOL fRetVal = FALSE;
         DWORD cbSid = GetLengthSid(psidTemp);
-        pSid.resize(cbSid); // assign output buffer
-        if (!CopySid(cbSid, pSid.data(), psidTemp)) {
-            pSid.clear();
+        std::vector<BYTE> sid;
+        sid.resize(cbSid); // assign output buffer
+        if (!CopySid(cbSid, sid.data(), psidTemp)) {
+            sid.clear();
         }
         else {
             fRetVal = TRUE;
         }
         FreeSid(psidTemp);
 
-        return fRetVal;
+        return {fRetVal, sid};
     }
 
     LsaWrap           m_policy;
