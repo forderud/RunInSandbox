@@ -4,9 +4,9 @@
 #include <atlbase.h> // CRegKey
 
 
-// Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
-
-
+/** Utility class for configuring which user account to run COM servers through.
+*   Will modify the AppID\RunAs registry key as documented on https://learn.microsoft.com/en-us/windows/win32/com/runas
+*   Based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm */
 class ComRunAs {
 public:
     ComRunAs() {
@@ -36,15 +36,17 @@ public:
                 wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", dwReturnValue);
                 return dwReturnValue;
             }
-        }
-        else {
-            // TODO: Skip password also for "nt authority\localservice" & "nt authority\networkservice"
-
-            if (_wcsicmp(username.c_str(), L"Interactive User") == 0) {
-                // password not needed
+        } else {
+            // check if account require password
+            bool passwordRequired = true;
+            for (const WCHAR* account : s_PasswordlessAccounts) {
+                if (_wcsicmp(username.c_str(), account) == 0) {
+                    passwordRequired = false;
+                    break;
+                }
             }
-            else {
-                // password needed
+
+            if (passwordRequired) {
                 if (!password) {
                     wprintf(L"ERROR: Password missing for user %s.\n", username.c_str());
                     return ERROR_INVALID_PASSWORD;
@@ -125,4 +127,11 @@ private:
 
     std::wstring m_appid;
     CRegKey      m_reg;
+
+    static inline const WCHAR* s_PasswordlessAccounts[] = {
+        L"Interactive User",
+        L"nt authority\\localservice",
+        L"nt authority\\networkservice",
+        L"nt authority\\system",
+    };
 };
