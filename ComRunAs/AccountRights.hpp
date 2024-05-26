@@ -18,14 +18,14 @@ public:
         if (res != ERROR_SUCCESS)
             return res;
 
-        std::tie(res, m_sidPrincipal) = GetPrincipalSID(username);
+        std::tie(res, m_user_sid) = GetPrincipalSID(username);
         return res;
     }
 
     bool HasRight(const WCHAR privilege[]) {
         LSA_UNICODE_STRING* rights = nullptr;
         ULONG count = 0;
-        NTSTATUS res = LsaEnumerateAccountRights(m_policy, m_sidPrincipal.data(), &rights, &count);
+        NTSTATUS res = LsaEnumerateAccountRights(m_policy, m_user_sid.data(), &rights, &count);
         if (res != STATUS_SUCCESS)
             return false;
 
@@ -47,7 +47,7 @@ public:
         lsaPrivilegeString.MaximumLength = lsaPrivilegeString.Length + sizeof(WCHAR); // include null-termination
         lsaPrivilegeString.Buffer = const_cast<WCHAR*>(privilege);
 
-        DWORD res = LsaAddAccountRights(m_policy, m_sidPrincipal.data(), &lsaPrivilegeString, 1);
+        DWORD res = LsaAddAccountRights(m_policy, m_user_sid.data(), &lsaPrivilegeString, 1);
         res = LsaNtStatusToWinError(res);
         return res;
     }
@@ -77,5 +77,5 @@ private:
     }
 
     LsaWrap           m_policy;
-    std::vector<BYTE> m_sidPrincipal; // PSID buffer
+    std::vector<BYTE> m_user_sid; // PSID buffer
 };
