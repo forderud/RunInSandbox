@@ -18,7 +18,7 @@ int wmain(int argc, wchar_t* argv[]) {
     ComRunAs runas;
     DWORD res = runas.Open(appid);
     if (res != ERROR_SUCCESS) {
-        wprintf(L"ERROR: Cannot open AppID %s registry key (%d).", appid, res);
+        wprintf(L"ERROR: Unable to open AppID %s registry key (%d).", appid, res);
         return res;
     }
 
