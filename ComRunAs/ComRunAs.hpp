@@ -17,7 +17,6 @@ public:
         return res;
     }
 
-
     DWORD Assign(const std::wstring username, /*optional*/const WCHAR* password) {
         DWORD res = ERROR_SUCCESS;
         if (_wcsicmp(username.c_str(), L"Launching User") == 0) { // https://learn.microsoft.com/en-us/windows/win32/com/launching-user
@@ -103,15 +102,15 @@ private:
     \*---------------------------------------------------------------------------*/
     static DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& password) {
         std::wstring key = L"SCM:" + AppID;
-        LSA_UNICODE_STRING lsaKeyString = {};
-        lsaKeyString.Length = (USHORT)(key.length() + 1) * sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
-        lsaKeyString.MaximumLength = lsaKeyString.Length;               // include null-termination
-        lsaKeyString.Buffer = key.data();
+        LSA_UNICODE_STRING KeyString = {};
+        KeyString.Length = (USHORT)(key.length() + 1) * sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
+        KeyString.MaximumLength = KeyString.Length;                    // include null-termination
+        KeyString.Buffer = key.data();
 
-        LSA_UNICODE_STRING lsaPasswordString = {};
-        lsaPasswordString.Length = (USHORT)(password.length() + 1) * sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
-        lsaPasswordString.MaximumLength = lsaPasswordString.Length;               // include null-termination
-        lsaPasswordString.Buffer = const_cast<WCHAR*>(password.data());
+        LSA_UNICODE_STRING PasswordString = {};
+        PasswordString.Length = (USHORT)(password.length() + 1) * sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
+        PasswordString.MaximumLength = PasswordString.Length;                    // include null-termination
+        PasswordString.Buffer = const_cast<WCHAR*>(password.data());
 
         // Open the local security policy
         LSA_OBJECT_ATTRIBUTES objectAttributes = {};
@@ -124,7 +123,7 @@ private:
             return res;
 
         // Store the user's password
-        res = LsaStorePrivateData(hPolicy, &lsaKeyString, &lsaPasswordString);
+        res = LsaStorePrivateData(hPolicy, &KeyString, &PasswordString);
         res = LsaNtStatusToWinError(res);
         return res;
     }
