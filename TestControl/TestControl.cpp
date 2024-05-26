@@ -119,6 +119,7 @@ HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos
             if (foreground_wnd != wnd) {
                 // SetForegroundWindow failed silently due to UIPI limitation
                 DWORD err = GetLastError(); // TODO: Figure out why err==0 here
+                err;
                 return E_ACCESSDENIED;
             }
         }
@@ -127,6 +128,7 @@ HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos
         BOOL ok = SetCursorPos(x_pos, y_pos);
         if (!ok) {
             DWORD err = GetLastError(); // TODO: Figure out why err==0 here
+            err;
             return E_ACCESSDENIED;
         }
 
