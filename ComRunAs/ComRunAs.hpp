@@ -23,7 +23,7 @@ public:
     }
 
 
-    DWORD Assign(const std::wstring username, const std::wstring password) {
+    DWORD Assign(const std::wstring username, /*optional*/const WCHAR* password) {
         DWORD dwReturnValue;
         if (_wcsicmp(username.c_str(), L"LAUNCHING USER") == 0) {
             // default case so delete "RunAs" value 
@@ -45,6 +45,11 @@ public:
             }
             else {
                 // password needed
+                if (!password) {
+                    wprintf(L"ERROR: Password missing for user %s.\n", username.c_str());
+                    return ERROR_INVALID_PASSWORD;
+                }
+
                 dwReturnValue = SetRunAsPassword(m_AppID, password);
                 if (dwReturnValue != ERROR_SUCCESS) {
                     wprintf(L"ERROR: Cannot set RunAs password (%d).\n", dwReturnValue);
