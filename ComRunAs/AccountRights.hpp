@@ -7,7 +7,7 @@
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-/** Set and query the account right for a given user.
+/** Query and set account rights for a given user.
 * Current values can be inspected opening gpedit.msc and navigating to "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" */
 class AccountRights {
 public:
@@ -53,11 +53,7 @@ public:
     }
 
 private:
-    /*---------------------------------------------------------------------------*\
-     * NAME: GetPrincipalSID                                                     *
-     * --------------------------------------------------------------------------*
-     * DESCRIPTION: Creates a SID for the supplied principal.                    *
-    \*---------------------------------------------------------------------------*/
+    /** Get security identifier (SID) associated with a given user account. */
     static std::tuple<DWORD, std::vector<BYTE>> GetPrincipalSID(const std::wstring& username) {
         WCHAR RefDomain[256] = {};
         DWORD RefDomainLen = (DWORD)std::size(RefDomain);

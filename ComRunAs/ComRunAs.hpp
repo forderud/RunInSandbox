@@ -101,8 +101,7 @@ private:
      * --------------------------------------------------------------------------*
      *  RETURNS: WIN32 Error Code                                                *
     \*---------------------------------------------------------------------------*/
-    static DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& password)
-    {
+    static DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& password) {
         std::wstring key = L"SCM:" + AppID;
         LSA_UNICODE_STRING lsaKeyString = {};
         lsaKeyString.Length = (USHORT)(key.length() + 1) * sizeof(WCHAR); // include null-termination (not according to spec but seem to be required for admin accounts)
