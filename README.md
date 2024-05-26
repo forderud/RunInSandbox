@@ -27,12 +27,10 @@ This approach performs client-side user impersonation with `ImpersonateLoggedOnU
 ## ComRunAs
 Command-line tool for configuring COM servers to be started through a specific user account. Requires the COM server to already have an [`AppID`](https://learn.microsoft.com/en-us/windows/win32/com/appid-key) registry entry. Very similar to [dcompermex](https://github.com/albertony/dcompermex).
 
+Instructions for how to [configure COM servers to always run elevated](ComElevation.md), either with or without UAC.
+
 ## GrantAccess
 Command-line tool to make a file or path writable by AppContainers and low IL process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
 
 ## RunElevatedNet
 C#/.Net sample code for launching an executable or COM class in an "elevated" process with admin privileges. The same functionality is also included in the RunInSandbox project.
-
-## COM elevation
-
-Instructions for how to [configure COM servers to always run elevated](ComElevation.md), either with or without UAC.
