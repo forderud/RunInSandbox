@@ -8,8 +8,8 @@
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
 /** Query and set account rights for a given user.
-* Current values can be inspected with "whoami /priv" from an admin command-prompt or by
-* opening gpedit.msc and navigating to "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" */
+* Current values can be inspected by opening gpedit.msc and navigating to
+* "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" opening "Log on as batch job". */
 class AccountRights {
 public:
     DWORD Open(const std::wstring& username) {
