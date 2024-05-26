@@ -23,13 +23,6 @@ public:
         if (res != ERROR_SUCCESS)
             return res;
 
-
-        // first check for known in-built SID
-        std::tie(res, m_sidPrincipal) = ConstructWellKnownSID(username);
-        if (res)
-            return ERROR_SUCCESS;
-
-        // fallback to check regular accounts
         std::tie(res, m_sidPrincipal) = GetPrincipalSID(username);
         return res;
     }
@@ -94,86 +87,6 @@ private:
         }
 
         return {res, sid};
-    }
-
-
-    /*---------------------------------------------------------------------------*\
-     * NAME: ConstructWellKnownSID                                               *
-     * --------------------------------------------------------------------------*
-     * DESCRIPTION: This method converts some designated well-known identities   *
-     * to a SID.                                                                 *
-    \*---------------------------------------------------------------------------*/
-    static std::tuple<BOOL, std::vector<BYTE>> ConstructWellKnownSID(const std::wstring& username)
-    {
-        // Look for well-known English names
-        DWORD dwSubAuthority = 0;
-        BOOL fUseWorldAuth = FALSE;
-        if (_wcsicmp(username.c_str(), L"Administrators") == 0) {
-            dwSubAuthority = DOMAIN_ALIAS_RID_ADMINS;
-        }
-        else if (_wcsicmp(username.c_str(), L"Power Users") == 0) {
-            dwSubAuthority = DOMAIN_ALIAS_RID_POWER_USERS;
-        }
-        else if (_wcsicmp(username.c_str(), L"Everyone") == 0) {
-            dwSubAuthority = SECURITY_WORLD_RID;
-            fUseWorldAuth = TRUE;
-        }
-        else if (_wcsicmp(username.c_str(), L"System") == 0) {
-            dwSubAuthority = SECURITY_LOCAL_SYSTEM_RID;
-        }
-        else if (_wcsicmp(username.c_str(), L"Self") == 0) {
-            dwSubAuthority = SECURITY_PRINCIPAL_SELF_RID;
-        }
-        else if (_wcsicmp(username.c_str(), L"Anonymous") == 0) {
-            dwSubAuthority = SECURITY_ANONYMOUS_LOGON_RID;
-        }
-        else if (_wcsicmp(username.c_str(), L"Interactive") == 0) {
-            dwSubAuthority = SECURITY_INTERACTIVE_RID;
-        }
-        else {
-            return {FALSE, {}};
-        }
-
-        PSID psidTemp = NULL;
-        SID_IDENTIFIER_AUTHORITY SidAuthorityNT = SECURITY_NT_AUTHORITY;
-        SID_IDENTIFIER_AUTHORITY SidAuthorityWorld = SECURITY_WORLD_SID_AUTHORITY;
-        if (dwSubAuthority == DOMAIN_ALIAS_RID_ADMINS || dwSubAuthority == DOMAIN_ALIAS_RID_POWER_USERS) {
-            if (!AllocateAndInitializeSid(
-                &SidAuthorityNT,
-                2,
-                SECURITY_BUILTIN_DOMAIN_RID,
-                dwSubAuthority,
-                0, 0, 0, 0, 0, 0,
-                &psidTemp
-            )) return {FALSE, {}};
-        }
-        else {
-            if (!AllocateAndInitializeSid(
-                fUseWorldAuth ? &SidAuthorityWorld : &SidAuthorityNT,
-                1,
-                dwSubAuthority,
-                0, 0, 0, 0, 0, 0, 0,
-                &psidTemp
-            )) return {FALSE, {}};
-
-        }
-
-        if (!IsValidSid(psidTemp))
-            return {FALSE, {}};
-
-        BOOL fRetVal = FALSE;
-        DWORD cbSid = GetLengthSid(psidTemp);
-        std::vector<BYTE> sid;
-        sid.resize(cbSid); // assign output buffer
-        if (!CopySid(cbSid, sid.data(), psidTemp)) {
-            sid.clear();
-        }
-        else {
-            fRetVal = TRUE;
-        }
-        FreeSid(psidTemp);
-
-        return {fRetVal, sid};
     }
 
     LsaWrap           m_policy;
