@@ -60,8 +60,15 @@ public:
 
                 // Grant user "Log on as a batch job" rights
                 // This is not enabled by default for manually created acounts
+                AccountRights ar;
+                dwReturnValue = ar.Open(username);
+                if (dwReturnValue != ERROR_SUCCESS) {
+                    wprintf(L"ERROR: Unknown user %s (%d).\n", username.c_str(), dwReturnValue);
+                    return dwReturnValue;
+                }
+
                 // TOOD: Check if user already has this right
-                dwReturnValue = SetAccountRights(username, L"SeBatchLogonRight");
+                dwReturnValue = ar.Set(L"SeBatchLogonRight");
                 if (dwReturnValue != ERROR_SUCCESS) {
                     wprintf(L"ERROR: Unable to grant SeBatchLogonRight (%d).\n", dwReturnValue);
                     return dwReturnValue;

@@ -9,31 +9,43 @@
 DWORD GetPrincipalSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 BOOL ConstructWellKnownSID(const std::wstring& username, /*out*/std::vector<BYTE>& pSid);
 
-/** Sets the account right for a given user.
- * Current values can be inspected opening gpedit.msc and navigating to "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" */
-DWORD SetAccountRights(const std::wstring& username, const WCHAR privilege[])
-{
-    LSA_OBJECT_ATTRIBUTES objectAttributes = {};
-    LsaWrap hPolicy;
-    DWORD dwReturnValue = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &hPolicy);
-    dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-    if (dwReturnValue != ERROR_SUCCESS)
-        return dwReturnValue;
 
-    std::vector<BYTE> sidPrincipal; // PSID buffer
-    dwReturnValue = GetPrincipalSID(username, sidPrincipal);
-    if (dwReturnValue != ERROR_SUCCESS)
-        return dwReturnValue;
+/** Set and query the account right for a given user.
+* Current values can be inspected opening gpedit.msc and navigating to "Computer Configuration\Windows Settings\Security Settings\Local Policies\User Rights Assignment" */
+class AccountRights {
+public:
+    AccountRights() {
+    }
+    ~AccountRights() {
+    }
 
-    LSA_UNICODE_STRING lsaPrivilegeString = {};
-    lsaPrivilegeString.Length = (USHORT)(wcslen(privilege) * sizeof(WCHAR)); // exclude null-termination
-    lsaPrivilegeString.MaximumLength = lsaPrivilegeString.Length + sizeof(WCHAR); // include null-termination
-    lsaPrivilegeString.Buffer = const_cast<WCHAR*>(privilege);
+    DWORD Open(const std::wstring& username) {
+        LSA_OBJECT_ATTRIBUTES objectAttributes = {};
+        DWORD res = LsaOpenPolicy(NULL, &objectAttributes, POLICY_CREATE_ACCOUNT | POLICY_LOOKUP_NAMES, &m_policy);
+        res = LsaNtStatusToWinError(res);
+        if (res != ERROR_SUCCESS)
+            return res;
 
-    dwReturnValue = LsaAddAccountRights(hPolicy, sidPrincipal.data(), &lsaPrivilegeString, 1);
-    dwReturnValue = LsaNtStatusToWinError(dwReturnValue);
-    return dwReturnValue;
-}
+        res = GetPrincipalSID(username, m_sidPrincipal);
+        return res;
+    }
+
+    DWORD Set(const WCHAR privilege[]) {
+        LSA_UNICODE_STRING lsaPrivilegeString = {};
+        lsaPrivilegeString.Length = (USHORT)(wcslen(privilege) * sizeof(WCHAR)); // exclude null-termination
+        lsaPrivilegeString.MaximumLength = lsaPrivilegeString.Length + sizeof(WCHAR); // include null-termination
+        lsaPrivilegeString.Buffer = const_cast<WCHAR*>(privilege);
+
+        DWORD res = LsaAddAccountRights(m_policy, m_sidPrincipal.data(), &lsaPrivilegeString, 1);
+        res = LsaNtStatusToWinError(res);
+        return res;
+    }
+
+private:
+    LsaWrap           m_policy;
+    std::vector<BYTE> m_sidPrincipal; // PSID buffer
+};
+
 
 /*---------------------------------------------------------------------------*\
  * NAME: GetPrincipalSID                                                     *
