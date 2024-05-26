@@ -31,7 +31,7 @@ static void TryOpenFile (std::wstring path) {
 
 static void TryNetworkConnection (const std::wstring& host, std::wstring port) {
     SocketWrap sock;
-    if (!sock.TryToConnect(ToAscii(host), stoi(port)))
+    if (!sock.TryToConnect(ToAscii(host), static_cast<uint16_t>(stoi(port))))
         throw std::runtime_error("unable to connect");
 }
 
