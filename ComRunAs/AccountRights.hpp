@@ -63,25 +63,21 @@ private:
      * --------------------------------------------------------------------------*
      * DESCRIPTION: Creates a SID for the supplied principal.                    *
     \*---------------------------------------------------------------------------*/
-    static std::tuple<DWORD, std::vector<BYTE>> GetPrincipalSID(const std::wstring& username)
-    {
-        TCHAR tszRefDomain[256] = { 0 };
-        DWORD cbRefDomain = 255;
-        SID_NAME_USE snu;
+    static std::tuple<DWORD, std::vector<BYTE>> GetPrincipalSID(const std::wstring& username) {
+        WCHAR RefDomain[256] = {};
+        DWORD RefDomainLen = (DWORD)std::size(RefDomain);
+        SID_NAME_USE snu = {};
         DWORD cbSid = 0;
-        LookupAccountNameW(NULL, username.c_str(), nullptr, &cbSid, tszRefDomain, &cbRefDomain, &snu);
-
+        LookupAccountNameW(NULL, username.c_str(), nullptr, &cbSid, RefDomain, &RefDomainLen, &snu);
         DWORD res = GetLastError();
         if (res != ERROR_INSUFFICIENT_BUFFER)
             return {res, {}};
 
         res = ERROR_SUCCESS;
-
         std::vector<BYTE> sid;
         sid.resize(cbSid);
-        cbRefDomain = 255;
-
-        if (!LookupAccountNameW(NULL, username.c_str(), (PSID)sid.data(), &cbSid, tszRefDomain, &cbRefDomain, &snu)) {
+        RefDomainLen = (DWORD)std::size(RefDomain);;
+        if (!LookupAccountNameW(NULL, username.c_str(), (PSID)sid.data(), &cbSid, RefDomain, &RefDomainLen, &snu)) {
             res = GetLastError();
             return {res, {}};
         }
