@@ -6,7 +6,7 @@
 
 // Code based on https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/Win7Samples/com/fundamentals/dcom/dcomperm
 
-DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password);
+DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& password);
 
 
 DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, const std::wstring password)
@@ -36,7 +36,7 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
             // password not needed
         } else {
             // password needed
-            dwReturnValue = SetRunAsPassword(AppID, username, password);
+            dwReturnValue = SetRunAsPassword(AppID, password);
             if (dwReturnValue != ERROR_SUCCESS) {
                 wprintf(L"ERROR: Cannot set RunAs password (%d).\n", dwReturnValue);
                 return dwReturnValue;
@@ -71,18 +71,15 @@ DWORD SetRunAsAccount(const std::wstring AppID, const std::wstring username, con
  * --------------------------------------------------------------------------*
  *  ARGUMENTS:                                                               *
  *                                                                           *
- *  tszAppID - The Application ID you wish to modify                         *
+ *  AppID - The Application ID you wish to modify                            *
  *  (e.g. "{99999999-9999-9999-9999-00AA00BBF7C7}")                          *
  *                                                                           *
- *  username - Name of the principal you have specified in the RunAs     *
- *  named value under the AppID registry key                                 *
- *                                                                           *
- *  tszPassword - Password of the user you have specified in the RunAs       *
+ *  password - Password of the user you have specified in the RunAs          *
  *  named value under the AppID registry key.                                *
  * --------------------------------------------------------------------------*
  *  RETURNS: WIN32 Error Code                                                *
 \*---------------------------------------------------------------------------*/
-DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& username, const std::wstring& password)
+DWORD SetRunAsPassword(const std::wstring& AppID, const std::wstring& password)
 {
     std::wstring key = L"SCM:" + AppID;
     LSA_UNICODE_STRING lsaKeyString = {};
