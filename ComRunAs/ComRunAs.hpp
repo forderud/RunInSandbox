@@ -16,18 +16,11 @@ public:
         return res;
     }
 
-    DWORD Assign(const std::wstring username, /*optional*/const WCHAR* password) {
+    DWORD Set(const std::wstring username, /*optional*/const WCHAR* password) {
         DWORD res = ERROR_SUCCESS;
         if (_wcsicmp(username.c_str(), L"Launching User") == 0) { // https://learn.microsoft.com/en-us/windows/win32/com/launching-user
-            // default case so delete "RunAs" value 
-            res = m_reg.DeleteValue(L"RunAs");
-
-            if (res == ERROR_FILE_NOT_FOUND) {
-                res = ERROR_SUCCESS;
-            } else if (res != ERROR_SUCCESS) {
-                wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", res);
-                return res;
-            }
+            // default case so delete "RunAs" value
+            return Remove();
         } else {
             // check if account require password
             bool passwordRequired = true;
@@ -79,6 +72,18 @@ public:
         }
 
         return ERROR_SUCCESS;
+    }
+
+    DWORD Remove() {
+        wprintf(L"INFO: Deleting RunAs value.\n");
+        DWORD res = m_reg.DeleteValue(L"RunAs");
+
+        if (res == ERROR_FILE_NOT_FOUND) {
+            res = ERROR_SUCCESS;
+        } else if (res != ERROR_SUCCESS) {
+            wprintf(L"ERROR: Cannot remove RunAs registry value (%d).\n", res);
+        }
+        return res;
     }
 
 private:
