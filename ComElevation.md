@@ -29,5 +29,3 @@ In order to be compatible with RunAs, elevated COM servers need to explicitly ca
 * From the Windows registry, set the `RunAs` registry value to `nt authority\localservice` or some other admin account.
 * Verify that the account have sufficient filesystem permissions to run the COM server.
 * To test, run `RunInSandbox.exe TestControl.TestControl` from a limited account. This will trigger creation of a TestControl.exe under the specified account with a COM communication channel between the processes.
-
-CoCreateInstance calls from non-admin accounts will now start the COM server using an admin account.
