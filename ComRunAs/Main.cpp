@@ -25,8 +25,6 @@ int wmain(int argc, wchar_t* argv[]) {
     if (argc >= 4)
         password = argv[3]; // optional
 
-    wprintf(L"Configuring COM server with AppID %s to run with user %s.\n", appid, username);
-
     ComRunAs runas;
     DWORD res = runas.Open(appid);
     if (res != ERROR_SUCCESS) {
@@ -35,6 +33,8 @@ int wmain(int argc, wchar_t* argv[]) {
     }
 
     if (username) {
+        wprintf(L"Configuring COM server with AppID %s to run with user %s.\n", appid, username);
+
         res = runas.Set(username, password);
         if (res != ERROR_SUCCESS) {
             wprintf(L"ERROR: Unable to assign RunAs account (%d).", res);
