@@ -1,7 +1,13 @@
 #include "ComRunAs.hpp"
+#include <Shlobj.h> // for IsUserAnAdmin
 #include <iostream>
 
 int wmain(int argc, wchar_t* argv[]) {
+    if (!IsUserAnAdmin()) {
+        wprintf(L"ERROR: Admin privileges required.\n");
+        return -1;
+    }
+
     if (argc < 2) {
         wprintf(L"USAGE: ComRunAs.exe <AppID> [UserName] [Password]\n");
         wprintf(L"Examples:\n");
