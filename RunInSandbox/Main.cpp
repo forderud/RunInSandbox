@@ -18,7 +18,7 @@ class ATL_NO_VTABLE CallbackTest :
     public CComCoClass<CallbackTest>, // no registry entries
     public ICallbackTest {
 public:
-    HRESULT STDMETHODCALLTYPE Ping () override {
+    HRESULT Ping () override {
         std::wcout << L"  Callback received.\n";
         return S_OK;
     }
@@ -35,16 +35,16 @@ class DropTarget :
     public CComCoClass<DropTarget>, // no registry entries
     public IDropTarget {
 public:
-    HRESULT STDMETHODCALLTYPE DragEnter(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
+    HRESULT DragEnter(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
         return E_NOTIMPL;
     }
-    HRESULT STDMETHODCALLTYPE DragOver(DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
+    HRESULT DragOver(DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
         return E_NOTIMPL;
     }
-    HRESULT STDMETHODCALLTYPE DragLeave() override {
+    HRESULT DragLeave() override {
         return E_NOTIMPL;
     }
-    HRESULT STDMETHODCALLTYPE Drop(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
+    HRESULT Drop(IDataObject* /*pDataObj*/, DWORD /*grfKeyState*/, POINTL /*pt*/, DWORD* /*pdwEffect*/) override {
         return E_NOTIMPL;
     }
 

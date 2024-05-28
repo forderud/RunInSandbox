@@ -15,26 +15,26 @@ public:
 
     /*NOT virtual*/ ~TestControl();
 
-    HRESULT STDMETHODCALLTYPE IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
+    HRESULT IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
 
-    HRESULT STDMETHODCALLTYPE GetUsername(/*out*/BSTR* username) override;
+    HRESULT GetUsername(/*out*/BSTR* username) override;
 
-    HRESULT STDMETHODCALLTYPE Add(int a, int b, int * sum) override;
+    HRESULT Add(int a, int b, int * sum) override;
 
-    HRESULT STDMETHODCALLTYPE PerformAdminTask() override;
+    HRESULT PerformAdminTask() override;
 
-    HRESULT STDMETHODCALLTYPE TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/VARIANT_BOOL * can_access) override;
+    HRESULT TestNetworkConnection (/*in*/BSTR host, USHORT port, /*out*/VARIANT_BOOL * can_access) override;
 
-    HRESULT STDMETHODCALLTYPE CreateInstance (VARIANT_BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
+    HRESULT CreateInstance (VARIANT_BOOL elevated, CLSID clsid, /*out*/IUnknown ** obj) override;
 
-    HRESULT STDMETHODCALLTYPE TestCallback(IUnknown * obj) override;
+    HRESULT TestCallback(IUnknown * obj) override;
 
-    HRESULT STDMETHODCALLTYPE MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos) override;
+    HRESULT MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos) override;
 
     // IOleWindow
-    HRESULT STDMETHODCALLTYPE GetWindow(/*out*/HWND* wnd) override;
+    HRESULT GetWindow(/*out*/HWND* wnd) override;
 
-    HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL /*fEnterMode*/) override {
+    HRESULT ContextSensitiveHelp(BOOL /*fEnterMode*/) override {
         return E_NOTIMPL;
     }
 
