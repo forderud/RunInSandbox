@@ -11,9 +11,9 @@ int wmain(int argc, wchar_t* argv[]) {
     if (argc < 2) {
         wprintf(L"USAGE: ComRunAs.exe <AppID> [UserName] [Password]\n");
         wprintf(L"Examples:\n");
-        wprintf(L"  ComRunAs.exe {99999999-9999-9999-9999-00AA00BBF7C7}\n");
-        wprintf(L"  ComRunAs.exe {99999999-9999-9999-9999-00AA00BBF7C7} \"nt authority\\localservice\"\n");
-        wprintf(L"  ComRunAs.exe {99999999-9999-9999-9999-00AA00BBF7C7} MyAccount MyPassword\n");
+        wprintf(L"  Launching user (default): ComRunAs.exe {99999999-9999-9999-9999-00AA00BBF7C7}\n");
+        wprintf(L"  LocalService account    : ComRunAs.exe {99999999-9999-9999-9999-00AA00BBF7C7} \"nt authority\\localservice\"\n");
+        wprintf(L"  Other account           : ComRunAs.exe {99999999-9999-9999-9999-00AA00BBF7C7} MyAccount MyPassword\n");
         return 1;
     }
 
