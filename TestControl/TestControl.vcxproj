@@ -22,7 +22,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AppID.rgs" />
-    <None Include="Module.def" />
     <None Include="TestControl.rgs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,17 +85,10 @@
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>IF $(ConfigurationType) == DynamicLibrary (
-  echo Registering DLL...
-  regsvr32 /s "$(TargetPath)"
-) ELSE (
-  echo Registering EXE...
-  "$(TargetPath)" /regserver
-)
-echo [done]</Command>
+      <Command>"$(TargetPath)" /regserver</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Post-build registration</Message>
+      <Message>Registering COM EXE</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,17 +113,10 @@ echo [done]</Command>
       <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>IF $(ConfigurationType) == DynamicLibrary (
-  echo Registering DLL...
-  regsvr32 /s "$(TargetPath)"
-) ELSE (
-  echo Registering EXE...
-  "$(TargetPath)" /regserver
-)
-echo [done]</Command>
+      <Command>"$(TargetPath)" /regserver</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Post-build registration</Message>
+      <Message>Registering COM EXE</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
