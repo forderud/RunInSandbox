@@ -4,8 +4,8 @@ Read [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/
 
 
 Instructions:
-* Build solution from Visual Studio started with admin privileges.
-* To test, run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started. The UAC prompt will require a password _if_ the current user is not an admin.
+* Build solution from Visual Studio.
+* To test, first run `TestControl.exe /regserver` from an admin command prompt. Then run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started. The UAC prompt will require a password _if_ the current user is not an admin.
 
 ![UAC_prompt](UAC_prompt.png) ![UAC_prompt_pw](UAC_prompt_pw.png)  
 
