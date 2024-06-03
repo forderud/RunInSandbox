@@ -24,7 +24,7 @@ The [`HKCR\AppID\{APPID}\RunAs`](https://learn.microsoft.com/en-us/windows/win32
 Alternatives for editing the registry value:
 * Edit registry with `regedit.exe`. This only works for accounts that doesn't require a password.
 * Run `ComRunAs.exe <AppID> <username> <password>` to specify username & password.
-* Edit manually using `Component Services` (`dcomcnfg.exe`).
+* Edit manually using Component Services (`dcomcnfg.exe`).
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
 
