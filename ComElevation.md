@@ -1,6 +1,11 @@
+## Prerequisites
+
+Elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect. The assigned user also need to have sufficient filesystem permissions to start the server.
+
+
 ## How to configure COM servers to always run as admin _with_ UAC
 
-Read [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker) for instructions for how to use User Account Control (UAC) prompts to request admin privileges for a COM server. UAC is general is documented in [How User Account Control works](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) Also need to explicitly call `CoInitializeSecurity` in the COM server to enable low privilege clients to connect.
+Read [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker) for instructions for how to use User Account Control (UAC) prompts to request admin privileges for a COM server. UAC is general is documented in [How User Account Control works](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)
 
 
 Instructions:
@@ -21,8 +26,6 @@ Alternatives for editing the registry value:
 * Run `ComRunAs.exe <AppID> <username> <password>` to specify username & password.
 * Edit manually using `Component Services` (`dcomcnfg.exe`).
 ![DCOM_RunAs](DCOM_RunAs.png)  
-
-In order to be compatible with RunAs, elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect. The assigned user also need to have sufficient filesystem permissions to start the server.
 
 
 ### Instructions to test
