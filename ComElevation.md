@@ -3,7 +3,7 @@
 Elevated COM servers need to explicitly call `CoInitializeSecurity` in the COM server to enable lower privilege clients to connect. The assigned user also need to have sufficient filesystem permissions to start the server.
 
 
-## How to configure COM servers to always run as admin _with_ UAC
+## How to configure COM servers to always run as admin _with_ UAC prompt
 
 Read [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker) for instructions for how to use User Account Control (UAC) prompts to request admin privileges for a COM server. UAC is general is documented in [How User Account Control works](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)
 
@@ -15,7 +15,7 @@ Instructions:
 ![UAC_prompt](UAC_prompt.png) ![UAC_prompt_pw](UAC_prompt_pw.png)  
 
 
-## How to configure COM servers to always run as admin _without_ UAC
+## How to configure COM servers to always run as admin _without_ UAC prompt
 
 **WARNING**: This will introduce a privilege escalation vulnerability if not used carefully.
 
