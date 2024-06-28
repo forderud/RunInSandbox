@@ -38,12 +38,17 @@ HRESULT TestControl::Add(int a, int b, int * sum) {
 
 
 HRESULT TestControl::PerformAdminTask() {
+#if 0
     IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
     if (proc_integrity < IntegrityLevel::High)
         return E_ACCESSDENIED;
+#endif
 
-    // TODO: Perform some task requiring admin privileves
-    return S_OK;
+    // Dummy task requiring admin privileges
+    CRegKey reg;
+    DWORD res = reg.Open(HKEY_LOCAL_MACHINE, L"SOFTWARE", KEY_ALL_ACCESS);
+    // will return ERROR_ACCESS_DENIED (5) if running without admin privileges 
+    return HRESULT_FROM_WIN32(res);
 }
 
 
