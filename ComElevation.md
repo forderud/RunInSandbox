@@ -29,5 +29,5 @@ Alternatives for editing the registry value:
 
 
 ### Instructions to test
-* Run `ComRunAs.exe {264FBADA-8FEF-44B7-801E-B728A1749B5A} "nt authority\localservice"` from an elevated command prompt to configure TestControl to be launched through the LocalService account.
+* Run `ComRunAs.exe {264FBADA-8FEF-44B7-801E-B728A1749B5A} "nt authority\localservice"` from an elevated command prompt to configure TestControl to be launched through the [LocalService](https://learn.microsoft.com/en-us/windows/win32/services/localservice-account) account. It's also possible to use [NetworkService](https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account) and [LocalSystem](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account).
 * To test, run `RunInSandbox.exe TestControl.TestControl` from a non-elevated command prompt. This will trigger creation of a TestControl.exe under the specified account.
