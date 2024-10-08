@@ -10,7 +10,7 @@ Read [COM Elevation Moniker](https://docs.microsoft.com/en-us/windows/win32/com/
 
 Instructions:
 * Build solution from Visual Studio.
-* To test, first run `TestControl.exe /regserver` from an admin command prompt. Then run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started. The UAC prompt will require a password _if_ the current user is not an admin.
+* Run `TestControl.exe /regserver` from an admin command prompt. Then run `RunInSandbox.exe hi TestControl.TestControl` from a non-admin command prompt. This will trigger a UAC prompt (if UAC is enabled) before the COM server is started. The UAC prompt will require a password _if_ the current user is not an admin.
 
 ![UAC_prompt](UAC_prompt.png) ![UAC_prompt_pw](UAC_prompt_pw.png)  
 
@@ -34,5 +34,6 @@ In-built accounts that can be used _without_ password:
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
 ### Instructions to test
-* Run `ComRunAs.exe {264FBADA-8FEF-44B7-801E-B728A1749B5A} "NT AUTHORITY\LocalService"` from an elevated command prompt to configure TestControl to be launched through the LocalService account.
-* To test, run `RunInSandbox.exe TestControl.TestControl` from a non-elevated command prompt. This will trigger creation of a TestControl.exe under the specified account.
+* Run `TestControl.exe /regserver` from an admin command prompt.
+* Run `ComRunAs.exe {264FBADA-8FEF-44B7-801E-B728A1749B5A} "NT AUTHORITY\LocalService"` from an admin command prompt to configure TestControl to be launched through the LocalService account.
+* To test, run `RunInSandbox.exe TestControl.TestControl` from a non-admin command prompt. This will trigger creation of a TestControl.exe under the specified account.
