@@ -127,6 +127,6 @@ private:
         L"Interactive User",             ///< https://learn.microsoft.com/en-us/windows/win32/com/interactive-user
         L"NT AUTHORITY\\LocalService",   ///< https://learn.microsoft.com/en-us/windows/win32/services/localservice-account
         L"NT AUTHORITY\\NetworkService", ///< https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account
-        L".\\LocalSystem",               ///< https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account
+        L"NT AUTHORITY\\SYSTEM",         ///< https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account
     };
 };
