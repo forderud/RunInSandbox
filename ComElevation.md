@@ -27,9 +27,9 @@ Alternatives for editing the registry value:
 * Edit manually using Component Services (`dcomcnfg.exe`).
 
 In-built accounts that can be used _without_ password:
-* [LocalService](https://learn.microsoft.com/en-us/windows/win32/services/localservice-account): `NT AUTHORITY\LocalService`
-* [NetworkService](https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account):
-* [LocalSystem](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account): 
+* [LocalService](https://learn.microsoft.com/en-us/windows/win32/services/localservice-account): `NT AUTHORITY\LocalService` - restricted user _without_ network identity
+* [NetworkService](https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account): `NT AUTHORITY\NetworkService` - restricted user _with_ network identity
+* [LocalSystem](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account): `.\LocalSystem` - high privilege super user
 
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
