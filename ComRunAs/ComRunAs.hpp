@@ -125,7 +125,7 @@ private:
 
     static inline const WCHAR* s_PasswordlessAccounts[] = {
         L"Interactive User",             ///< https://learn.microsoft.com/en-us/windows/win32/com/interactive-user
-        L"nt authority\\localservice",   ///< https://learn.microsoft.com/en-us/windows/win32/services/localservice-account
+        L"NT AUTHORITY\\LocalService",   ///< https://learn.microsoft.com/en-us/windows/win32/services/localservice-account
         L"nt authority\\networkservice", ///< https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account
         L"nt authority\\system",         ///< https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account
     };
