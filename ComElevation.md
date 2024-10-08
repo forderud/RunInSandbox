@@ -25,9 +25,15 @@ Alternatives for editing the registry value:
 * Edit registry with `regedit.exe`. This only works for accounts that doesn't require a password.
 * Run `ComRunAs.exe <AppID> <username> <password>` to specify username & password.
 * Edit manually using Component Services (`dcomcnfg.exe`).
+
+In-built accounts that can be used _without_ password:
+* [LocalService](https://learn.microsoft.com/en-us/windows/win32/services/localservice-account)
+* [NetworkService](https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account)
+* [LocalSystem](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account)
+
 ![DCOM_RunAs](DCOM_RunAs.png)  
 
 
 ### Instructions to test
-* Run `ComRunAs.exe {264FBADA-8FEF-44B7-801E-B728A1749B5A} "nt authority\localservice"` from an elevated command prompt to configure TestControl to be launched through the [LocalService](https://learn.microsoft.com/en-us/windows/win32/services/localservice-account) account. It's also possible to use [NetworkService](https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account) and [LocalSystem](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account).
+* Run `ComRunAs.exe {264FBADA-8FEF-44B7-801E-B728A1749B5A} "nt authority\localservice"` from an elevated command prompt to configure TestControl to be launched through the LocalService account.
 * To test, run `RunInSandbox.exe TestControl.TestControl` from a non-elevated command prompt. This will trigger creation of a TestControl.exe under the specified account.
