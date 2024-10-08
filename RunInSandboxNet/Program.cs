@@ -1,4 +1,6 @@
-﻿class RunInSandbox
+﻿/* NOTE: Need to register TestControl before building this project. */
+
+class RunInSandbox
 {
     static void TestCreate(string level, Type clsid)
     {
