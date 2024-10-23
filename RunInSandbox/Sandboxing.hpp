@@ -557,8 +557,10 @@ struct ImpersonateThread {
             if (!GetTokenInformation(token.Get(), TokenElevationType, &elevation_type, sizeof(elevation_type), &ret_len))
                 abort(); // should never happen
 
-            // elevation_type is usually TokenElevationTypeFull, or
-            // TokenElevationTypeDefault if UAC is disabled.
+            // DOC: https://devblogs.microsoft.com/oldnewthing/20241003-00/?p=110336
+            // elevation_type values:
+            // * TokenElevationTypeFull if user is UAC-elevateed
+            // * TokenElevationTypeDefault if UAC is disabled
         }
 
         return elevation.TokenIsElevated;
