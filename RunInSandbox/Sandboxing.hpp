@@ -258,6 +258,7 @@ public:
                 if (!ok) {
                     DWORD err = GetLastError();
                     assert(err == ERROR_NONE_MAPPED); err;
+                    // TODO: Figure out why this happens for non-builtin AppContainers
                     printf("WARNING: Unable to check existing permissions for the provided identity.\n");
                     return;
                 }
