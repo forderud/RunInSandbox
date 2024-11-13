@@ -254,11 +254,10 @@ public:
 
             {
                 AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
-                ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, {}, NULL, &tmp_ctx);
+                ok = AuthzInitializeContextFromSid(AUTHZ_SKIP_TOKEN_GROUPS, identity_sid_bin, m_autz_mgr.get(), NULL, {}, NULL, &tmp_ctx);
                 if (!ok) {
                     DWORD err = GetLastError();
                     assert(err == ERROR_NONE_MAPPED); err;
-                    // TODO: Figure out why this happens for non-builtin AppContainers
                     printf("WARNING: Unable to check existing permissions for the provided identity.\n");
                     return;
                 }
