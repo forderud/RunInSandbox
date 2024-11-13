@@ -255,8 +255,12 @@ public:
             {
                 AUTHZ_CLIENT_CONTEXT_HANDLE tmp_ctx = nullptr;
                 ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, {}, NULL, &tmp_ctx);
-                if (!ok)
+                if (!ok) {
+                    DWORD err = GetLastError();
+                    if (err == ERROR_NONE_MAPPED)
+                        printf("ERROR: No mapping between account names and security IDs was done.\n");
                     throw std::runtime_error("AuthzInitializeContextFromSid failure");
+                }
 
                 m_autz_client_ctx = {tmp_ctx, AuthzFreeContext};
             }
