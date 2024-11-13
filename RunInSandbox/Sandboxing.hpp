@@ -257,9 +257,9 @@ public:
                 ok = AuthzInitializeContextFromSid(0, identity_sid_bin, m_autz_mgr.get(), NULL, {}, NULL, &tmp_ctx);
                 if (!ok) {
                     DWORD err = GetLastError();
-                    if (err == ERROR_NONE_MAPPED)
-                        printf("ERROR: No mapping between account names and security IDs was done.\n");
-                    throw std::runtime_error("AuthzInitializeContextFromSid failure");
+                    assert(err == ERROR_NONE_MAPPED); err;
+                    printf("WARNING: Unable to check existing permissions for the provided identity.\n");
+                    return;
                 }
 
                 m_autz_client_ctx = {tmp_ctx, AuthzFreeContext};
