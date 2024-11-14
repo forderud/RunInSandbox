@@ -320,6 +320,13 @@ public:
                 return true;
             return false;
         }
+        static bool HasWriteAccess(ACCESS_MASK mask) {
+            if ((mask & GENERIC_WRITE) == GENERIC_WRITE)
+                return true;
+            if ((mask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE)
+                return true;
+            return false;
+        }
 
         /** Special access control checking for COM. Must be kept in sync with EnableLaunchActPermission function below.
             REF: https://docs.microsoft.com/en-us/windows/win32/com/access-control-lists-for-com */
