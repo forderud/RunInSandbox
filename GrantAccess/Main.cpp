@@ -6,7 +6,7 @@
 int wmain(int argc, wchar_t *argv[]) {
     if (argc < 3) {
         std::wcout << L"Utility to make filesystem paths writable from AppContainers and low integrity level processes.\n";
-        std::wcout << L"Usage: GrantAccess [ac|li] <path>\n";
+        std::wcout << L"Usage: GrantAccess [ac|li] <path> [AppContainer-name]\n";
         return 1;
     }
 
