@@ -3,15 +3,31 @@
 #include "../RunInSandbox/Sandboxing.hpp"
 
 
+bool HasSufficientAccess(const std::wstring& ac_str_sid, const std::wstring& path, bool writeAccessRequested) {
+    DWORD existing_access = Permissions::Check(ac_str_sid.c_str()).TryAccessPath(path.c_str());
+
+    if (!Permissions::Check::HasReadAccess(existing_access))
+        return false;
+
+    if (writeAccessRequested) {
+        if (!Permissions::Check::HasWriteAccess(existing_access))
+            return false;
+    }
+
+    return true;
+}
+
+
 int wmain(int argc, wchar_t *argv[]) {
     if (argc < 3) {
         std::wcout << L"Utility to make filesystem paths writable from AppContainers and low integrity level processes.\n";
-        std::wcout << L"Usage: GrantAccess [ac|li] <path> [AppContainer-name]\n";
+        std::wcout << L"Usage: GrantAccess [ac|li] <path> [AppContainer-name] [-f]\n";
         return 1;
     }
 
     std::wstring mode = argv[1];
     std::wstring path = argv[2];
+    bool fullAccess = false;
 
     if (mode == L"li") {
         std::wcout << L"Making path low IL: " << path << std::endl;
@@ -25,6 +41,13 @@ int wmain(int argc, wchar_t *argv[]) {
         std::wstring ac_str_sid;
         if (argc > 3) {
             std::wstring ac_name = argv[3];
+
+            if (argc > 4) {
+                std::wstring arg = argv[4];
+                if (arg == L"-f")
+                    fullAccess = true;
+            }
+
             std::wcout << L"Making path " << path << L" accessible by AppContainer " << ac_name << L".\n";
             SidWrap ac_sid;
             HRESULT hr = DeriveAppContainerSidFromAppContainerName(ac_name.c_str(), &ac_sid);
@@ -44,13 +67,16 @@ int wmain(int argc, wchar_t *argv[]) {
             ac_str_sid = L"S-1-15-2-1"; // ALL_APP_PACKAGES
         }
 
-        DWORD existing_access = Permissions::Check(ac_str_sid.c_str()).TryAccessPath(path.c_str());
-        if (Permissions::Check::HasReadAccess(existing_access)) {
-            std::wcout << "AppContainer already have read access.\n";
+        // check if existing access is sufficient
+        if (HasSufficientAccess(ac_str_sid, path, fullAccess)) {
+            std::wcout << "AppContainer already has access.\n";
             return 0;
         }
 
-        DWORD err = Permissions::MakePathAppContainer(ac_str_sid.c_str(), path, SE_FILE_OBJECT, GENERIC_READ | GENERIC_EXECUTE);
+        ACCESS_MASK access = GENERIC_READ | GENERIC_EXECUTE;
+        if (fullAccess)
+            access = GENERIC_ALL;
+        DWORD err = Permissions::MakePathAppContainer(ac_str_sid.c_str(), path, SE_FILE_OBJECT, access);
         if (err != ERROR_SUCCESS) {
             _com_error error(err);
             std::wcerr << L"ERROR: " << error.ErrorMessage() << L" (" << err << L")" << std::endl;
