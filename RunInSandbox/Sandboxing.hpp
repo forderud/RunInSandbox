@@ -258,7 +258,7 @@ public:
                 if (!ok) {
                     DWORD err = GetLastError();
                     assert(err == ERROR_NONE_MAPPED); err;
-                    printf("WARNING: Unable to check existing permissions for the provided identity.\n");
+                    wprintf(L"WARNING: Unable to check existing permissions for the provided identity.\n");
                     return;
                 }
 
