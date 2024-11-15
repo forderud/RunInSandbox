@@ -23,14 +23,13 @@ int wmain(int argc, wchar_t *argv[]) {
         std::wcout << L"Utility to make filesystem paths writable from AppContainers and low integrity level processes.\n";
         std::wcout << L"Usage:\n";
         std::wcout << L"  \"GrantAccess.exe li <path>\" to give low IL processes access.\n";
-        std::wcout << L"  \"GrantAccess.exe ac <path>\" to give all AppContainers access.\n";
+        std::wcout << L"  \"GrantAccess.exe ac <path> [-f]\" to give all AppContainers read access, -f grants full access.\n";
         std::wcout << L"  \"GrantAccess.exe ac <path> <AppContainer-name> [-f]\" to give a specific AppContainer read access, -f grants full access.\n";
         return 1;
     }
 
     std::wstring mode = argv[1];
     std::wstring path = argv[2];
-    bool fullAccess = false;
 
     if (mode == L"li") {
         std::wcout << L"Making path low IL: " << path << std::endl;
@@ -41,15 +40,22 @@ int wmain(int argc, wchar_t *argv[]) {
             return -2;
         }
     } else if (mode == L"ac") {
-        std::wstring ac_str_sid;
-        if (argc > 3) {
-            std::wstring ac_name = argv[3];
+        bool fullAccess = false; // grant full access
+        for (int i = 3; i < argc; i++) {
+            std::wstring arg = argv[i];
+            if (arg == L"-f")
+                fullAccess = true;
+        }
 
-            if (argc > 4) {
-                std::wstring arg = argv[4];
-                if (arg == L"-f")
-                    fullAccess = true;
-            }
+        bool parseAppContainerName = false;
+        if (!fullAccess && (argc > 3))
+            parseAppContainerName = true;
+        else if (argc > 4)
+            parseAppContainerName = true;
+
+        std::wstring ac_str_sid;
+        if (parseAppContainerName) {
+            std::wstring ac_name = argv[3];
 
             std::wcout << L"Making path " << path << L" accessible by AppContainer " << ac_name << L".\n";
             SidWrap ac_sid;
