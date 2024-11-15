@@ -21,7 +21,10 @@ bool HasSufficientAccess(const std::wstring& ac_str_sid, const std::wstring& pat
 int wmain(int argc, wchar_t *argv[]) {
     if (argc < 3) {
         std::wcout << L"Utility to make filesystem paths writable from AppContainers and low integrity level processes.\n";
-        std::wcout << L"Usage: GrantAccess [ac|li] <path> [AppContainer-name] [-f]\n";
+        std::wcout << L"Usage:\n";
+        std::wcout << L"  \"GrantAccess.exe li <path>\" to give low IL processes access.\n";
+        std::wcout << L"  \"GrantAccess.exe ac <path>\" to give all AppContainers access.\n";
+        std::wcout << L"  \"GrantAccess.exe ac <path> <AppContainer-name> [-f]\" to give a specific AppContainer read access, -f grants full access.\n";
         return 1;
     }
 
