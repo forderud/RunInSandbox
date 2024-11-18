@@ -20,7 +20,7 @@ void AlternativeAppContainerSID_impl(std::wstring appContainerName) {
     if (!CryptCreateHash(cryptProv, CALG_SHA_256, 0, 0, &hashObj))
         abort();
 
-    // compute SHA256 hash
+    // compute SHA256 hash of UTF-16 string
     if (!CryptHashData(hashObj, (BYTE*)appContainerName.c_str(), 2*(DWORD)appContainerName.size(), 0))
         abort();
 
