@@ -35,7 +35,7 @@ Command-line tool to make a file or path writable by AppContainers and low IL pr
 
 It's also possible to use [icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls) for tweaking file security settings. Examples:
 * `icacls.exe <path> /setintegritylevel Low` to make a file or folder writable from low IL processes.
-* `icacls.exe <path> /grant *S-1-15-2-1:(OI)(CI)(F)` to grant `ALL_APP_PACKAGES` full access to a given path.
+* `icacls.exe <path> /grant *S-1-15-2-1:(OI)(CI)(F)` to grant [ALL_APP_PACKAGES](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/81d92bba-d22b-4a8c-908a-554ab29148ab) full access to a given path.
 
 ## RunElevatedNet
 C#/.Net sample code for launching an executable or COM class in an "elevated" process with admin privileges. The same functionality is also included in the RunInSandbox project.
