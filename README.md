@@ -32,8 +32,9 @@ Instructions for how to [configure COM servers to always run elevated](ComElevat
 ## GrantAccess
 Command-line tool to make a file or path writable by AppContainers and low IL process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
 
+For serious usage, it's recommended to instead use [icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls) for tweaking file security settings, since icacls is a official Microsoft tool bundled with Windows.
 
-It's also possible to use [icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls) for tweaking file security settings. Examples:
+Examples:
 * `icacls.exe <path> /setintegritylevel Low` to make a file or folder writable from low IL processes.
 * `icacls.exe <path> /grant *S-1-15-2-1:(OI)(CI)(F)` to grant [ALL_APP_PACKAGES](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/81d92bba-d22b-4a8c-908a-554ab29148ab) full access to a given path.
 
