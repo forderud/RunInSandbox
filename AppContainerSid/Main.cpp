@@ -20,9 +20,11 @@ void AlternativeAppContainerSID_impl(std::wstring appContainerName) {
     if (!CryptCreateHash(cryptProv, CALG_SHA_256, 0, 0, &hashObj))
         abort();
 
+    // compute SHA256 hash
     if (!CryptHashData(hashObj, (BYTE*)appContainerName.c_str(), 2*(DWORD)appContainerName.size(), 0))
         abort();
 
+    // extract hash value as 8 32bit integers
     uint32_t hash[8] = {};
     DWORD hashSize = sizeof(hash);
     if (!CryptGetHashParam(hashObj, HP_HASHVAL, (BYTE*)hash, &hashSize, 0))
@@ -31,12 +33,13 @@ void AlternativeAppContainerSID_impl(std::wstring appContainerName) {
     CryptDestroyHash(hashObj);
     CryptReleaseContext(cryptProv, 0);
 
-    // print AppContainer SID
+    // print AppContainer SID (the last 32bit int is deliberately skipped)
     wprintf(L"S-1-15-2");
     for (size_t i = 0; i < 8-1; i++)
         wprintf(L"-%u", hash[i]);
     wprintf(L"\n");
 }
+
 
 int wmain(int argc, wchar_t* argv[]) {
     if (argc < 2) {
