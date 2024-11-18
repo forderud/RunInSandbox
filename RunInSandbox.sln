@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RunInSandboxNet", "RunInSan
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComRunAs", "ComRunAs\ComRunAs.vcxproj", "{E145C919-E044-4028-99EF-B1A3236F2E26}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppContainerSid", "AppContainerSid\AppContainerSid.vcxproj", "{A6741FDC-1165-4AC3-A026-8C01548E7275}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -60,6 +62,10 @@ Global
 		{E145C919-E044-4028-99EF-B1A3236F2E26}.Debug|x64.Build.0 = Debug|x64
 		{E145C919-E044-4028-99EF-B1A3236F2E26}.Release|x64.ActiveCfg = Release|x64
 		{E145C919-E044-4028-99EF-B1A3236F2E26}.Release|x64.Build.0 = Release|x64
+		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Debug|x64.ActiveCfg = Debug|x64
+		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Debug|x64.Build.0 = Debug|x64
+		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Release|x64.ActiveCfg = Release|x64
+		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
