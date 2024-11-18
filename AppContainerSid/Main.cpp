@@ -6,6 +6,38 @@
 #pragma comment(lib, "Userenv.lib") // for DeriveAppContainerSidFromAppContainerName
 
 
+/** Alternative implementation of the DeriveAppContainerSidFromAppContainerName algorithm. */
+void AlternativeAppContainerSID_impl(std::wstring appContainerName) {
+    // convert name to lowercase
+    for (auto& elm : appContainerName)
+        elm = (wchar_t)std::tolower(elm);
+
+    HCRYPTPROV cryptProv = 0;
+    if (!CryptAcquireContext(&cryptProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
+        abort();
+
+    HCRYPTHASH hashObj = 0;
+    if (!CryptCreateHash(cryptProv, CALG_SHA_256, 0, 0, &hashObj))
+        abort();
+
+    if (!CryptHashData(hashObj, (BYTE*)appContainerName.c_str(), 2*(DWORD)appContainerName.size(), 0))
+        abort();
+
+    uint32_t hash[8] = {};
+    DWORD hashSize = sizeof(hash);
+    if (!CryptGetHashParam(hashObj, HP_HASHVAL, (BYTE*)hash, &hashSize, 0))
+        abort();
+
+    CryptDestroyHash(hashObj);
+    CryptReleaseContext(cryptProv, 0);
+
+    // print AppContainer SID
+    wprintf(L"S-1-15-2");
+    for (size_t i = 0; i < 8-1; i++)
+        wprintf(L"-%u", hash[i]);
+    wprintf(L"\n");
+}
+
 int wmain(int argc, wchar_t* argv[]) {
     if (argc < 2) {
         wprintf(L"Compute the SID for a given AppContainer.\n");
@@ -15,6 +47,7 @@ int wmain(int argc, wchar_t* argv[]) {
     
     std::wstring appContainer = argv[1];
 
+#if 1
     // DOC: https://devblogs.microsoft.com/oldnewthing/20220502-00/?p=106550
     SidWrap sid;
     HRESULT hr = DeriveAppContainerSidFromAppContainerName(appContainer.c_str(), &sid);
@@ -35,5 +68,8 @@ int wmain(int argc, wchar_t* argv[]) {
     }
 
     wprintf(L"%s\n", (wchar_t*)sid_str);
+#else
+    AlternativeAppContainerSID_impl(appContainer);
+#endif
     return 0;
 }
