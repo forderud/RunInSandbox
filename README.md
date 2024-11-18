@@ -33,7 +33,9 @@ Instructions for how to [configure COM servers to always run elevated](ComElevat
 Command-line tool to make a file or path writable by AppContainers and low IL process. Useful for whitelisting specific folders that should not be subject to application sandboxing.
 
 
-It's also possible to use [icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls) for tweaking security settings. You can e.g. use `icacls.exe <path> /setintegritylevel Low` to make a file or folder writable from low IL processes.
+It's also possible to use [icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls) for tweaking security settings. Examples:
+* `icacls.exe <path> /setintegritylevel Low` to make a file or folder writable from low IL processes.
+* `icacls.exe <path> /grant *S-1-15-2-1:(OI)(CI)(F)` to grant `ALL_APP_PACKAGES` full access to a given path.
 
 ## RunElevatedNet
 C#/.Net sample code for launching an executable or COM class in an "elevated" process with admin privileges. The same functionality is also included in the RunInSandbox project.
