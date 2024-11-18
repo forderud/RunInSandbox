@@ -8,7 +8,7 @@
 
 int wmain(int argc, wchar_t* argv[]) {
     if (argc < 2) {
-        wprintf(L"Tool for determining the SID for a given AppContainer.\n");
+        wprintf(L"Compute the SID for a given AppContainer.\n");
         wprintf(L"USAGE: AppContainerSid.exe <AppContainer-name>\n");
         return -1;
     }
@@ -25,15 +25,15 @@ int wmain(int argc, wchar_t* argv[]) {
     }
 
     // convert SID to string representation in "S-1-15-2-x1-x2-x3-x4-x5-x6-x7" format,
-    // where x1-x7 are the first 28 bytes of the SHA256 hash of the app name.
-    LocalWrap<wchar_t*> sid_str_buf;
-    BOOL ok = ConvertSidToStringSidW(sid, &sid_str_buf);
+    // where x1-x7 are the first 28 bytes of the SHA256 hash of the lowercase app name.
+    LocalWrap<wchar_t*> sid_str;
+    BOOL ok = ConvertSidToStringSidW(sid, &sid_str);
     if (!ok) {
         DWORD err = GetLastError();
         wprintf(L"ERROR: Unable to convert AppContainer SID to string (%u).\n", err);
         return -3;
     }
 
-    wprintf(L"%s\n", (wchar_t*)sid_str_buf);
+    wprintf(L"%s\n", (wchar_t*)sid_str);
     return 0;
 }
