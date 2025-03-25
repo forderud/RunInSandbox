@@ -15,7 +15,7 @@ Instructions:
 ![UAC_prompt](UAC_prompt.png) ![UAC_prompt_pw](UAC_prompt_pw.png)  
 
 
-## Configure COM servers to always run as admin _without_ UAC prompt
+## Configure COM servers to run with specific account _without_ UAC prompt
 
 **WARNING**: This will introduce a privilege escalation vulnerability if not used carefully.
 
