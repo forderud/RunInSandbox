@@ -107,7 +107,7 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
         // request UAC elevation
         SHELLEXECUTEINFOW info = {};
         info.cbSize = sizeof(info);
-        info.fMask = 0;
+        info.fMask = SEE_MASK_NOCLOSEPROCESS;
         info.hwnd = NULL;
         info.lpVerb = L"runas";
         info.lpFile = exe_path;
@@ -115,7 +115,11 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
         info.nShow = SW_NORMAL;
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
-        return ProcessHandles();
+
+        ProcessHandles proc;
+        proc.proc.Attach(info.hProcess);
+        proc.thrd; // unknown
+        return proc;
     } else {
         HandleWrap parent_proc; // lifetime tied to "si"
         if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
