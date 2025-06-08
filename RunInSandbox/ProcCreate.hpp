@@ -112,7 +112,13 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
         info.hwnd = NULL;
         info.lpVerb = L"runas";
         info.lpFile = exe_path;
-        info.lpParameters = L"";
+
+        // append arguments
+        std::wstring params;
+        for (const auto& arg : arguments)
+            params += L" " + arg;
+        info.lpParameters = params.data();
+
         info.nShow = SW_NORMAL;
         WIN32_CHECK(::ShellExecuteExW(&info));
         std::wcout << L"Successfully created elevated process.\n";
