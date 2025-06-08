@@ -31,7 +31,7 @@ class Sandboxing
             // reduce integrity level
             var tokenMandatoryLabel = new TOKEN_MANDATORY_LABEL(sidPtr);
             int TokenIntegrityLevel = 25; // from TOKEN_INFORMATION_CLASS enum
-            if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel) + GetLengthSid(sidPtr)))
+            if (!SetTokenInformation(token, TokenIntegrityLevel, tokenMandatoryLabel, Marshal.SizeOf(tokenMandatoryLabel)))
                 throw new Win32Exception("SetTokenInformationStruct failed");
 
             Marshal.FreeHGlobal(sidPtr); // LocalFree wrapper
@@ -76,7 +76,4 @@ class Sandboxing
 
     [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
     private static extern bool ConvertStringSidToSidW(string sid, out IntPtr psid);
-
-    [DllImport("Advapi32.dll")]
-    private static extern int GetLengthSid(IntPtr pSid);
 }

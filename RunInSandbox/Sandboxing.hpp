@@ -511,7 +511,7 @@ struct ImpersonateThread {
         TOKEN_MANDATORY_LABEL tml = {};
         tml.Label.Attributes = SE_GROUP_INTEGRITY;
         tml.Label.Sid = impersonation_sid;
-        WIN32_CHECK(SetTokenInformation(m_token.Get(), TokenIntegrityLevel, &tml, sizeof(tml) + GetLengthSid(impersonation_sid)));
+        WIN32_CHECK(SetTokenInformation(m_token.Get(), TokenIntegrityLevel, &tml, sizeof(tml)));
     }
 
     static HandleWrap GetShellProc() {
