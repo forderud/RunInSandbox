@@ -508,10 +508,10 @@ struct ImpersonateThread {
         impersonation_sid.Create(static_cast<WELL_KNOWN_SID_TYPE>(integrity));
 
         // reduce process integrity level
-        TOKEN_MANDATORY_LABEL TIL = {};
-        TIL.Label.Attributes = SE_GROUP_INTEGRITY;
-        TIL.Label.Sid = impersonation_sid;
-        WIN32_CHECK(SetTokenInformation(m_token.Get(), TokenIntegrityLevel, &TIL, sizeof(TIL) + GetLengthSid(impersonation_sid)));
+        TOKEN_MANDATORY_LABEL tml = {};
+        tml.Label.Attributes = SE_GROUP_INTEGRITY;
+        tml.Label.Sid = impersonation_sid;
+        WIN32_CHECK(SetTokenInformation(m_token.Get(), TokenIntegrityLevel, &tml, sizeof(tml) + GetLengthSid(impersonation_sid)));
     }
 
     static HandleWrap GetShellProc() {
