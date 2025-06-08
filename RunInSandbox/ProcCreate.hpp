@@ -90,19 +90,6 @@ static bool IsCMD (std::wstring path) {
 
 /** Launch a new suspended process. */
 static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
-    std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
-    // append arguments
-    for (const auto & arg : arguments)
-        cmdline += L" " + arg;
-
-    ProcessInfoWrap pi;
-
-    constexpr BOOL INHERIT_HANDLES = FALSE;
-    DWORD creation_flags = EXTENDED_STARTUPINFO_PRESENT
-                         | CREATE_SUSPENDED; // suspended state without any running threads
-    if (IsCMD(exe_path))
-        creation_flags |= CREATE_NEW_CONSOLE; // required for starting cmd.exe
-
     if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // request UAC elevation
         // WARNING: The created processes won't be suspended
@@ -127,7 +114,22 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
         proc.proc.Attach(info.hProcess);
         proc.thrd; // unknown
         return proc;
-    } else {
+    }
+
+    std::wstring cmdline = L"\"" + std::wstring(exe_path) + L"\"";
+    // append arguments
+    for (const auto & arg : arguments)
+        cmdline += L" " + arg;
+
+    ProcessInfoWrap pi;
+
+    constexpr BOOL INHERIT_HANDLES = FALSE;
+    DWORD creation_flags = EXTENDED_STARTUPINFO_PRESENT
+                         | CREATE_SUSPENDED; // suspended state without any running threads
+    if (IsCMD(exe_path))
+        creation_flags |= CREATE_NEW_CONSOLE; // required for starting cmd.exe
+
+    {
         HandleWrap parent_proc; // lifetime tied to "si"
         if ((mode <= IntegrityLevel::Medium) && ImpersonateThread::IsProcessElevated()) {
             // use explorer.exe as parent process to escape existing UAC elevation
