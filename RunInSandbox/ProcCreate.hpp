@@ -105,6 +105,7 @@ static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t
 
     if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // request UAC elevation
+        // WARNING: The created processes won't be suspended
         SHELLEXECUTEINFOW info = {};
         info.cbSize = sizeof(info);
         info.fMask = SEE_MASK_NOCLOSEPROCESS;
