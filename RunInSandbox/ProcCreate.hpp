@@ -88,30 +88,37 @@ static bool IsCMD (std::wstring path) {
 }
 
 
+/** Request UAC elevation */
+static HandleWrap CreateElevatedProcess(const wchar_t* exe_path, const std::vector<std::wstring>& arguments) {
+    SHELLEXECUTEINFOW info = {};
+    info.cbSize = sizeof(info);
+    info.fMask = SEE_MASK_NOCLOSEPROCESS;
+    info.hwnd = NULL;
+    info.lpVerb = L"runas";
+    info.lpFile = exe_path;
+
+    // append arguments
+    std::wstring params;
+    for (const auto& arg : arguments)
+        params += L" " + arg;
+    info.lpParameters = params.data();
+
+    info.nShow = SW_NORMAL;
+    WIN32_CHECK(::ShellExecuteExW(&info));
+    std::wcout << L"Successfully created elevated process.\n";
+
+    return HandleWrap(info.hProcess);
+}
+
 /** Launch a new suspended process. */
 static ProcessHandles CreateSuspendedProcess(StartupInfoWrap & si, const wchar_t * exe_path, IntegrityLevel mode, const std::vector<std::wstring>& arguments) {
     if ((mode == IntegrityLevel::High) && !ImpersonateThread::IsProcessElevated()) {
         // request UAC elevation
         // WARNING: The created processes won't be suspended
-        SHELLEXECUTEINFOW info = {};
-        info.cbSize = sizeof(info);
-        info.fMask = SEE_MASK_NOCLOSEPROCESS;
-        info.hwnd = NULL;
-        info.lpVerb = L"runas";
-        info.lpFile = exe_path;
-
-        // append arguments
-        std::wstring params;
-        for (const auto& arg : arguments)
-            params += L" " + arg;
-        info.lpParameters = params.data();
-
-        info.nShow = SW_NORMAL;
-        WIN32_CHECK(::ShellExecuteExW(&info));
-        std::wcout << L"Successfully created elevated process.\n";
+        HandleWrap processId = CreateElevatedProcess(exe_path, arguments);
 
         ProcessHandles proc;
-        proc.proc.Attach(info.hProcess);
+        proc.proc = std::move(processId);
         proc.thrd; // unknown
         return proc;
     }
