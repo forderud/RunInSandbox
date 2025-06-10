@@ -111,14 +111,16 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
             StartupInfoWrap si;
             ProcessHandles proc = CreateSuspendedProcess(si, exe_path.c_str(), mode, {L"-Embedding"}); // mimic how svchost passes "-Embedding" argument
 
-            if (break_at_startup) {
+            if (proc.thrd.IsValid() && break_at_startup) {
                 std::wcout << L"Process created in suspended mode. You can now attach a debugger for investigation of startup problems.\nPress any key to continue." << std::endl;
                 std::wcin.get();
             }
 
             // awake process
-            DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
-            assert(prev_sleep_cnt == 1); prev_sleep_cnt;
+            if (proc.thrd.IsValid()) {
+                DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
+                assert(prev_sleep_cnt == 1); prev_sleep_cnt;
+            }
 
             // wait for process to initialize
             // ignore failure if process is not a GUI app

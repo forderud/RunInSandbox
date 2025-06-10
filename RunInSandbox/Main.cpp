@@ -258,13 +258,13 @@ int wmain (int argc, wchar_t *argv[]) {
 
         ProcessHandles proc = CreateSuspendedProcess(si, progid.c_str(), mode, args);
 
-        if (break_at_startup) {
+        if (proc.thrd.IsValid() && break_at_startup) {
             std::wcout << L"Process created in suspended mode. You can now attach a debugger for investigation of startup problems.\nPress any key to continue." << std::endl;
             std::wcin.get();
         }
 
         // awake process
-        if (proc.thrd.Get()) {
+        if (proc.thrd.IsValid()) {
             DWORD prev_sleep_cnt = ResumeThread(proc.thrd.Get());
             assert(prev_sleep_cnt == 1); prev_sleep_cnt;
         }
