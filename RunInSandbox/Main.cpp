@@ -174,7 +174,7 @@ int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
         std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] [-g] [-b] ProgID\n";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] [-b] ExePath|URL\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] [-b] ExePath|URL <arguments>\n";
         return -1;
     }
 
