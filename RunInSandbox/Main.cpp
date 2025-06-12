@@ -173,8 +173,8 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
 int wmain (int argc, wchar_t *argv[]) {
     if (argc < 2) {
         std::wcerr << L"Too few arguments\n.";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ProgID [-g]\n";
-        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] ExePath|URL\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] [-g] [-b] ProgID\n";
+        std::wcerr << L"Usage: RunInSandbox.exe [ac|li|mi|hi] [-b] ExePath|URL\n";
         return -1;
     }
 
@@ -185,13 +185,7 @@ int wmain (int argc, wchar_t *argv[]) {
     if (mode != IntegrityLevel::Default)
         arg_idx++;
 
-    // check if 1st argument is a COM class ProgID
-    CLSID clsid = {};
-    std::wstring progid = argv[arg_idx];
-    bool progid_provided = SUCCEEDED(CLSIDFromProgID(progid.c_str(), &clsid));
-    bool url_provided = std::wstring(argv[arg_idx]).substr(0, 4) == L"http";
-    arg_idx++;
-
+    // check for -g and -b arguments
     bool break_at_startup = false;
     bool grant_appcontainer_permissions = false;
     while (arg_idx < argc) {
@@ -199,9 +193,18 @@ int wmain (int argc, wchar_t *argv[]) {
             grant_appcontainer_permissions = true;
         } else if (std::wstring(argv[arg_idx]) == L"-b") {
             break_at_startup = true;
+        } else {
+            break;
         }
         arg_idx++;
     }
+
+    // check if next argument is a COM class ProgID
+    CLSID clsid = {};
+    std::wstring progid = argv[arg_idx];
+    bool progid_provided = SUCCEEDED(CLSIDFromProgID(progid.c_str(), &clsid));
+    bool url_provided = std::wstring(argv[arg_idx]).substr(0, 4) == L"http";
+    arg_idx++;
 
     if (progid_provided) {
         // initialize single-threaded COM apartment with OLE support
