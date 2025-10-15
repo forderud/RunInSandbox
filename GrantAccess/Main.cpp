@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "../RunInSandbox/Sandboxing.hpp"
+#include "Privileges.hpp"
 
 
 bool HasSufficientAccess(const std::wstring& ac_str_sid, const std::wstring& path, bool writeAccessRequested) {
@@ -30,6 +31,9 @@ int wmain(int argc, wchar_t *argv[]) {
 
     std::wstring mode = argv[1];
     std::wstring path = argv[2];
+
+    // check if user has sufficient privileges
+    CheckPrivileges(GetCurrentProcessTokenEx());
 
     if (mode == L"li") {
         std::wcout << L"Making path low IL: " << path << std::endl;
