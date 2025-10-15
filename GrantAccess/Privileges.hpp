@@ -73,17 +73,25 @@ public:
 };
 
 bool CheckPrivileges(HANDLE token) {
+    wprintf(L"Token details:\n");
     {
         TOKEN_TYPE tokenType = {};
         DWORD tokenLen = 0;
         if (!GetTokenInformation(token, TokenType, &tokenType, sizeof(tokenType), &tokenLen))
             abort();
 
-        wprintf(L"  TokenType: %s\n", (tokenType == TokenPrimary) ? L"Primary" : L"Impersonation");
+        wprintf(L"  Type: %s\n", (tokenType == TokenPrimary) ? L"Primary" : L"Impersonation");
     }
 
-    Privilege Impersonate(token, SE_IMPERSONATE_NAME); // required by CreateProcessWithToken
+    Privilege IncreaseQuta(token, SE_INCREASE_QUOTA_NAME); // required by CreateProcessAsUser
+    Privilege AssignPrimaryToken(token, SE_ASSIGNPRIMARYTOKEN_NAME); // may be required by CreateProcessAsUser
+    Privilege Impersonate(token, SE_IMPERSONATE_NAME);     // required by CreateProcessWithToken
+    Privilege Security(token, SE_SECURITY_NAME);           // required to get or set the SACL
+
+    wprintf(L"  SE_INCREASE_QUOTA_NAME privilege %s\n", IncreaseQuta.ToString());
+    wprintf(L"  SE_ASSIGNPRIMARYTOKEN_NAME privilege %s\n", AssignPrimaryToken.ToString());
     wprintf(L"  SE_IMPERSONATE_NAME privilege %s\n", Impersonate.ToString());
+    wprintf(L"  SE_SECURITY_NAME privilege %s\n", Security.ToString());
 
     return true;
 }
