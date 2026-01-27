@@ -9,16 +9,16 @@ int wmain (int argc, wchar_t* argv[]) {
         return -1;
     }
 
-    if (argc < 2) {
+    if (argc < 3) {
         wprintf(L"USAGE: ExeRunAs.exe [UserName] <command>\n");
         wprintf(L"Examples:\n");
-        wprintf(L"  LocalService account: ExeRunAs.exe LocalService cmd.exe\n");
+        wprintf(L"  LocalService account: ExeRunAs.exe AUTHORITY\\LocalService cmd.exe\n");
         return 1;
     }
 
     const wchar_t* username = argv[1];
-    const wchar_t* domain = nullptr;
-    const wchar_t* password = nullptr;
+    const wchar_t* domain = nullptr; // L".";
+    const wchar_t* password = nullptr; // L"";
     DWORD logonFlags = 0; // LOGON_WITH_PROFILE
     const wchar_t* appName = argv[2];
     wchar_t* cmdLine = argv[2];
