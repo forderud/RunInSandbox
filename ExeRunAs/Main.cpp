@@ -21,8 +21,14 @@ int wmain (int argc, wchar_t* argv[]) {
     const wchar_t* domain = nullptr; // L".";
     const wchar_t* password = argv[2];
     DWORD logonFlags = LOGON_WITH_PROFILE; // confirmed to populate HKEY_CURRENT_USER
-    const wchar_t* appName = nullptr;
-    wchar_t* cmdLine = argv[3];
+
+    const wchar_t* appName = argv[3];
+
+    std::wstring cmdLine = L"\"" + std::wstring(appName) + L"\"";
+    // append arguments
+    for (size_t i = 4; i < argc; i++)
+        cmdLine += L" " + std::wstring(argv[i]);
+
     DWORD creationFlags = 0;
     void* env = nullptr;
     const wchar_t* curDir = nullptr; // same as parent process
@@ -32,7 +38,7 @@ int wmain (int argc, wchar_t* argv[]) {
     };
     PROCESS_INFORMATION pi{};
 
-    BOOL ok = CreateProcessWithLogonW(username, domain, password, logonFlags, appName, cmdLine, creationFlags, env, curDir, &si, &pi);
+    BOOL ok = CreateProcessWithLogonW(username, domain, password, logonFlags, appName, cmdLine.data(), creationFlags, env, curDir, &si, &pi);
     if (!ok) {
         _com_error err(GetLastError());
         wprintf(L"ERROR: CreateProcessWithLogon failed with %s (err=%u)\n", err.ErrorMessage(), err.Error());
