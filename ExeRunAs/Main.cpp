@@ -1,4 +1,5 @@
 #include <iostream>
+#include <comdef.h> // for _com_error
 #include <Shlobj.h> // for IsUserAnAdmin
 
 
@@ -32,9 +33,9 @@ int wmain (int argc, wchar_t* argv[]) {
 
     BOOL ok = CreateProcessWithLogonW(username, domain, password, logonFlags, appName, cmdLine, createFlags, env, curDir, &si, &pi);
     if (!ok) {
-        DWORD err = GetLastError();
-        wprintf(L"ERROR: CreateProcessWithLogon failed with err=%u\n", err);
-        return err;
+        _com_error err(GetLastError());
+        wprintf(L"ERROR: CreateProcessWithLogon failed with %s (err=%u)\n", err.ErrorMessage(), err.Error());
+        return err.Error();
     }
 
     CloseHandle(pi.hThread);
