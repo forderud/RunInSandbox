@@ -15,5 +15,30 @@ int wmain (int argc, wchar_t* argv[]) {
         return 1;
     }
 
-    wprintf(L"Not yet implemented.\n");
+    const wchar_t* username = argv[1];
+    const wchar_t* domain = nullptr;
+    const wchar_t* password = nullptr;
+    DWORD logonFlags = 0;
+    const wchar_t* appName = argv[2];
+    wchar_t* cmdLine = argv[2];
+    DWORD createFlags = 0;
+    void* env = nullptr;
+    const wchar_t* curDir = nullptr;
+
+    STARTUPINFOW si{
+        .cb = sizeof(si)
+    };
+    PROCESS_INFORMATION pi{};
+
+    BOOL ok = CreateProcessWithLogonW(username, domain, password, logonFlags, appName, cmdLine, createFlags, env, curDir, &si, &pi);
+    if (!ok) {
+        DWORD err = GetLastError();
+        wprintf(L"ERROR: CreateProcessWithLogon failed with err=%u\n", err);
+        return err;
+    }
+
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+
+    wprintf(L"SUCCESS: Process created.\n");
 }
