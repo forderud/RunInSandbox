@@ -22,7 +22,7 @@ int wmain (int argc, wchar_t* argv[]) {
     DWORD logonFlags = LOGON_WITH_PROFILE; // confirmed to populate HKEY_CURRENT_USER
     const wchar_t* appName = argv[3];
     wchar_t* cmdLine = argv[3];
-    DWORD createFlags = 0;
+    DWORD creationFlags = 0;
     void* env = nullptr;
     const wchar_t* curDir = nullptr; // same as parent process
 
@@ -31,18 +31,17 @@ int wmain (int argc, wchar_t* argv[]) {
     };
     PROCESS_INFORMATION pi{};
 
-    BOOL ok = CreateProcessWithLogonW(username, domain, password, logonFlags, appName, cmdLine, createFlags, env, curDir, &si, &pi);
+    BOOL ok = CreateProcessWithLogonW(username, domain, password, logonFlags, appName, cmdLine, creationFlags, env, curDir, &si, &pi);
     if (!ok) {
         _com_error err(GetLastError());
         wprintf(L"ERROR: CreateProcessWithLogon failed with %s (err=%u)\n", err.ErrorMessage(), err.Error());
         return err.Error();
     }
+    wprintf(L"SUCCESS: Process created.\n");
 
     wprintf(L"Waiting for process to terminate...\n");
     WaitForSingleObject(pi.hProcess, INFINITE);
 
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
-
-    wprintf(L"SUCCESS: Process created.\n");
 }
