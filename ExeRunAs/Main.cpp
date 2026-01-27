@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 #include <comdef.h> // for _com_error
 #include <Shlobj.h> // for IsUserAnAdmin
 
@@ -41,6 +42,12 @@ int wmain (int argc, wchar_t* argv[]) {
 
     wprintf(L"Waiting for process to terminate...\n");
     WaitForSingleObject(pi.hProcess, INFINITE);
+
+    DWORD exitCode = 0;
+    ok = GetExitCodeProcess(pi.hProcess, &exitCode);
+    assert(ok);
+
+    wprintf(L"Process terminated with exit code %u.\n", exitCode);
 
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
