@@ -21,7 +21,7 @@ int wmain (int argc, wchar_t* argv[]) {
     const wchar_t* domain = nullptr; // L".";
     const wchar_t* password = argv[2];
     DWORD logonFlags = LOGON_WITH_PROFILE; // confirmed to populate HKEY_CURRENT_USER
-    const wchar_t* appName = argv[3];
+    const wchar_t* appName = nullptr;
     wchar_t* cmdLine = argv[3];
     DWORD creationFlags = 0;
     void* env = nullptr;
