@@ -18,12 +18,12 @@ int wmain (int argc, wchar_t* argv[]) {
     const wchar_t* username = argv[1];
     const wchar_t* domain = nullptr;
     const wchar_t* password = nullptr;
-    DWORD logonFlags = 0;
+    DWORD logonFlags = 0; // LOGON_WITH_PROFILE
     const wchar_t* appName = argv[2];
     wchar_t* cmdLine = argv[2];
     DWORD createFlags = 0;
     void* env = nullptr;
-    const wchar_t* curDir = nullptr;
+    const wchar_t* curDir = nullptr; // same as parent process
 
     STARTUPINFOW si{
         .cb = sizeof(si)
