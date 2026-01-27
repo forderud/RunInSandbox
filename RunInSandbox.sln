@@ -28,6 +28,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComRunAs", "ComRunAs\ComRun
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppContainerSid", "AppContainerSid\AppContainerSid.vcxproj", "{A6741FDC-1165-4AC3-A026-8C01548E7275}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExeRunAs", "ExeRunAs\ExeRunAs.vcxproj", "{FEF637E2-9BD6-493E-BCFA-D61692C1CA1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -66,6 +68,10 @@ Global
 		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Debug|x64.Build.0 = Debug|x64
 		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Release|x64.ActiveCfg = Release|x64
 		{A6741FDC-1165-4AC3-A026-8C01548E7275}.Release|x64.Build.0 = Release|x64
+		{FEF637E2-9BD6-493E-BCFA-D61692C1CA1F}.Debug|x64.ActiveCfg = Debug|x64
+		{FEF637E2-9BD6-493E-BCFA-D61692C1CA1F}.Debug|x64.Build.0 = Debug|x64
+		{FEF637E2-9BD6-493E-BCFA-D61692C1CA1F}.Release|x64.ActiveCfg = Release|x64
+		{FEF637E2-9BD6-493E-BCFA-D61692C1CA1F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
