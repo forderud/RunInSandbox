@@ -51,4 +51,6 @@ int wmain (int argc, wchar_t* argv[]) {
 
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
+
+    return exitCode;
 }
