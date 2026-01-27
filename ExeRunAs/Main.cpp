@@ -19,7 +19,7 @@ int wmain (int argc, wchar_t* argv[]) {
     const wchar_t* username = argv[1];
     const wchar_t* domain = nullptr; // L".";
     const wchar_t* password = argv[2];
-    DWORD logonFlags = 0; // LOGON_WITH_PROFILE
+    DWORD logonFlags = LOGON_WITH_PROFILE; // confirmed to populate HKEY_CURRENT_USER
     const wchar_t* appName = argv[3];
     wchar_t* cmdLine = argv[3];
     DWORD createFlags = 0;
@@ -37,6 +37,9 @@ int wmain (int argc, wchar_t* argv[]) {
         wprintf(L"ERROR: CreateProcessWithLogon failed with %s (err=%u)\n", err.ErrorMessage(), err.Error());
         return err.Error();
     }
+
+    wprintf(L"Waiting for process to terminate...\n");
+    WaitForSingleObject(pi.hProcess, INFINITE);
 
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
