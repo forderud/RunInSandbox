@@ -5,6 +5,8 @@
 
 
 int wmain (int argc, wchar_t* argv[]) {
+    wprintf(L"WARNING: It's usually preferabe to instead use the inbuilt runas tool.\n");
+
     if (!IsUserAnAdmin()) {
         wprintf(L"ERROR: Admin privileges required.\n");
         return -1;
