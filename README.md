@@ -6,6 +6,8 @@ Related projects:
 ## RunInSandbox - Executable sandboxing
 Run `RunInSandbox.exe [ac|li|mi|hi] [-b] ExePath <arguments>` to launch the `ExePath` application in an AppContainer, low IL, medium IL or high IL process. This works for `STARTUPINFOEX`-based process creation. The `-b` option is used to break execution immediately after process creation to enable debugging of startup problems.
 
+Example: `RunInSandbox.exe li c:\Windows\System32\cmd.exe` will start a new command prompt at low IL.
+
 ## RunInSandbox - COM sandboxing
 Run `RunInSandbox.exe [ac|li|mi|hi] [-g][-b] ProgID` to launch the `ProgID` COM server in an AppContainer, low IL, medium IL or high IL process. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
 
