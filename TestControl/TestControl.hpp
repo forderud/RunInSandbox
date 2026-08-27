@@ -15,7 +15,7 @@ public:
 
     /*NOT virtual*/ ~TestControl();
 
-    HRESULT IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) override;
+    HRESULT IsElevated (/*out*/VARIANT_BOOL* is_elevated, /*out*/DWORD* integrity_level) override;
 
     HRESULT GetUsername(/*out*/BSTR* username) override;
 

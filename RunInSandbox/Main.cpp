@@ -85,10 +85,12 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         std::wcout << L"Add(2, 3) returned " << sum << L".\n";
         assert(sum == 2 + 3);
 
-        VARIANT_BOOL is_elevated = false, is_high_il = false;
-        CHECK(test->IsElevated(&is_elevated, &is_high_il));
+        VARIANT_BOOL is_elevated = false;
+        DWORD integrity_level = 0;
+        CHECK(test->IsElevated(&is_elevated, &integrity_level));
+        auto integrity = ImpersonateThread::ToIntegrityLevel(integrity_level);
         std::wcout << L"IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-        std::wcout << L"IsHighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
+        std::wcout << L"IsHighIL: " << ((integrity >= IntegrityLevel::High) ? L"true" : L"false") << L"\n";
 
         CComBSTR username;
         CHECK(test->GetUsername(&username));
@@ -153,10 +155,11 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         CHECK(test->CreateInstance(true, clsid, &child));
         CComPtr<ITestInterface> child_test;
         child_test = child;
-        is_elevated = false, is_high_il = false;
-        CHECK(child_test->IsElevated(&is_elevated, &is_high_il));
+        is_elevated = false, integrity_level = 0;
+        CHECK(child_test->IsElevated(&is_elevated, &integrity_level));
+        integrity = ImpersonateThread::ToIntegrityLevel(integrity_level);
         std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
-        std::wcout << L"Child IsHighIL: " << (is_high_il ? L"true" : L"false") << L"\n";
+        std::wcout << L"Child IsHighIL: " << ((integrity >= IntegrityLevel::High) ? L"true" : L"false") << L"\n";
 #endif
     }
 

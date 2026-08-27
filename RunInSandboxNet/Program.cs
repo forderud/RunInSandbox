@@ -10,9 +10,11 @@ class RunInSandbox
         var tc = (TestControl.ITestInterface)obj;
         if (tc != null)
         {
-            bool isElevated, isHighIL;
-            tc.IsElevated(out isElevated, out isHighIL);
-            Console.WriteLine("High IL: " + isHighIL);
+            bool isElevated;
+            uint integrityLevel;
+            tc.IsElevated(out isElevated, out integrityLevel);
+            Console.WriteLine("Elevated: " + isElevated);
+            Console.WriteLine("IL:       " + integrityLevel);
 
             Console.WriteLine("Username: " + tc.GetUsername());
         }
