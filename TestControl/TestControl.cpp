@@ -11,7 +11,7 @@ TestControl::TestControl(){
 TestControl::~TestControl() {
 }
 
-HRESULT TestControl::IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/DWORD* integrity_level) {
+HRESULT TestControl::ElevationCheck(/*out*/VARIANT_BOOL * is_elevated, /*out*/DWORD* integrity_level) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
 
     auto proc_integrity = ImpersonateThread::GetProcessIntegrityLevel();

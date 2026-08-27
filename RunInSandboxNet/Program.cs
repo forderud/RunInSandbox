@@ -12,7 +12,7 @@ class RunInSandbox
         {
             bool isElevated;
             uint integrityLevel;
-            tc.IsElevated(out isElevated, out integrityLevel);
+            tc.ElevationCheck(out isElevated, out integrityLevel);
             Console.WriteLine("Elevated: " + isElevated);
             Console.WriteLine("IL:       " + integrityLevel);
 
