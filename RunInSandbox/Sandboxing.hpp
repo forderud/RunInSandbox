@@ -528,7 +528,7 @@ struct ImpersonateThread {
 
     /** Determine the integrity level for a process.
     Based on https://github.com/chromium/chromium/blob/master/base/process/process_info_win.cc */
-    static IntegrityLevel GetProcessLevel(HANDLE process_token = GetCurrentProcessToken()) {
+    static DWORD GetProcessIntegrityLevel(HANDLE process_token = GetCurrentProcessToken()) {
         DWORD token_info_length = 0;
         if (GetTokenInformation(process_token, TokenIntegrityLevel, NULL, 0, &token_info_length))
             abort(); // should never fail
@@ -539,6 +539,12 @@ struct ImpersonateThread {
             abort(); // should never fail
 
         DWORD integrity_level = *GetSidSubAuthority(token_info->Label.Sid, *GetSidSubAuthorityCount(token_info->Label.Sid) - 1);
+        return integrity_level;
+    }
+
+    /** GetProcessIntegrityLevel wrapper that converts the result to a custom IntegrityLevel enum. */
+    static IntegrityLevel GetProcessLevel(HANDLE process_token = GetCurrentProcessToken()) {
+        DWORD integrity_level = GetProcessIntegrityLevel(process_token);
 
         if (integrity_level < SECURITY_MANDATORY_LOW_RID)
             return IntegrityLevel::Untrusted;
