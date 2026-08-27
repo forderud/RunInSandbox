@@ -84,19 +84,21 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
 
         std::wcout << L"Add(2, 3) returned " << sum << L".\n";
         assert(sum == 2 + 3);
+        std::wcout << L"\n";
 
         VARIANT_BOOL is_elevated = false;
         DWORD integrity_level = 0;
         VARIANT_BOOL app_container = false;
         CHECK(test->ElevationCheck(&is_elevated, &integrity_level, &app_container));
         auto integrity = ToIntegrityLevel(integrity_level);
-        std::wcout << L"IsElevated:     " << (is_elevated ? L"true" : L"false") << L"\n";
+        std::wcout << L"Elevated:       " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"IntegrityLevel: " << ToString(integrity) << L"\n";
         std::wcout << L"AppContainer:   " << (app_container ? L"true" : L"false") << L"\n";
 
         CComBSTR username;
         CHECK(test->GetUsername(&username));
-        std::wcout << L"Username: " << username.m_str << L"\n";
+        std::wcout << L"Username:       " << username.m_str << L"\n";
+        std::wcout << L"\n";
 
         {
             // fails for AppContainers if host is elevated
@@ -104,6 +106,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
             auto cb = CreateLocalInstance<CallbackTest>();
             CHECK(test->TestCallback(cb));
             std::wcout << L"[success]\n";
+            std::wcout << L"\n";
         }
 
         {
@@ -113,6 +116,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
                 std::wcout << L"[success]\n";
             else
                 std::wcout << L"[failed]\n";
+            std::wcout << L"\n";
         }
 
         {
@@ -161,7 +165,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         app_container = false;
         CHECK(child_test->ElevationCheck(&is_elevated, &integrity_level, &app_container));
         integrity = ToIntegrityLevel(integrity_level);
-        std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
+        std::wcout << L"Child Elevated:       " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"Child IntegrityLevel: " << ToString(integrity)  << L"\n";
         std::wcout << L"Child AppContainer:   " << (app_container ? L"true" : L"false") << L"\n";
 #endif
