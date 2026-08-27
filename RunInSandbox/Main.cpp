@@ -87,10 +87,12 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
 
         VARIANT_BOOL is_elevated = false;
         DWORD integrity_level = 0;
-        CHECK(test->ElevationCheck(&is_elevated, &integrity_level));
+        VARIANT_BOOL app_container = false;
+        CHECK(test->ElevationCheck(&is_elevated, &integrity_level, &app_container));
         auto integrity = ToIntegrityLevel(integrity_level);
         std::wcout << L"IsElevated:     " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"IntegrityLevel: " << ToString(integrity) << L"\n";
+        std::wcout << L"AppContainer:   " << (app_container ? L"true" : L"false") << L"\n";
 
         CComBSTR username;
         CHECK(test->GetUsername(&username));
@@ -155,11 +157,13 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         CHECK(test->CreateInstance(true, clsid, &child));
         CComPtr<ITestInterface> child_test;
         child_test = child;
-        is_elevated = false, integrity_level = 0;
-        CHECK(child_test->ElevationCheck(&is_elevated, &integrity_level));
-        integrity = ImpersonateThread::ToIntegrityLevel(integrity_level);
+        is_elevated = false; integrity_level = 0;
+        app_container = false;
+        CHECK(child_test->ElevationCheck(&is_elevated, &integrity_level, &app_container));
+        integrity = ToIntegrityLevel(integrity_level);
         std::wcout << L"Child IsElevated: " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"Child IntegrityLevel: " << ToString(integrity)  << L"\n";
+        std::wcout << L"Child AppContainer:   " << (app_container ? L"true" : L"false") << L"\n";
 #endif
     }
 

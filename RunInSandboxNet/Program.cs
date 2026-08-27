@@ -12,9 +12,11 @@ class RunInSandbox
         {
             bool isElevated;
             uint integrityLevel;
-            tc.ElevationCheck(out isElevated, out integrityLevel);
-            Console.WriteLine("Elevated: " + isElevated);
-            Console.WriteLine("IL:       " + integrityLevel);
+            bool isAppContainer;
+            tc.ElevationCheck(out isElevated, out integrityLevel, out isAppContainer);
+            Console.WriteLine("Elevated:    " + isElevated);
+            Console.WriteLine("IL:          " + integrityLevel);
+            Console.WriteLine("AppContainer:" + isAppContainer);
 
             Console.WriteLine("Username: " + tc.GetUsername());
         }

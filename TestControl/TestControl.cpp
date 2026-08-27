@@ -11,11 +11,10 @@ TestControl::TestControl(){
 TestControl::~TestControl() {
 }
 
-HRESULT TestControl::ElevationCheck(/*out*/VARIANT_BOOL * is_elevated, /*out*/DWORD* integrity_level) {
+HRESULT TestControl::ElevationCheck(/*out*/VARIANT_BOOL * is_elevated, /*out*/DWORD* integrity_level, /*out*/VARIANT_BOOL* app_container) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
-
-    auto proc_integrity = ImpersonateThread::GetProcessIntegrityLevel();
-    *integrity_level = proc_integrity;
+    *integrity_level = ImpersonateThread::GetProcessIntegrityLevel();
+    *app_container = ImpersonateThread::IsProcessAppContainer();
 
     return S_OK;
 }

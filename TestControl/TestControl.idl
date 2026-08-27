@@ -17,7 +17,7 @@ interface ICallbackTest : IUnknown {
  uuid(570FBF3C-D853-435E-B761-6A264393B9DA)]
 interface ITestInterface : IUnknown {
     [helpstring("Check if object is running in an elevated process")]
-    HRESULT ElevationCheck([out] VARIANT_BOOL* is_elevated, [out] DWORD* integrity_level);
+    HRESULT ElevationCheck([out] VARIANT_BOOL* is_elevated, [out] DWORD* integrity_level, [out] VARIANT_BOOL* app_container);
 
     [helpstring("Get COM server user account")]
     HRESULT GetUsername([out, retval] BSTR* username);
