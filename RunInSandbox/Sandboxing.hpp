@@ -581,6 +581,20 @@ struct ImpersonateThread {
         return elevation.TokenIsElevated;
     }
 
+    static bool IsProcessAppContainer (HANDLE process = GetCurrentProcess()) {
+        HandleWrap token;
+        if (!OpenProcessToken(process, TOKEN_QUERY, token.GetAddressOf()))
+            abort(); // should never happen
+
+        DWORD is_app_container = 0;
+        DWORD ret_len = 0;
+        if (!GetTokenInformation(token.Get(), TokenIsAppContainer, &is_app_container, sizeof(is_app_container), &ret_len))
+            abort(); // should never happen
+        assert(ret_len == sizeof(is_app_container));
+
+        return is_app_container;
+    }
+
     HandleWrap  m_token;
 };
 
