@@ -216,7 +216,7 @@ static IntegrityLevel ToIntegrityLevel(DWORD integrity_level) {
     if (integrity_level < SECURITY_MANDATORY_LOW_RID)
         return IntegrityLevel::Untrusted;
     if (integrity_level < SECURITY_MANDATORY_MEDIUM_RID)
-        return IntegrityLevel::Low;
+        return IntegrityLevel::Low; // or AppContainer
     else if (integrity_level < SECURITY_MANDATORY_HIGH_RID)
         return IntegrityLevel::Medium;
     else
