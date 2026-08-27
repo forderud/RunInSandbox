@@ -285,5 +285,5 @@ int wmain (int argc, wchar_t *argv[]) {
         }
     }
 
-    std::wcout << L"[done]" << std::endl;
+    std::wcout << L"\n[done]" << std::endl;
 }
