@@ -1,7 +1,6 @@
 #include "TestControl.hpp"
 #include "../RunInSandbox/ComCreate.hpp"
 #include "Socket.hpp"
-#include <atlwin.h>
 #include <future>
 
 
@@ -9,6 +8,9 @@ TestControl::TestControl(){
 }
 
 TestControl::~TestControl() {
+    // clean up
+    if (m_wnd)
+        m_wnd.DestroyWindow();
 }
 
 HRESULT TestControl::ElevationCheck(/*out*/VARIANT_BOOL * is_elevated, /*out*/DWORD* integrity_level, /*out*/VARIANT_BOOL* app_container) {
@@ -148,13 +150,12 @@ HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos
 
 HRESULT TestControl::GetWindow(/*out*/HWND* result) {
     // create dummy window that will be used for establishing a parent-child UI relationship with the parent process
-    CWindow wnd;
-    {
+    if (!m_wnd) {
         RECT rect = { 200, 0, 400, 200 };
-        wnd.Create(L"Button", /*parent*/NULL, rect, L"Child window", WS_OVERLAPPEDWINDOW);
-        wnd.ShowWindow(SW_SHOW);
+        m_wnd.Create(L"Button", /*parent*/NULL, rect, L"Child window", WS_OVERLAPPEDWINDOW);
+        m_wnd.ShowWindow(SW_SHOW);
     }
 
-    *result = wnd;
+    *result = m_wnd;
     return S_OK;
 }

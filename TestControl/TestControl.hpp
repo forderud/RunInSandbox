@@ -2,6 +2,7 @@
 #include "ComSupport.hpp"
 #include "Resource.h"
 #include "TestControl_h.h"
+#include <atlwin.h>
 
 
 class ATL_NO_VTABLE TestControl :
@@ -44,6 +45,9 @@ public:
         COM_INTERFACE_ENTRY(ITestInterface)
         COM_INTERFACE_ENTRY(IOleWindow)
     END_COM_MAP()
+
+private:
+    CWindow m_wnd;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_TestControl, TestControl)
