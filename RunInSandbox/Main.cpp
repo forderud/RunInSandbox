@@ -150,7 +150,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
 #if 0
         // try to create child object in elevated process
         // WARNING: Doesn't trigger UAC elevation if launched from a medium-integrity process that was launched from an elevated process
-        std::wcout << L"Creating child COM object in " << ToString(IntegrityLevel::High).c_str() << L"...\n";
+        std::wcout << L"Creating child COM object in " << ToString(IntegrityLevel::High) << L"...\n";
         CComPtr<IUnknown> child;
         CHECK(test->CreateInstance(true, clsid, &child));
         CComPtr<ITestInterface> child_test;
@@ -229,7 +229,7 @@ int wmain (int argc, wchar_t *argv[]) {
             CHECK(RegisterDragDrop(wnd, drop_target));
         }
 
-        std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode).c_str() << L"...\n";
+        std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode) << L"...\n";
         // perform COM calls from main thread (STA)
         ComTests(clsid, mode, break_at_startup, grant_appcontainer_permissions, wnd);
     } else if (url_provided) {
@@ -243,7 +243,7 @@ int wmain (int argc, wchar_t *argv[]) {
             return ret;
         }
     } else {
-        std::wcout << L"Starting executable " << progid << L" in " << ToString(mode).c_str() << L"...\n";
+        std::wcout << L"Starting executable " << progid << L" in " << ToString(mode) << L"...\n";
         std::vector<std::wstring> args;
         for (; arg_idx < argc; ++arg_idx)
             args.push_back(argv[arg_idx]);
