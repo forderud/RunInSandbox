@@ -211,6 +211,18 @@ enum class IntegrityLevel {
     High      = WinHighLabelSid,     ///< same as ConvertStringSidToSid("S-1-16-12288",..)
 };
 
+/** Convert Win32 integrity level values to a custom IntegrityLevel enum. */
+static IntegrityLevel ToIntegrityLevel(DWORD integrity_level) {
+    if (integrity_level < SECURITY_MANDATORY_LOW_RID)
+        return IntegrityLevel::Untrusted;
+    if (integrity_level < SECURITY_MANDATORY_MEDIUM_RID)
+        return IntegrityLevel::Low;
+    else if (integrity_level < SECURITY_MANDATORY_HIGH_RID)
+        return IntegrityLevel::Medium;
+    else
+        return IntegrityLevel::High;
+}
+
 static std::wstring ToString (IntegrityLevel integrity) {
     switch (integrity) {
     case IntegrityLevel::Default:      return L"default";
@@ -540,18 +552,6 @@ struct ImpersonateThread {
 
         DWORD integrity_level = *GetSidSubAuthority(token_info->Label.Sid, *GetSidSubAuthorityCount(token_info->Label.Sid) - 1);
         return integrity_level;
-    }
-
-    /** Convert Win32 integrity level values to a custom IntegrityLevel enum. */
-    static IntegrityLevel ToIntegrityLevel(DWORD integrity_level) {
-        if (integrity_level < SECURITY_MANDATORY_LOW_RID)
-            return IntegrityLevel::Untrusted;
-        if (integrity_level < SECURITY_MANDATORY_MEDIUM_RID)
-            return IntegrityLevel::Low;
-        else if (integrity_level < SECURITY_MANDATORY_HIGH_RID)
-            return IntegrityLevel::Medium;
-        else
-            return IntegrityLevel::High;
     }
 
     /** Check if a process is "elevated".

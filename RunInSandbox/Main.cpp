@@ -88,7 +88,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
         VARIANT_BOOL is_elevated = false;
         DWORD integrity_level = 0;
         CHECK(test->ElevationCheck(&is_elevated, &integrity_level));
-        auto integrity = ImpersonateThread::ToIntegrityLevel(integrity_level);
+        auto integrity = ToIntegrityLevel(integrity_level);
         std::wcout << L"IsElevated:     " << (is_elevated ? L"true" : L"false") << L"\n";
         std::wcout << L"IntegrityLevel: " << ToString(integrity) << L"\n";
 
@@ -181,7 +181,7 @@ int wmain (int argc, wchar_t *argv[]) {
         return -1;
     }
 
-    std::wcout << "Host is running in " << ToString(ImpersonateThread::ToIntegrityLevel(ImpersonateThread::GetProcessIntegrityLevel())) << L".\n";
+    std::wcout << "Host is running in " << ToString(ToIntegrityLevel(ImpersonateThread::GetProcessIntegrityLevel())) << L".\n";
 
     int arg_idx = 1;
     IntegrityLevel mode = FromString(argv[arg_idx]);
@@ -234,7 +234,7 @@ int wmain (int argc, wchar_t *argv[]) {
         ComTests(clsid, mode, break_at_startup, grant_appcontainer_permissions, wnd);
     } else if (url_provided) {
         std::wcout << L"Opening URL " << progid << " in default browser\n";
-        if (ImpersonateThread::ToIntegrityLevel(ImpersonateThread::GetProcessIntegrityLevel()) == IntegrityLevel::Low)
+        if (ToIntegrityLevel(ImpersonateThread::GetProcessIntegrityLevel()) == IntegrityLevel::Low)
             std::wcout << L"WARNING: Does not seem to work in low-integrity!\n";
 
         int ret = (int)reinterpret_cast<INT_PTR>(ShellExecuteW(NULL, NULL, progid.c_str(), NULL, NULL, SW_SHOWNORMAL));
