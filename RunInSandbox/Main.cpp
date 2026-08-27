@@ -109,7 +109,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
             std::wcout << L"\n";
         }
 
-        {
+        if (integrity >= IntegrityLevel::High) {
             std::wcout << L"Testing if admin task succeeds...\n";
             hr = test->PerformAdminTask();
             if (SUCCEEDED(hr))
