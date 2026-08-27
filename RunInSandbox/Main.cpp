@@ -234,6 +234,7 @@ int wmain (int argc, wchar_t *argv[]) {
         }
 
         std::wcout << L"Creating COM object " << progid << L" in " << ToString(mode) << L"...\n";
+        std::wcout << L"\n";
         // perform COM calls from main thread (STA)
         ComTests(clsid, mode, break_at_startup, grant_appcontainer_permissions, wnd);
     } else if (url_provided) {
