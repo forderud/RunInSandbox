@@ -111,7 +111,7 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
                 std::wcout << L"[failed]\n";
         }
 
-        if (mode >= IntegrityLevel::Medium) {
+        {
             bool reproduce_uipi_child_wnd_issue = true;
             if (reproduce_uipi_child_wnd_issue) {
                 // Request child window from sandboxed COM/OLE process
