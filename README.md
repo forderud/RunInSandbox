@@ -12,7 +12,7 @@ Example: `RunInSandbox.exe li c:\Windows\System32\cmd.exe` will start a new comm
 Run `RunInSandbox.exe [ac|li|mi|hi] [-g][-b] ProgID` to launch the `ProgID` COM server in an AppContainer, low IL, medium IL or high IL process. The `-g` option is used to grant AppContainer permissions for the COM server, which only need to be done once.
 
 Example usage:
-* `RunInSandbox.exe ac TestControl.TestControl -g` to start the TestControl project in a AppContainer process and test its COM API.
+* `RunInSandbox.exe ac -g TestControl.TestControl` to start the TestControl project in a AppContainer process and test its COM API.
 * `RunInSandbox.exe li PowerPoint.Application` to start Microsoft PowerPoint in a low IL process connected using COM automation.
 
 #### Client-side impersonation
