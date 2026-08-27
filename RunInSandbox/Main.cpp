@@ -129,11 +129,18 @@ static void ComTests (CLSID clsid, IntegrityLevel mode, bool break_at_startup, b
                 CHECK(win_test->GetWindow(&child_wnd));
 
                 // Attach child to (invisible) parent window to simulate OLE embedding. This triggers UIPI SetForegroundWindow blocking that also affect unrelated windows.
+                std::wcout << L"Re-parenting window...\n";
                 auto winStyle = GetWindowLongPtrW(child_wnd, GWL_STYLE);
                 winStyle &= ~WS_CAPTION; // Remove title bar
                 winStyle |= WS_CHILD;    // Convert to child window. Trigger UIPI blocking when used together with SetParent.
                 SetWindowLongPtrW(child_wnd, GWL_STYLE, winStyle);
-                SetParent(child_wnd, wnd); // Trigger UIPI blocking when used together with WS_CHILD
+                HWND prev = SetParent(child_wnd, wnd); // Trigger UIPI blocking when used together with WS_CHILD
+                if (!prev) {
+                    // fails if child is more elevated than host
+                    _com_error err(GetLastError());
+                    std::wcerr << L"[FAILED] SetParent failed with error " << err.ErrorMessage() << L".\n";
+                }
+                std::wcout << L"\n";
             }
 
             // Fails in medium IL if host is elevated despite the window being in foreground.
