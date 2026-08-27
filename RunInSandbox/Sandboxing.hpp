@@ -542,10 +542,8 @@ struct ImpersonateThread {
         return integrity_level;
     }
 
-    /** GetProcessIntegrityLevel wrapper that converts the result to a custom IntegrityLevel enum. */
-    static IntegrityLevel GetProcessLevel(HANDLE process_token = GetCurrentProcessToken()) {
-        DWORD integrity_level = GetProcessIntegrityLevel(process_token);
-
+    /** Convert Win32 integrity level values to a custom IntegrityLevel enum. */
+    static IntegrityLevel ToIntegrityLevel(DWORD integrity_level) {
         if (integrity_level < SECURITY_MANDATORY_LOW_RID)
             return IntegrityLevel::Untrusted;
         if (integrity_level < SECURITY_MANDATORY_MEDIUM_RID)

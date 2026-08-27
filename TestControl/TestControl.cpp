@@ -14,7 +14,7 @@ TestControl::~TestControl() {
 HRESULT TestControl::IsElevated (/*out*/VARIANT_BOOL * is_elevated, /*out*/VARIANT_BOOL * is_high_il) {
     *is_elevated = ImpersonateThread::IsProcessElevated();
 
-    IntegrityLevel proc_integrity = ImpersonateThread::GetProcessLevel();
+    IntegrityLevel proc_integrity = ImpersonateThread::ToIntegrityLevel(ImpersonateThread::GetProcessIntegrityLevel());
     *is_high_il = (proc_integrity >= IntegrityLevel::High);
 
     return S_OK;
