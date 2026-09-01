@@ -112,10 +112,13 @@ static_assert(sizeof(SidWrap) == sizeof(PSID), "SidWrap size mismatch");
 class AppContainerWrap {
 public:
     AppContainerWrap(const wchar_t * name, const wchar_t * desc, bool enable_networking) {
-        // https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations
+        AddCapability(L"microphone");
+        AddCapability(L"webcam");
+
+        //AddCapability(L"removableStorage"); // have been unable to get this to work (see https://github.com/M2Team/Privexec/issues/31 for more info)
+
         if (enable_networking)
             AddCapability(L"internetClient"); // confirmed to enable client sockets (but not ping)
-        //AddCapability(L"removableStorage"); // have been unable to get this to work (see https://github.com/M2Team/Privexec/issues/31 for more info)
 
         // delete existing (if present)
         Delete(name);
@@ -162,6 +165,7 @@ public:
         return sc;
     }
 
+    /** Available capabilities are documented on https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations */
     void AddCapability(const wchar_t * cap_name) {
         PSID * cap_group_sids = nullptr;
         DWORD cap_group_sids_len = 0;
