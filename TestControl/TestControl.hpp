@@ -5,7 +5,7 @@
 #include <atlwin.h>
 
 
-class ATL_NO_VTABLE TestControl :
+class TestControl :
     public CComObjectRootEx<CComMultiThreadModel>, // also compatible with single-threaded apartment
     public CComCoClass<TestControl, &CLSID_TestControl>,
     public ITestInterface,

@@ -13,7 +13,7 @@
 
 
 /** COM callback test class. */
-class ATL_NO_VTABLE CallbackTest : 
+class CallbackTest : 
     public CComObjectRootEx<CComMultiThreadModel>,
     public CComCoClass<CallbackTest>, // no registry entries
     public ICallbackTest {
