@@ -173,7 +173,7 @@ CComPtr<IUnknown> CoCreateAsUser_impersonate (CLSID clsid, IntegrityLevel mode, 
 }
 
 
-/** Create a AppID and elevation-enabled COM server in a admin process.
+/** Create COM server in elevated process. Might trigger UAC prompt.
     REF: https://docs.microsoft.com/en-us/windows/win32/com/the-com-elevation-moniker */
 template <typename T>
 static HRESULT CoCreateInstanceElevated (HWND window, const GUID clsid, T ** result) {
