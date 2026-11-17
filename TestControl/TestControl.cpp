@@ -1,6 +1,7 @@
 #include "TestControl.hpp"
 #include "../RunInSandbox/ComCreate.hpp"
 #include "Socket.hpp"
+#include <bit>
 #include <future>
 
 
@@ -149,7 +150,7 @@ HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos
 
 
 HRESULT TestControl::SetParent(ULONGLONG child, ULONGLONG newParent) {
-    HWND oldParent = ::SetParent(reinterpret_cast<HWND>(child), reinterpret_cast<HWND>(newParent));
+    HWND oldParent = ::SetParent(std::bit_cast<HWND>(child), std::bit_cast<HWND>(newParent));
     if (!oldParent) {
         return HRESULT_FROM_WIN32(::GetLastError());
     }
