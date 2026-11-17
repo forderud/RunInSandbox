@@ -148,6 +148,15 @@ HRESULT TestControl::MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos
 }
 
 
+HRESULT TestControl::SetParent(ULONGLONG child, ULONGLONG newParent) {
+    HWND oldParent = ::SetParent(reinterpret_cast<HWND>(child), reinterpret_cast<HWND>(newParent));
+    if (!oldParent) {
+        return HRESULT_FROM_WIN32(::GetLastError());
+    }
+    return S_OK;
+}
+
+
 HRESULT TestControl::GetWindow(/*out*/HWND* result) {
     // create dummy window that will be used for establishing a parent-child UI relationship with the parent process
     if (!m_wnd) {

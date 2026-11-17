@@ -32,6 +32,8 @@ public:
 
     HRESULT MoveMouseCursor(VARIANT_BOOL threaded, int x_pos, int y_pos) override;
 
+    HRESULT SetParent(ULONGLONG child, ULONGLONG newParent) override;
+
     // IOleWindow
     HRESULT GetWindow(/*out*/HWND* wnd) override;
 

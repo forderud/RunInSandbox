@@ -39,6 +39,9 @@ interface ITestInterface : IUnknown {
 
     [helpstring("Move the mouse cursor")]
     HRESULT MoveMouseCursor([in] VARIANT_BOOL threaded, [in] int x_pos, [in] int y_pos);
+
+    [helpstring("Wrapper for the Win32 SetParent function. ULONGLONG used instead of HWND to avoid marshalling problems.")]
+    HRESULT SetParent([in]ULONGLONG child, [in] ULONGLONG newParent);
 };
 
 
